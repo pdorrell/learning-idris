@@ -13,6 +13,10 @@ parityOf (S x) = opposite $ parityOf x
 data PNat : Parity -> Type where
      PZ : PNat Even
      PS : PNat p -> PNat $ opposite p
+     
+parityOfPNat: (pn: PNat p) -> Parity
+parityOfPNat PZ = Even
+parityOfPNat (PS pn) = opposite $ parityOfPNat pn
 
 pNat2Nat : PNat p -> Nat
 pNat2Nat PZ     = Z
@@ -27,4 +31,10 @@ opposite_its_own_inverse : (p : Parity) -> opposite (opposite p) = p
 opposite_its_own_inverse Even = Refl
 opposite_its_own_inverse Odd  = Refl
 
-parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2PNat n)
+lemma: (n : Nat) -> opposite (parityOf n) = parityOf (S n)
+lemma n = Refl
+
+{- parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2PNat n)
+parityOf_gets_parity Z     = Refl
+parityOf_gets_parity (S k) = ?rhs -}
+
