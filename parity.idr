@@ -49,11 +49,16 @@ opposite_lemma p1 p2 prf = cong {f = opposite} prf
 opposite_is_mono : (p1,p2 : Parity) -> opposite p1 = opposite p2 -> p1 = p2 
 opposite_is_mono p1 p2 prf = rewrite sym (opposite_its_own_inverse p1) in rewrite sym (opposite_its_own_inverse p2) in opposite_lemma p1 p2 prf
 
+nat2PNat_Sn : (n : Nat) -> nat2PNat (S n) = (opposite (fst (nat2PNat n)) ** (PS (snd (nat2PNat n))))
+nat2PNat_Sn Z     = Refl
+nat2PNat_Sn (S k) with (nat2PNat k)
+  nat2PNat_Sn (S k) | (p ** pn) = Refl
+
 parityOf_gets_parity_ind_hyp: (n : Nat) -> parityOf n = fst (nat2PNat n) -> parityOf (S n) = fst (nat2PNat (S n))
 parityOf_gets_parity_ind_hyp n prf with (nat2PNat n)
-  parityOf_gets_parity_ind_hyp n prf | (p ** pn) = ?rhs2
+  parityOf_gets_parity_ind_hyp n prf | (p ** pn) = ?rhs_ind_hyp
 
 parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2PNat n)
 parityOf_gets_parity Z     = Refl
 parityOf_gets_parity (S k) with (nat2PNat k)
-  parityOf_gets_parity (S k) | (p ** pn) = ?rhs
+  parityOf_gets_parity (S k) | (p ** pn) = ?rhs_parity
