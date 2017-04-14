@@ -26,7 +26,5 @@ nat2PNat_S5 = Refl
 nat2PNat_Sn : (n : Nat) -> nat2PNat (S n) = (opposite (fst (nat2PNat n)) ** (PS (snd (nat2PNat n))))
 nat2PNat_Sn Z     = Refl
 nat2PNat_Sn (S k) with (nat2PNat k)
-  nat2PNat_Sn (S k) | (p ** pn) = Refl
-
-
+   | (p ** pn) = Refl
 
