@@ -47,6 +47,12 @@ nat2PNat_Sn : (n : Nat) -> nat2PNat (S n) = (opposite (fst (nat2PNat n)) ** (PS 
 nat2PNat_Sn Z     = Refl
 nat2PNat_Sn (S k) with (nat2PNat k)
   nat2PNat_Sn (S k) | (p ** pn) = Refl
+  
+fst_nat2PNat_Sn : (n : Nat) -> fst (nat2PNat (S n)) = opposite (fst (nat2PNat n))
+fst_nat2PNat_Sn Z = Refl
+fst_nat2PNat_Sn (S k) with (nat2PNat k)
+  | (p ** pn) = ?rhs2
+
 
 parityOf_gets_parity_5 :  parityOf 5 = fst (nat2PNat 5)
 parityOf_gets_parity_5 = Refl
@@ -54,4 +60,4 @@ parityOf_gets_parity_5 = Refl
 parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2PNat n)
 parityOf_gets_parity Z     = Refl
 parityOf_gets_parity (S k) with (nat2PNat k)
-  parityOf_gets_parity (S k) | (p ** pn) = ?rhs_parity
+  | (p ** pn) = ?rhs
