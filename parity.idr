@@ -46,13 +46,12 @@ opposite_is_mono p1 p2 prf = rewrite opposite_its_own_inverse p1 in rewrite oppo
 nat2PNat_Sn : (n : Nat) -> nat2PNat (S n) = (opposite (fst (nat2PNat n)) ** (PS (snd (nat2PNat n))))
 nat2PNat_Sn Z     = Refl
 nat2PNat_Sn (S k) with (nat2PNat k)
-  nat2PNat_Sn (S k) | (p ** pn) = Refl
+  | (p ** pn) = Refl
   
 fst_nat2PNat_Sn : (n : Nat) -> fst (nat2PNat (S n)) = opposite (fst (nat2PNat n))
 fst_nat2PNat_Sn Z = Refl
-fst_nat2PNat_Sn (S k) with (nat2PNat k)
-  | (p ** pn) = ?rhs2
-
+fst_nat2PNat_Sn (S k) with (nat2PNat (S k))
+  | (p ** pn) = Refl
 
 parityOf_gets_parity_5 :  parityOf 5 = fst (nat2PNat 5)
 parityOf_gets_parity_5 = Refl
