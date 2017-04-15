@@ -27,19 +27,22 @@ nat2PNat Z    = (Even ** PZ)
 nat2PNat (S x) with (nat2PNat x)
      | (p1 ** px) = (opposite(p1) ** (PS px))
      
+opposite_its_own_inverse : (p : Parity) -> p = opposite (opposite p)
+opposite_its_own_inverse Even = Refl
+opposite_its_own_inverse Odd  = Refl
+
+opposite_opposite_parity_mapper : (p: Parity) -> PNat (opposite (opposite p)) -> PNat p
+opposite_opposite_parity_mapper p pnat = rewrite opposite_its_own_inverse p in pnat
+     
 nat2Pat_not_dpair : {p : Parity} -> Nat -> Maybe (PNat p)
 nat2Pat_not_dpair {p=Even} Z = Just PZ
 nat2Pat_not_dpair {p=Odd} Z = Nothing
 nat2Pat_not_dpair {p=p1} (S k) with (nat2Pat_not_dpair {p=opposite p1} k)
    | Nothing = Nothing
-   | Just pk = Just (PS pk)
+   | Just pk = Just (opposite_opposite_parity_mapper p1 (PS pk))
 
 nat2PNat_5 : nat2PNat 5 = (Odd ** PS (PS (PS (PS (PS PZ)))))
 nat2PNat_5 = Refl
-
-opposite_its_own_inverse : (p : Parity) -> p = opposite (opposite p)
-opposite_its_own_inverse Even = Refl
-opposite_its_own_inverse Odd  = Refl
 
 fst_of_dpair: (p:Parity) -> PNat p -> fst (p**pn) = p
 fst_of_dpair p x = Refl
