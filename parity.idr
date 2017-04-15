@@ -56,14 +56,18 @@ fst_nat2PNat_Sn (S k) with (nat2PNat (S k))
 parityOf_gets_parity_5 :  parityOf 5 = fst (nat2PNat 5)
 parityOf_gets_parity_5 = Refl
 
+parityOf_Sn: (n : Nat) -> parityOf (S n) = opposite (parityOf n)
+parityOf_Sn n = Refl
+
 parityOf_gets_parity_ind_hyp2 : (n : Nat) -> parityOf n = fst (nat2PNat n) -> opposite (parityOf n) = opposite (fst (nat2PNat n))
 parityOf_gets_parity_ind_hyp2 n prf = cong prf
 
+parityOf_gets_parity_ind_hyp3 : (n : Nat) -> parityOf n = fst (nat2PNat n) -> parityOf (S n) = opposite (fst (nat2PNat n))
+parityOf_gets_parity_ind_hyp3 n prf = cong prf
+
 parityOf_gets_parity_ind_hyp : (n : Nat) -> parityOf n = fst (nat2PNat n) -> parityOf (S n) = fst (nat2PNat (S n))
-parityOf_gets_parity_ind_hyp n prf with ((parityOf_gets_parity_ind_hyp2 n prf, fst_nat2PNat_Sn n))
-  | (x,y) = ?h1
+parityOf_gets_parity_ind_hyp n prf = rewrite (parityOf_gets_parity_ind_hyp2 n prf) in ?h2
 
 parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2PNat n)
 parityOf_gets_parity Z     = Refl
 parityOf_gets_parity (S k) = rewrite (parityOf_gets_parity_ind_hyp k (parityOf_gets_parity k)) in Refl
-
