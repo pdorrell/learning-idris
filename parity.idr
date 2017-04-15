@@ -66,7 +66,7 @@ parityOf_gets_parity_ind_hyp3 : (n : Nat) -> parityOf n = fst (nat2PNat n) -> pa
 parityOf_gets_parity_ind_hyp3 n prf = cong prf
 
 parityOf_gets_parity_ind_hyp : (n : Nat) -> parityOf n = fst (nat2PNat n) -> parityOf (S n) = fst (nat2PNat (S n))
-parityOf_gets_parity_ind_hyp n prf = rewrite (parityOf_gets_parity_ind_hyp2 n prf) in ?h2
+parityOf_gets_parity_ind_hyp n prf = rewrite fst_nat2PNat_Sn n in parityOf_gets_parity_ind_hyp3 n prf
 
 parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2PNat n)
 parityOf_gets_parity Z     = Refl
