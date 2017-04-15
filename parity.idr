@@ -27,6 +27,13 @@ nat2PNat Z    = (Even ** PZ)
 nat2PNat (S x) with (nat2PNat x)
      | (p1 ** px) = (opposite(p1) ** (PS px))
      
+nat2Pat_not_dpair : {p : Parity} -> Nat -> Maybe (PNat p)
+nat2Pat_not_dpair {p=Even} Z = Just PZ
+nat2Pat_not_dpair {p=Odd} Z = Nothing
+nat2Pat_not_dpair {p=p1} (S k) with (nat2Pat_not_dpair {p=opposite p1} k)
+   | Nothing = Nothing
+   | Just pk = Just (PS pk)
+
 nat2PNat_5 : nat2PNat 5 = (Odd ** PS (PS (PS (PS (PS PZ)))))
 nat2PNat_5 = Refl
 
