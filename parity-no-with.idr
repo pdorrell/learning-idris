@@ -43,23 +43,29 @@ pNat2Nat : PNat p -> Nat
 pNat2Nat PZ     = Z
 pNat2Nat (PS x) = S (pNat2Nat x)
 
+-- Type of Dependent pair of a Parity and a PNat
+DPNat : Type
+DPNat = (p ** PNat p)
+
 -- Map a Nat to a dependent pair of a Parity and a PNat
-nextPNatDpair : (p ** PNat p) -> (p1 ** PNat p1)
+nextPNatDpair : DPNat -> DPNat
 nextPNatDpair (p ** pn) = (opposite p ** PS pn)
 
-nat2DPNat : Nat -> (p ** PNat p)
+nat2DPNat : Nat -> DPNat
 nat2DPNat Z = (Even ** PZ)
 nat2DPNat (S k) = nextPNatDpair (nat2DPNat k)
 
+examples_dpnat : List DPNat
+examples_dpnat = [(Even ** PZ), nat2DPNat 5]
 
 -- Steps to prove parityOf_gets_parity ...
 fst_of_dpair: PNat p -> fst (p**pn) = p
 fst_of_dpair x = Refl
 
-nextPNatDpairEquality : (dpNat : (p ** PNat p)) -> nextPNatDpair dpNat = (opposite (fst dpNat) ** PS (snd dpNat))
+nextPNatDpairEquality : (dpNat : DPNat) -> nextPNatDpair dpNat = (opposite (fst dpNat) ** PS (snd dpNat))
 nextPNatDpairEquality (x ** pf) = Refl
 
-fstNextPNatDpair : (dpNat : (p ** PNat p)) -> fst (nextPNatDpair dpNat) = opposite (fst dpNat)
+fstNextPNatDpair : (dpNat : DPNat) -> fst (nextPNatDpair dpNat) = opposite (fst dpNat)
 fstNextPNatDpair dpNat = cong {f=fst} (nextPNatDpairEquality dpNat)
 
 parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2DPNat n)
