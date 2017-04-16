@@ -72,7 +72,6 @@ parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2DPNat n)
 parityOf_gets_parity Z = Refl
 parityOf_gets_parity (S k) = rewrite parityOf_gets_parity k in rewrite fstNextPNatDpair (nat2DPNat k) in Refl
 
-
 -- Proofs about 'opposite' ...
 opposite_its_own_inverse : (p : Parity) -> p = opposite (opposite p)
 opposite_its_own_inverse Even = Refl
@@ -84,3 +83,16 @@ opposite_opposite_parity_mapper p pnat = rewrite opposite_its_own_inverse p in p
 opposite_is_mono : (p1,p2 : Parity) -> opposite p1 = opposite p2 -> p1 = p2
 opposite_is_mono p1 p2 prf = rewrite opposite_its_own_inverse p1 in rewrite opposite_its_own_inverse p2 in cong { f = opposite } prf
 
+-- From Nat to DPNat and back again
+snd_nextPNatDpair_dpn: (dpn : DPNat) -> snd (nextPNatDpair dpn) = PS (snd dpn)
+snd_nextPNatDpair_dpn (p ** pn) = Refl
+
+sndNat2DpNat : (n : Nat) -> snd (nat2DPNat (S n)) = PS (snd (nat2DPNat n))
+sndNat2DpNat n = rewrite snd_nextPNatDpair_dpn (nat2DPNat n) in Refl
+
+pNat2NatSndNat2DpNat : (n : Nat) -> pNat2Nat (snd (nat2DPNat (S n))) = S (pNat2Nat (snd (nat2DPNat n)))
+pNat2NatSndNat2DpNat n = rewrite sndNat2DpNat n in Refl
+
+nat2DpNat2Nat : (n : Nat) -> pNat2Nat (snd (nat2DPNat n)) = n
+nat2DpNat2Nat Z = Refl
+nat2DpNat2Nat (S k) = rewrite pNat2NatSndNat2DpNat k in rewrite nat2DpNat2Nat k in Refl
