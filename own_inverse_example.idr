@@ -9,14 +9,14 @@ opposite Even = Odd
 opposite Odd  = Even
 
 -- The 'opposite' function is it's own inverse
-opposite_its_own_inverse : (p : Parity) -> p = opposite (opposite p)
+opposite_its_own_inverse : (p : Parity) -> opposite (opposite p) = p
 opposite_its_own_inverse Even = Refl
 opposite_its_own_inverse Odd  = Refl
 
 -- abstraction of being one's own inverse
 
 IsItsOwnInverse : {t : Type} -> (f: t->t) -> Type
-IsItsOwnInverse {t} f = (x: t) -> x = f (f x)
+IsItsOwnInverse {t} f = (x: t) -> f (f x) = x
 
 opposite_IsItsOwnInverse : IsItsOwnInverse {t=Parity} opposite
 opposite_IsItsOwnInverse = opposite_its_own_inverse
