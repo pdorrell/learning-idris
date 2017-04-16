@@ -83,3 +83,11 @@ opposite_opposite_parity_mapper p pnat = rewrite opposite_its_own_inverse p in p
      
 opposite_is_mono : (p1,p2 : Parity) -> opposite p1 = opposite p2 -> p1 = p2
 opposite_is_mono p1 p2 prf = rewrite opposite_its_own_inverse p1 in rewrite opposite_its_own_inverse p2 in cong { f = opposite } prf
+
+-- abstraction of being one's own inverse
+
+IsItsOwnInverse : {t : Type} -> (f: t->t) -> Type
+IsItsOwnInverse {t} f = (x: t) -> x = f (f x)
+
+opposite_IsItsOwnInverse : IsItsOwnInverse {t=Parity} opposite
+opposite_IsItsOwnInverse = opposite_its_own_inverse
