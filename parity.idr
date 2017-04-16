@@ -1,27 +1,47 @@
 %default total
 
+{- In the Idris documentation there is a Parity example where Odd or Even belong
+   to type Parity n for a natural number n depending on if it's even or odd.
+   Here I explore doing it the other way round.
+ -}
+
+-- The type of parity values - either Even or Odd
 data Parity = Even | Odd
 
+-- Even is the opposite of Odd and Odd is the opposite of Even
 opposite: Parity -> Parity
 opposite Even = Odd
 opposite Odd  = Even
 
+-- Calculate the parity of a natural number
 parityOf : Nat -> Parity
 parityOf Z     = Even
 parityOf (S x) = opposite $ parityOf x
 
+-- PNat is a type constructor where PNat Even contains the even numbers, and PNat Odd contains the odd numbers
+-- The elements of PNat p can't actually be members of Nat (because Idris only allows items to belong
+-- to the type that introduces those items), so I use constructors PZ and PS analogous to the original Z and S.
 data PNat : Parity -> Type where
      PZ : PNat Even
      PS : PNat p -> PNat $ opposite p
      
-parityOfPNat: (pn: PNat p) -> Parity
+-- PNat values and Nat values are different, but we expect to be able to map from one to the other
+
+-- Calculate the parity of a PNat.
+parityOfPNat: {p: Parity} -> (pn: PNat p) -> Parity
 parityOfPNat PZ = Even
 parityOfPNat (PS pn) = opposite $ parityOfPNat pn
 
+-- The following alternative doesn't work (because the p doesn't exist at run-time, I think):
+--parityOfPNat2: {p: Parity} -> (pn: PNat p) -> Parity
+--parityOfPNat2 pn = p
+
+-- Map a PNat to a Nat by straightforward induction
 pNat2Nat : PNat p -> Nat
 pNat2Nat PZ     = Z
 pNat2Nat (PS x) = S (pNat2Nat x)
 
+-- Map a Nat to a dependent pair of a Parity and a PNat
 nat2PNat : Nat -> (p ** PNat p)
 nat2PNat Z    = (Even ** PZ)
 nat2PNat (S x) with (nat2PNat x)
