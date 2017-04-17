@@ -18,7 +18,16 @@ opposite_its_own_inverse Odd  = Refl
 IsItsOwnInverse : {t : Type} -> (f: t->t) -> Type
 IsItsOwnInverse {t} f = (x: t) -> f (f x) = x
 
-opposite_IsItsOwnInverse : IsItsOwnInverse {t=Parity} opposite
+opposite_IsItsOwnInverse : IsItsOwnInverse {t=Parity} Main.opposite
 opposite_IsItsOwnInverse = opposite_its_own_inverse
+
+-- implicit {t=Parity} can be left out
+opposite_IsItsOwnInverse2 : IsItsOwnInverse Main.opposite
+opposite_IsItsOwnInverse2 = opposite_its_own_inverse
+
+-- Or do the whole proof in one step
+opposite_IsItsOwnInverse3 : IsItsOwnInverse Main.opposite
+opposite_IsItsOwnInverse3 Even = Refl
+opposite_IsItsOwnInverse3 Odd = Refl
 
 -- The last definition fails with 'Type mismatch between opposite (opposite v0) and opposite (opposite v0)'
