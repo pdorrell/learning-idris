@@ -96,3 +96,12 @@ pNat2NatSndNat2DpNat n = rewrite sndNat2DpNat n in Refl
 nat2DpNat2Nat : (n : Nat) -> pNat2Nat (snd (nat2DPNat n)) = n
 nat2DpNat2Nat Z = Refl
 nat2DpNat2Nat (S k) = rewrite pNat2NatSndNat2DpNat k in rewrite nat2DpNat2Nat k in Refl
+
+-- From DPNat to Nat and back again
+p_pNat2Nat2dpNat : (p : Parity) -> (pn : PNat p) -> nat2DPNat (pNat2Nat pn) = (p ** pn)
+p_pNat2Nat2dpNat Even PZ = Refl
+p_pNat2Nat2dpNat (opposite p1) (PS pn1) = rewrite p_pNat2Nat2dpNat p1 pn1 in Refl
+
+dpNat2Nat2dpNat : (dpn : DPNat) -> nat2DPNat (pNat2Nat (snd dpn)) = dpn
+dpNat2Nat2dpNat (p ** pn) = p_pNat2Nat2dpNat p pn
+
