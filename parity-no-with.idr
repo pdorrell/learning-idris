@@ -73,15 +73,17 @@ parityOf_gets_parity Z = Refl
 parityOf_gets_parity (S k) = rewrite parityOf_gets_parity k in rewrite fstNextPNatDpair (nat2DPNat k) in Refl
 
 -- Proofs about 'opposite' ...
-opposite_its_own_inverse : (p : Parity) -> p = opposite (opposite p)
+opposite_its_own_inverse : (p : Parity) -> opposite (opposite p) = p
 opposite_its_own_inverse Even = Refl
 opposite_its_own_inverse Odd  = Refl
 
 opposite_opposite_parity_mapper : (p: Parity) -> PNat (opposite (opposite p)) -> PNat p
-opposite_opposite_parity_mapper p pnat = rewrite opposite_its_own_inverse p in pnat
+opposite_opposite_parity_mapper p pnat = rewrite sym $ opposite_its_own_inverse p in pnat
      
 opposite_is_mono : (p1,p2 : Parity) -> opposite p1 = opposite p2 -> p1 = p2
-opposite_is_mono p1 p2 prf = rewrite opposite_its_own_inverse p1 in rewrite opposite_its_own_inverse p2 in cong { f = opposite } prf
+opposite_is_mono p1 p2 prf = rewrite sym $ opposite_its_own_inverse p1 in 
+                             rewrite sym $ opposite_its_own_inverse p2 in 
+                             cong { f = opposite } prf
 
 -- From Nat to DPNat and back again
 snd_nextPNatDpair_dpn: (dpn : DPNat) -> snd (nextPNatDpair dpn) = PS (snd dpn)
@@ -105,3 +107,28 @@ p_pNat2Nat2dpNat (opposite p1) (PS pn1) = rewrite p_pNat2Nat2dpNat p1 pn1 in Ref
 dpNat2Nat2dpNat : (dpn : DPNat) -> nat2DPNat (pNat2Nat (snd dpn)) = dpn
 dpNat2Nat2dpNat (p ** pn) = p_pNat2Nat2dpNat p pn
 
+-- Some abstractions
+
+is_an_involution: {t : Type} ->  (f : t -> t) -> Type
+is_an_involution {t} f = (x: t) -> f (f x) = x
+
+opposite_is_an_involution: is_an_involution Main.opposite
+opposite_is_an_involution = opposite_its_own_inverse
+
+is_left_inverse: {t1: Type} -> {t2: Type} -> (f : t1 -> t2) -> (g : t2 -> t1) -> Type
+is_left_inverse {t1} {t2} f g = (x: t2) -> f (g x) = x
+
+pNat2Nat_snd : (dpn : DPNat) -> Nat
+pNat2Nat_snd = \dpn => pNat2Nat (snd dpn)
+
+nat2DPNat_is_left_inverse_of_pNat2Nat_snd: is_left_inverse Main.nat2DPNat Main.pNat2Nat_snd
+nat2DPNat_is_left_inverse_of_pNat2Nat_snd = dpNat2Nat2dpNat
+
+pNat2Nat_snd_is_left_inverse_of_nat2DPNat: is_left_inverse Main.pNat2Nat_snd Main.nat2DPNat
+pNat2Nat_snd_is_left_inverse_of_nat2DPNat = nat2DpNat2Nat
+
+are_inverses_of_each_other: {t1: Type} -> {t2: Type} -> (f : t1 -> t2) -> (g : t2 -> t1) -> Type
+are_inverses_of_each_other f g = (is_left_inverse f g, is_left_inverse g f)
+
+pNat2Nat_snd_and_nat2DPNat_are_inverses: are_inverses_of_each_other Main.nat2DPNat Main.pNat2Nat_snd
+pNat2Nat_snd_and_nat2DPNat_are_inverses = (nat2DPNat_is_left_inverse_of_pNat2Nat_snd, pNat2Nat_snd_is_left_inverse_of_nat2DPNat)
