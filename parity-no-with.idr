@@ -34,9 +34,10 @@ parityOfPNat: {p: Parity} -> (pn: PNat p) -> Parity
 parityOfPNat PZ = Even
 parityOfPNat (PS pn) = opposite $ parityOfPNat pn
 
--- The following alternative doesn't work (because the p doesn't exist at run-time, I think):
---parityOfPNat2: {p: Parity} -> (pn: PNat p) -> Parity
---parityOfPNat2 pn = p
+-- Get the parity from the type itself, which works as longs as the type variable {p} is brought into scope
+parityOfPNat2: {p: Parity} -> (pn: PNat p) -> Parity
+parityOfPNat2 {p} pn = p
+
 
 -- Map a PNat to a Nat by straightforward induction
 pNat2Nat : PNat p -> Nat
