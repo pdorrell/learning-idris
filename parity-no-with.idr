@@ -29,7 +29,7 @@ data PNat : Parity -> Type where
      
 -- PNat values and Nat values are different, but we expect to be able to map from one to the other
 
--- Calculate the parity of a PNat.
+-- Calculate the parity of a PNat, by induction on PS
 parityOfPNat: {p: Parity} -> (pn: PNat p) -> Parity
 parityOfPNat PZ = Even
 parityOfPNat (PS pn) = opposite $ parityOfPNat pn
@@ -38,6 +38,9 @@ parityOfPNat (PS pn) = opposite $ parityOfPNat pn
 parityOfPNat2: {p: Parity} -> (pn: PNat p) -> Parity
 parityOfPNat2 {p} pn = p
 
+pnat_parity_functions_equal: {p: Parity} -> (pn: PNat p) -> parityOfPNat pn = parityOfPNat2 pn
+pnat_parity_functions_equal PZ = Refl
+pnat_parity_functions_equal (PS p1) = rewrite pnat_parity_functions_equal p1 in Refl
 
 -- Map a PNat to a Nat by straightforward induction
 pNat2Nat : PNat p -> Nat
