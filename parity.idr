@@ -25,8 +25,8 @@ namespace parity_arithmetic
   plus Odd Odd = Even
 
   mult:  Parity -> Parity -> Parity
-  mult Odd Odd = Odd
-  mult _ _ = Even
+  mult Odd x = x
+  mult Even x = Even
 
 -- Calculate the parity of a natural number
 parityOf : Nat -> Parity
@@ -59,16 +59,25 @@ parityOf_is_addition_homomorphism Z n2 = Refl
 parityOf_is_addition_homomorphism (S k) n2 = rewrite plus_opposite (parityOf k) (parityOf n2) in 
                                               rewrite parityOf_is_addition_homomorphism k n2 in Refl
 
+mult_opposite: (p1 : Parity) -> (p2 : Parity) -> (opposite p1) * p2 = p1*p2 + p2
+mult_opposite Even p2 = Refl
+mult_opposite Odd Even = Refl
+mult_opposite Odd Odd = Refl
+
 -- PNat is a type constructor where PNat Even contains the even numbers, and PNat Odd contains the odd numbers
 -- The elements of PNat p can't actually be members of Nat (because Idris only allows items to belong
 -- to the type that introduces those items), so I use constructors PZ and PS analogous to the original Z and S.
 data PNat : Parity -> Type where
      PZ : PNat Even
      PS : PNat p -> PNat $ opposite p
-     
+
 pnat_plus: PNat p1 -> PNat p2 -> PNat (p1 + p2)
 pnat_plus PZ y = y
 pnat_plus {p1=opposite p} {p2} (PS x) y = rewrite plus_opposite p p2 in PS (pnat_plus x y)
+
+pnat_mult: PNat p1 -> PNat p2 -> PNat (p1 * p2)
+pnat_mult PZ y = PZ
+pnat_mult {p1=opposite p} {p2} (PS x) y = rewrite mult_opposite p p2 in pnat_plus (pnat_mult x y) y
 
 -- PNat values and Nat values are different, but we expect to be able to map from one to the other
 
