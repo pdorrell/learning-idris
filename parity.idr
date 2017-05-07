@@ -20,8 +20,7 @@ opposite Odd  = Even
 namespace parity_arithmetic
           
   plus: Parity -> Parity -> Parity
-  plus Even Even = Even
-  plus Even Odd = Odd
+  plus Even x = x
   plus Odd Even = Odd
   plus Odd Odd = Even
 
