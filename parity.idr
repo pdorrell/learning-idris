@@ -1,3 +1,5 @@
+module Parity
+
 %default total
 
 {- In the Idris documentation there is a Parity example where Odd or Even belong
@@ -116,7 +118,7 @@ dpNat2Nat2dpNat (p ** pn) = p_pNat2Nat2dpNat p pn
 is_an_involution: {t : Type} ->  (f : t -> t) -> Type
 is_an_involution {t} f = (x: t) -> f (f x) = x
 
-opposite_is_an_involution: is_an_involution Main.opposite
+opposite_is_an_involution: is_an_involution Parity.opposite
 opposite_is_an_involution = opposite_its_own_inverse
 
 is_left_inverse: {t1: Type} -> {t2: Type} -> (f : t1 -> t2) -> (g : t2 -> t1) -> Type
@@ -125,14 +127,14 @@ is_left_inverse {t1} {t2} f g = (x: t2) -> f (g x) = x
 pNat2Nat_snd : (dpn : DPNat) -> Nat
 pNat2Nat_snd = \dpn => pNat2Nat (snd dpn)
 
-nat2DPNat_is_left_inverse_of_pNat2Nat_snd: is_left_inverse Main.nat2DPNat Main.pNat2Nat_snd
+nat2DPNat_is_left_inverse_of_pNat2Nat_snd: is_left_inverse Parity.nat2DPNat Parity.pNat2Nat_snd
 nat2DPNat_is_left_inverse_of_pNat2Nat_snd = dpNat2Nat2dpNat
 
-pNat2Nat_snd_is_left_inverse_of_nat2DPNat: is_left_inverse Main.pNat2Nat_snd Main.nat2DPNat
+pNat2Nat_snd_is_left_inverse_of_nat2DPNat: is_left_inverse Parity.pNat2Nat_snd Parity.nat2DPNat
 pNat2Nat_snd_is_left_inverse_of_nat2DPNat = nat2DpNat2Nat
 
 are_inverses_of_each_other: {t1: Type} -> {t2: Type} -> (f : t1 -> t2) -> (g : t2 -> t1) -> Type
 are_inverses_of_each_other f g = (is_left_inverse f g, is_left_inverse g f)
 
-pNat2Nat_snd_and_nat2DPNat_are_inverses: are_inverses_of_each_other Main.nat2DPNat Main.pNat2Nat_snd
+pNat2Nat_snd_and_nat2DPNat_are_inverses: are_inverses_of_each_other Parity.nat2DPNat Parity.pNat2Nat_snd
 pNat2Nat_snd_and_nat2DPNat_are_inverses = (nat2DPNat_is_left_inverse_of_pNat2Nat_snd, pNat2Nat_snd_is_left_inverse_of_nat2DPNat)
