@@ -4,6 +4,8 @@
    to type Parity n for a natural number n depending on if it's even or odd.
    Here I explore doing it the other way round.
  -}
+ 
+ -- This file is like parity.idr, but I avoid using a 'with' in the nat2PNat definition
 
 -- The type of parity values - either Even or Odd
 data Parity = Even | Odd
@@ -27,77 +29,110 @@ data PNat : Parity -> Type where
      
 -- PNat values and Nat values are different, but we expect to be able to map from one to the other
 
--- Calculate the parity of a PNat.
+-- Calculate the parity of a PNat, by induction on PS
 parityOfPNat: {p: Parity} -> (pn: PNat p) -> Parity
 parityOfPNat PZ = Even
 parityOfPNat (PS pn) = opposite $ parityOfPNat pn
 
--- The following alternative doesn't work (because the p doesn't exist at run-time, I think):
---parityOfPNat2: {p: Parity} -> (pn: PNat p) -> Parity
---parityOfPNat2 pn = p
+-- Get the parity from the type itself, which works as longs as the type variable {p} is brought into scope
+parityOfPNat2: {p: Parity} -> (pn: PNat p) -> Parity
+parityOfPNat2 {p} pn = p
+
+pnat_parity_functions_equal: {p: Parity} -> (pn: PNat p) -> parityOfPNat pn = parityOfPNat2 pn
+pnat_parity_functions_equal PZ = Refl
+pnat_parity_functions_equal (PS p1) = rewrite pnat_parity_functions_equal p1 in Refl
 
 -- Map a PNat to a Nat by straightforward induction
 pNat2Nat : PNat p -> Nat
 pNat2Nat PZ     = Z
 pNat2Nat (PS x) = S (pNat2Nat x)
 
+-- Type of Dependent pair of a Parity and a PNat
+DPNat : Type
+DPNat = (p ** PNat p)
+
 -- Map a Nat to a dependent pair of a Parity and a PNat
-nat2PNat : Nat -> (p ** PNat p)
-nat2PNat Z    = (Even ** PZ)
-nat2PNat (S x) with (nat2PNat x)
-     | (p1 ** px) = (opposite(p1) ** (PS px))
-     
-opposite_its_own_inverse : (p : Parity) -> p = opposite (opposite p)
+nextPNatDpair : DPNat -> DPNat
+nextPNatDpair (p ** pn) = (opposite p ** PS pn)
+
+nat2DPNat : Nat -> DPNat
+nat2DPNat Z = (Even ** PZ)
+nat2DPNat (S k) = nextPNatDpair (nat2DPNat k)
+
+examples_dpnat : List DPNat
+examples_dpnat = [(Even ** PZ), nat2DPNat 5]
+
+-- Steps to prove parityOf_gets_parity ...
+fst_of_dpair: PNat p -> fst (p**pn) = p
+fst_of_dpair x = Refl
+
+nextPNatDpairEquality : (dpNat : DPNat) -> nextPNatDpair dpNat = (opposite (fst dpNat) ** PS (snd dpNat))
+nextPNatDpairEquality (x ** pf) = Refl
+
+fstNextPNatDpair : (dpNat : DPNat) -> fst (nextPNatDpair dpNat) = opposite (fst dpNat)
+fstNextPNatDpair dpNat = cong {f=fst} (nextPNatDpairEquality dpNat)
+
+parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2DPNat n)
+parityOf_gets_parity Z = Refl
+parityOf_gets_parity (S k) = rewrite parityOf_gets_parity k in rewrite fstNextPNatDpair (nat2DPNat k) in Refl
+
+-- Proofs about 'opposite' ...
+opposite_its_own_inverse : (p : Parity) -> opposite (opposite p) = p
 opposite_its_own_inverse Even = Refl
 opposite_its_own_inverse Odd  = Refl
 
 opposite_opposite_parity_mapper : (p: Parity) -> PNat (opposite (opposite p)) -> PNat p
-opposite_opposite_parity_mapper p pnat = rewrite opposite_its_own_inverse p in pnat
+opposite_opposite_parity_mapper p pnat = rewrite sym $ opposite_its_own_inverse p in pnat
      
-nat2Pat_not_dpair : {p : Parity} -> Nat -> Maybe (PNat p)
-nat2Pat_not_dpair {p=Even} Z = Just PZ
-nat2Pat_not_dpair {p=Odd} Z = Nothing
-nat2Pat_not_dpair {p=p1} (S k) with (nat2Pat_not_dpair {p=opposite p1} k)
-   | Nothing = Nothing
-   | Just pk = Just (opposite_opposite_parity_mapper p1 (PS pk))
-
-nat2PNat_5 : nat2PNat 5 = (Odd ** PS (PS (PS (PS (PS PZ)))))
-nat2PNat_5 = Refl
-
-fst_of_dpair: (p:Parity) -> PNat p -> fst (p**pn) = p
-fst_of_dpair p x = Refl
-
-parityOf_gets_parity_for5: parityOf 5 = fst (nat2PNat 5)
-parityOf_gets_parity_for5 = Refl
-
 opposite_is_mono : (p1,p2 : Parity) -> opposite p1 = opposite p2 -> p1 = p2
-opposite_is_mono p1 p2 prf = rewrite opposite_its_own_inverse p1 in rewrite opposite_its_own_inverse p2 in cong { f = opposite } prf
+opposite_is_mono p1 p2 prf = rewrite sym $ opposite_its_own_inverse p1 in 
+                             rewrite sym $ opposite_its_own_inverse p2 in 
+                             cong { f = opposite } prf
 
-nat2PNat_Sn : (n : Nat) -> nat2PNat (S n) = (opposite (fst (nat2PNat n)) ** (PS (snd (nat2PNat n))))
-nat2PNat_Sn Z     = Refl
-nat2PNat_Sn (S k) with (nat2PNat k)
-  | (p ** pn) = Refl
-  
-fst_nat2PNat_Sn : (n : Nat) -> fst (nat2PNat (S n)) = opposite (fst (nat2PNat n))
-fst_nat2PNat_Sn Z = Refl
-fst_nat2PNat_Sn (S k) with (nat2PNat (S k))
-  | (p ** pn) = Refl
-  
-parityOf_gets_parity_5 :  parityOf 5 = fst (nat2PNat 5)
-parityOf_gets_parity_5 = Refl
+-- From Nat to DPNat and back again
+snd_nextPNatDpair_dpn: (dpn : DPNat) -> snd (nextPNatDpair dpn) = PS (snd dpn)
+snd_nextPNatDpair_dpn (p ** pn) = Refl
 
-parityOf_Sn: (n : Nat) -> parityOf (S n) = opposite (parityOf n)
-parityOf_Sn n = Refl
+sndNat2DpNat : (n : Nat) -> snd (nat2DPNat (S n)) = PS (snd (nat2DPNat n))
+sndNat2DpNat n = rewrite snd_nextPNatDpair_dpn (nat2DPNat n) in Refl
 
-parityOf_gets_parity_ind_hyp2 : (n : Nat) -> parityOf n = fst (nat2PNat n) -> opposite (parityOf n) = opposite (fst (nat2PNat n))
-parityOf_gets_parity_ind_hyp2 n prf = cong prf
+pNat2NatSndNat2DpNat : (n : Nat) -> pNat2Nat (snd (nat2DPNat (S n))) = S (pNat2Nat (snd (nat2DPNat n)))
+pNat2NatSndNat2DpNat n = rewrite sndNat2DpNat n in Refl
 
-parityOf_gets_parity_ind_hyp3 : (n : Nat) -> parityOf n = fst (nat2PNat n) -> parityOf (S n) = opposite (fst (nat2PNat n))
-parityOf_gets_parity_ind_hyp3 n prf = cong prf
+nat2DpNat2Nat : (n : Nat) -> pNat2Nat (snd (nat2DPNat n)) = n
+nat2DpNat2Nat Z = Refl
+nat2DpNat2Nat (S k) = rewrite pNat2NatSndNat2DpNat k in rewrite nat2DpNat2Nat k in Refl
 
-parityOf_gets_parity_ind_hyp : (n : Nat) -> parityOf n = fst (nat2PNat n) -> parityOf (S n) = fst (nat2PNat (S n))
-parityOf_gets_parity_ind_hyp n prf = rewrite fst_nat2PNat_Sn n in parityOf_gets_parity_ind_hyp3 n prf
+-- From DPNat to Nat and back again
+p_pNat2Nat2dpNat : (p : Parity) -> (pn : PNat p) -> nat2DPNat (pNat2Nat pn) = (p ** pn)
+p_pNat2Nat2dpNat Even PZ = Refl
+p_pNat2Nat2dpNat (opposite p1) (PS pn1) = rewrite p_pNat2Nat2dpNat p1 pn1 in Refl
 
-parityOf_gets_parity : (n : Nat) -> parityOf n = fst (nat2PNat n)
-parityOf_gets_parity Z     = Refl
-parityOf_gets_parity (S k) = rewrite (parityOf_gets_parity_ind_hyp k (parityOf_gets_parity k)) in Refl
+dpNat2Nat2dpNat : (dpn : DPNat) -> nat2DPNat (pNat2Nat (snd dpn)) = dpn
+dpNat2Nat2dpNat (p ** pn) = p_pNat2Nat2dpNat p pn
+
+-- Some abstractions
+
+is_an_involution: {t : Type} ->  (f : t -> t) -> Type
+is_an_involution {t} f = (x: t) -> f (f x) = x
+
+opposite_is_an_involution: is_an_involution Main.opposite
+opposite_is_an_involution = opposite_its_own_inverse
+
+is_left_inverse: {t1: Type} -> {t2: Type} -> (f : t1 -> t2) -> (g : t2 -> t1) -> Type
+is_left_inverse {t1} {t2} f g = (x: t2) -> f (g x) = x
+
+pNat2Nat_snd : (dpn : DPNat) -> Nat
+pNat2Nat_snd = \dpn => pNat2Nat (snd dpn)
+
+nat2DPNat_is_left_inverse_of_pNat2Nat_snd: is_left_inverse Main.nat2DPNat Main.pNat2Nat_snd
+nat2DPNat_is_left_inverse_of_pNat2Nat_snd = dpNat2Nat2dpNat
+
+pNat2Nat_snd_is_left_inverse_of_nat2DPNat: is_left_inverse Main.pNat2Nat_snd Main.nat2DPNat
+pNat2Nat_snd_is_left_inverse_of_nat2DPNat = nat2DpNat2Nat
+
+are_inverses_of_each_other: {t1: Type} -> {t2: Type} -> (f : t1 -> t2) -> (g : t2 -> t1) -> Type
+are_inverses_of_each_other f g = (is_left_inverse f g, is_left_inverse g f)
+
+pNat2Nat_snd_and_nat2DPNat_are_inverses: are_inverses_of_each_other Main.nat2DPNat Main.pNat2Nat_snd
+pNat2Nat_snd_and_nat2DPNat_are_inverses = (nat2DPNat_is_left_inverse_of_pNat2Nat_snd, pNat2Nat_snd_is_left_inverse_of_nat2DPNat)
