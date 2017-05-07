@@ -17,10 +17,25 @@ opposite: Parity -> Parity
 opposite Even = Odd
 opposite Odd  = Even
 
+plus: Parity -> Parity -> Parity
+plus Even Even = Even
+plus Even Odd = Odd
+plus Odd Even = Odd
+plus Odd Odd = Even
+
+mult:  Parity -> Parity -> Parity
+mult Odd Odd = Odd
+mult _ _ = Even
+
 -- Calculate the parity of a natural number
 parityOf : Nat -> Parity
 parityOf Z     = Even
 parityOf (S x) = opposite $ parityOf x
+
+Num Parity where
+  (+) = plus
+  (*) = mult
+  fromInteger = \i => parityOf $ fromInteger i
 
 -- PNat is a type constructor where PNat Even contains the even numbers, and PNat Odd contains the odd numbers
 -- The elements of PNat p can't actually be members of Nat (because Idris only allows items to belong
