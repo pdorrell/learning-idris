@@ -114,6 +114,19 @@ nat2DPNat (S k) = nextPNatDpair (nat2DPNat k)
 examples_dpnat : List DPNat
 examples_dpnat = [(Even ** PZ), nat2DPNat 5]
 
+namespace dpnat_arithmetic
+  
+  plus: DPNat -> DPNat -> DPNat
+  plus (p1 ** pn1) (p2 ** pn2) = (p1+p2 ** (pnat_plus pn1 pn2))
+
+  mult: DPNat -> DPNat -> DPNat
+  mult (p1 ** pn1) (p2 ** pn2) = (p1*p2 ** (pnat_mult pn1 pn2))
+
+Num DPNat where
+  (+) = dpnat_arithmetic.plus
+  (*) = dpnat_arithmetic.mult
+  fromInteger = nat2DPNat . fromInteger
+
 -- Steps to prove parityOf_gets_parity ...
 fst_of_dpair: PNat p -> fst (p**pn) = p
 fst_of_dpair x = Refl
