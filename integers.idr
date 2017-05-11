@@ -15,7 +15,12 @@ namespace signed_nat
 
 Eq SignedNat where
   (==) = signed_nat.equals
- 
+  
+plus_one: SignedNat -> SignedNat
+plus_one (Minus Z) = Plus (S Z)
+plus_one (Minus (S k)) = Minus k
+plus_one (Plus k) = Plus (S k)
+
 data PeanoInteger : Type where
   Z : PeanoInteger
   P : PeanoInteger -> PeanoInteger
