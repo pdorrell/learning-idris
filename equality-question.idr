@@ -15,23 +15,18 @@ a_equals_b x y = is_a_or_b x == is_a_or_b y
 Eq ABC where
   (==) = a_equals_b
   
-bool_lemma : (x : Bool) -> x == x = True
-bool_lemma False = Refl
-bool_lemma True = Refl
-
-lemma2 :  (x : ABC) -> (is_a_or_b x) == (is_a_or_b x) = True
-lemma2 x = bool_lemma (is_a_or_b x)
+bool_equality_is_reflexive : (x : Bool) -> x == x = True
+bool_equality_is_reflexive False = Refl
+bool_equality_is_reflexive True = Refl
 
 a_equals_b_is_reflexive : (x : ABC) -> (x == x) = True
-a_equals_b_is_reflexive x = lemma2 x
+a_equals_b_is_reflexive x = bool_equality_is_reflexive (is_a_or_b x)
+
+bool_equality_is_symmetric : (x : Bool) -> (y : Bool) -> x == y = y == x
+bool_equality_is_symmetric False False = Refl
+bool_equality_is_symmetric False True = Refl
+bool_equality_is_symmetric True False = Refl
+bool_equality_is_symmetric True True = Refl
 
 a_equals_b_is_symmetric : (x : ABC) -> (y : ABC) -> x == y = y == x
-a_equals_b_is_symmetric A A = Refl
-a_equals_b_is_symmetric A B = Refl
-a_equals_b_is_symmetric A C = Refl
-a_equals_b_is_symmetric B A = Refl
-a_equals_b_is_symmetric B B = Refl
-a_equals_b_is_symmetric B C = Refl
-a_equals_b_is_symmetric C A = Refl
-a_equals_b_is_symmetric C B = Refl
-a_equals_b_is_symmetric C C = Refl
+a_equals_b_is_symmetric x y = bool_equality_is_symmetric (is_a_or_b x) (is_a_or_b y)
