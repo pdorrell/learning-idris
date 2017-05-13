@@ -36,3 +36,6 @@ bool_equality_is_transitive False False z Refl = Refl
 bool_equality_is_transitive False True _ Refl impossible
 bool_equality_is_transitive True False _ Refl impossible
 bool_equality_is_transitive True True z Refl = Refl
+
+a_equals_b_is_transitive : (x : ABC) -> (y : ABC) -> (z : ABC) -> x == y = True -> x == z = y == z
+a_equals_b_is_transitive x y z = bool_equality_is_transitive (is_a_or_b x) (is_a_or_b y) (is_a_or_b z)
