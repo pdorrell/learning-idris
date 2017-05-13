@@ -4,18 +4,6 @@ module EqualityExamples
 
 data ABC = A | B | C
 
-bad_equals_abc : ABC -> ABC -> Bool
-bad_equals_abc A B = True
-bad_equals_abc B C = True
-bad_equals_abc C A = True
-bad_equals_abc _ _ = False
-
---[BadEquality] Eq ABC where
---  (==) = bad_equals_abc
-
-bad_equals_abc_not_reflexive : bad_equals_abc A B = not $ bad_equals_abc B A
-bad_equals_abc_not_reflexive = Refl
-
 interface Eq t => LawfulEq t where
   eq_is_reflexive : (x : t) -> x == x = True
   eq_is_symmetric : (x : t) -> (y : t) -> x == y = y == x
@@ -48,27 +36,26 @@ is_a_or_b : ABC -> Bool
 is_a_or_b A = True
 is_a_or_b B = True
 is_a_or_b C = False
-
   
-a_equals_b : ABC -> ABC -> Bool
-a_equals_b x y = is_a_or_b x == is_a_or_b y
-
 Eq ABC where
-  (==) = a_equals_b
-
-a_equals_b_is_reflexive : (x : ABC) -> x == x = True
-a_equals_b_is_reflexive x = eq_is_reflexive (is_a_or_b x)
-
-a_equals_b_is_symmetric : (x : ABC) -> (y : ABC) -> x == y = y == x
-a_equals_b_is_symmetric x y = eq_is_symmetric (is_a_or_b x) (is_a_or_b y)
-
-a_equals_b_is_transitive : (x : ABC) -> (y : ABC) -> (z : ABC) -> x == y = True -> x == z = y == z
-a_equals_b_is_transitive x y z = eq_is_transitive (is_a_or_b x) (is_a_or_b y) (is_a_or_b z)
-
+  (==) = \x, y => is_a_or_b x == is_a_or_b y
+  
 LawfulEq ABC where
-  eq_is_reflexive = a_equals_b_is_reflexive
-  eq_is_symmetric = a_equals_b_is_symmetric
-  eq_is_transitive = a_equals_b_is_transitive
+  eq_is_reflexive = \x => eq_is_reflexive (is_a_or_b x)
+  eq_is_symmetric = \x, y => eq_is_symmetric (is_a_or_b x) (is_a_or_b y)
+  eq_is_transitive = \x, y, z => eq_is_transitive (is_a_or_b x) (is_a_or_b y) (is_a_or_b z)
 
+-- And now for some bad unlawful equality ...
 
+bad_equals_abc : ABC -> ABC -> Bool
+bad_equals_abc A B = True
+bad_equals_abc B C = True
+bad_equals_abc C A = True
+bad_equals_abc _ _ = False
+
+[BadEquality] Eq ABC where
+  (==) = bad_equals_abc
+
+bad_equals_abc_not_reflexive : bad_equals_abc A B = not $ bad_equals_abc B A
+bad_equals_abc_not_reflexive = Refl
 
