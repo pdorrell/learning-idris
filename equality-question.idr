@@ -30,3 +30,9 @@ bool_equality_is_symmetric True True = Refl
 
 a_equals_b_is_symmetric : (x : ABC) -> (y : ABC) -> x == y = y == x
 a_equals_b_is_symmetric x y = bool_equality_is_symmetric (is_a_or_b x) (is_a_or_b y)
+
+bool_equality_is_transitive : (x : Bool) -> (y : Bool) -> (z : Bool) -> x == y = True -> x == z = y == z
+bool_equality_is_transitive False False z Refl = Refl
+bool_equality_is_transitive False True _ Refl impossible
+bool_equality_is_transitive True False _ Refl impossible
+bool_equality_is_transitive True True z Refl = Refl
