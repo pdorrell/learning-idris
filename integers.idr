@@ -53,3 +53,10 @@ normalize Z = Z
 normalize (P x) = P_of_normalized (normalize x)
 normalize (S x) = S_of_normalized (normalize x)
 
+data Sign = Negative | Zero | Positive
+
+SignOf : PeanoInteger -> Sign
+SignOf x with (normalize x)
+  | Z = Zero
+  | (P y) = Positive
+  | (S y) = Negative
