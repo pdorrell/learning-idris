@@ -58,5 +58,16 @@ data Sign = Negative | Zero | Positive
 SignOf : PeanoInteger -> Sign
 SignOf x with (normalize x)
   | Z = Zero
-  | (P y) = Positive
-  | (S y) = Negative
+  | (S y) = Positive
+  | (P y) = Negative
+  
+DepthOfPeanoInteger : PeanoInteger -> Nat
+DepthOfPeanoInteger Z = 0
+DepthOfPeanoInteger (P x) = S $ DepthOfPeanoInteger x
+DepthOfPeanoInteger (S x) = S $ DepthOfPeanoInteger x
+
+Examples : (SignOf (P (S Z)) = Zero, SignOf(S (S Z)) = Positive, SignOf(P (S (P (P Z)))) = Negative)
+Examples = (Refl, Refl, Refl)
+
+Abs : PeanoInteger -> Nat
+Abs x = DepthOfPeanoInteger $ normalize x
