@@ -21,6 +21,11 @@ plus_one (Minus Z) = Plus (S Z)
 plus_one (Minus (S k)) = Minus k
 plus_one (Plus k) = Plus (S k)
 
+minus_one: SignedNat -> SignedNat
+minus_one (Minus k) = Minus (S k)
+minus_one (Plus Z) = Minus (S Z)
+minus_one (Plus (S k)) = Plus k
+
 data PeanoInteger : Type where
   Z : PeanoInteger
   P : PeanoInteger -> PeanoInteger
@@ -37,6 +42,19 @@ minusNat2PeanoInt (S k) = P (minusNat2PeanoInt k)
 signedNat2PeanoInt : SignedNat -> PeanoInteger
 signedNat2PeanoInt (Minus k) = minusNat2PeanoInt k
 signedNat2PeanoInt (Plus k) = nat2PeanoInt k
+
+repeat : PeanoInteger -> (f: a -> a) -> (f': a -> a) -> a -> a
+repeat Z f f' y = y
+repeat (P x) f f' y = f' $ repeat x f f' y
+repeat (S x) f f' y = f $ repeat x f f' y
+
+repeat_int: Nat -> (f: a -> a) -> a -> a
+repeat_int Z f x = x
+repeat_int (S k) f x = f $ repeat_int k f x
+
+repeat_signed_nat : SignedNat -> (f: a -> a) -> (f': a -> a) -> a -> a
+repeat_signed_nat (Minus k) f f' y = repeat_int k f' y
+repeat_signed_nat (Plus k) f f' y = repeat_int k f y
 
 p_of_normalized : PeanoInteger -> PeanoInteger
 p_of_normalized Z = P Z
