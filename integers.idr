@@ -43,6 +43,21 @@ signedNat2PeanoInt : SignedNat -> PeanoInteger
 signedNat2PeanoInt (Minus k) = minusNat2PeanoInt k
 signedNat2PeanoInt (Plus k) = nat2PeanoInt k
 
+is_inverse_of: Eq a => (a -> a) -> (a -> a) -> Type
+is_inverse_of {a} f f' = (x : a) -> (f (f' x)) = x
+
+are_inverses : Eq a => (a -> a) -> (a -> a) -> Type
+are_inverses f f' = (is_inverse_of f f', is_inverse_of f' f)
+
+data FunctionAndInverse : (a : Type) -> Type where
+  FunAndInverse : Eq a => (f : a -> a) -> (f' : a -> a) -> (are_inverses f f') -> FunctionAndInverse a
+  
+apply_fun : FunctionAndInverse a -> a -> a
+apply_fun (FunAndInverse f f' prf) y = f y
+
+unapply_fun : FunctionAndInverse a -> a -> a
+unapply_fun (FunAndInverse f f' prf) y = f' y
+
 interface BidirectionalRepeater t where
    repeat : t -> (a -> a, a -> a) -> a -> a
 
@@ -64,6 +79,8 @@ repeat_signed_nat (Plus k) (f, f') y = repeat_int k f y
 
 BidirectionalRepeater SignedNat where
   repeat = repeat_signed_nat
+  
+
 
 peanoInt2SignedNat: PeanoInteger -> SignedNat
 peanoInt2SignedNat x = repeat_peano_int x (plus_one, minus_one) (Plus Z)
