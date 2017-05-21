@@ -72,3 +72,11 @@ sign_of_examples = (Refl, Refl, Refl)
 abs : PeanoInteger -> Nat
 abs x = depth_of_peano_integer $ normalize x
 
+signed_int : Sign -> Nat -> PeanoInteger
+signed_int Negative Z = Z
+signed_int Negative (S n) = P (signed_int Negative n)
+signed_int Zero n = Z
+signed_int Positive Z = Z
+signed_int Positive (S n) = S (signed_int Positive n)
+
+
