@@ -43,18 +43,21 @@ signedNat2PeanoInt : SignedNat -> PeanoInteger
 signedNat2PeanoInt (Minus k) = minusNat2PeanoInt k
 signedNat2PeanoInt (Plus k) = nat2PeanoInt k
 
-repeat : PeanoInteger -> (f: a -> a) -> (f': a -> a) -> a -> a
-repeat Z f f' y = y
-repeat (P x) f f' y = f' $ repeat x f f' y
-repeat (S x) f f' y = f $ repeat x f f' y
+repeat_peano_int : PeanoInteger -> (a -> a, a -> a) -> a -> a
+repeat_peano_int Z (f, f') y = y
+repeat_peano_int (P x) (f, f') y = f' $ repeat_peano_int x (f, f') y
+repeat_peano_int (S x) (f, f') y = f $ repeat_peano_int x (f, f') y
 
 repeat_int: Nat -> (f: a -> a) -> a -> a
 repeat_int Z f x = x
 repeat_int (S k) f x = f $ repeat_int k f x
 
-repeat_signed_nat : SignedNat -> (f: a -> a) -> (f': a -> a) -> a -> a
-repeat_signed_nat (Minus k) f f' y = repeat_int k f' y
-repeat_signed_nat (Plus k) f f' y = repeat_int k f y
+repeat_signed_nat : SignedNat -> (a -> a, a -> a) -> a -> a
+repeat_signed_nat (Minus k) (f, f') y = repeat_int k f' y
+repeat_signed_nat (Plus k) (f, f') y = repeat_int k f y
+
+peanoInt2SignedNat: PeanoInteger -> SignedNat
+peanoInt2SignedNat x = repeat_peano_int x (plus_one, minus_one) (Plus Z)
 
 p_of_normalized : PeanoInteger -> PeanoInteger
 p_of_normalized Z = P Z
