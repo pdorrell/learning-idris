@@ -38,36 +38,37 @@ signedNat2PeanoInt : SignedNat -> PeanoInteger
 signedNat2PeanoInt (Minus k) = minusNat2PeanoInt k
 signedNat2PeanoInt (Plus k) = nat2PeanoInt k
 
-P_of_normalized : PeanoInteger -> PeanoInteger
-P_of_normalized Z = P Z
-P_of_normalized (P x) = P (P x)
-P_of_normalized (S x) = x
+p_of_normalized : PeanoInteger -> PeanoInteger
+p_of_normalized Z = P Z
+p_of_normalized (P x) = P (P x)
+p_of_normalized (S x) = x
 
-S_of_normalized : PeanoInteger -> PeanoInteger
-S_of_normalized Z = S Z
-S_of_normalized (S x) = S (S x)
-S_of_normalized (P x) = x
+s_of_normalized : PeanoInteger -> PeanoInteger
+s_of_normalized Z = S Z
+s_of_normalized (S x) = S (S x)
+s_of_normalized (P x) = x
 
 normalize : PeanoInteger -> PeanoInteger
 normalize Z = Z
-normalize (P x) = P_of_normalized (normalize x)
-normalize (S x) = S_of_normalized (normalize x)
+normalize (P x) = p_of_normalized (normalize x)
+normalize (S x) = s_of_normalized (normalize x)
 
 data Sign = Negative | Zero | Positive
 
-SignOf : PeanoInteger -> Sign
-SignOf x with (normalize x)
+sign_of : PeanoInteger -> Sign
+sign_of x with (normalize x)
   | Z = Zero
   | (S y) = Positive
   | (P y) = Negative
   
-DepthOfPeanoInteger : PeanoInteger -> Nat
-DepthOfPeanoInteger Z = 0
-DepthOfPeanoInteger (P x) = S $ DepthOfPeanoInteger x
-DepthOfPeanoInteger (S x) = S $ DepthOfPeanoInteger x
+depth_of_peano_integer : PeanoInteger -> Nat
+depth_of_peano_integer Z = 0
+depth_of_peano_integer (P x) = S $ depth_of_peano_integer x
+depth_of_peano_integer (S x) = S $ depth_of_peano_integer x
 
-Examples : (SignOf (P (S Z)) = Zero, SignOf(S (S Z)) = Positive, SignOf(P (S (P (P Z)))) = Negative)
-Examples = (Refl, Refl, Refl)
+sign_of_examples : (sign_of (P (S Z)) = Zero, sign_of(S (S Z)) = Positive, sign_of(P (S (P (P Z)))) = Negative)
+sign_of_examples = (Refl, Refl, Refl)
 
-Abs : PeanoInteger -> Nat
-Abs x = DepthOfPeanoInteger $ normalize x
+abs : PeanoInteger -> Nat
+abs x = depth_of_peano_integer $ normalize x
+
