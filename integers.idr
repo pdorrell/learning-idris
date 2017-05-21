@@ -43,10 +43,16 @@ signedNat2PeanoInt : SignedNat -> PeanoInteger
 signedNat2PeanoInt (Minus k) = minusNat2PeanoInt k
 signedNat2PeanoInt (Plus k) = nat2PeanoInt k
 
+interface BidirectionalRepeater t where
+   repeat : t -> (a -> a, a -> a) -> a -> a
+
 repeat_peano_int : PeanoInteger -> (a -> a, a -> a) -> a -> a
 repeat_peano_int Z (f, f') y = y
 repeat_peano_int (P x) (f, f') y = f' $ repeat_peano_int x (f, f') y
 repeat_peano_int (S x) (f, f') y = f $ repeat_peano_int x (f, f') y
+
+BidirectionalRepeater PeanoInteger where
+  repeat = repeat_peano_int
 
 repeat_int: Nat -> (f: a -> a) -> a -> a
 repeat_int Z f x = x
@@ -55,6 +61,9 @@ repeat_int (S k) f x = f $ repeat_int k f x
 repeat_signed_nat : SignedNat -> (a -> a, a -> a) -> a -> a
 repeat_signed_nat (Minus k) (f, f') y = repeat_int k f' y
 repeat_signed_nat (Plus k) (f, f') y = repeat_int k f y
+
+BidirectionalRepeater SignedNat where
+  repeat = repeat_signed_nat
 
 peanoInt2SignedNat: PeanoInteger -> SignedNat
 peanoInt2SignedNat x = repeat_peano_int x (plus_one, minus_one) (Plus Z)
