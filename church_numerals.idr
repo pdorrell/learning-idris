@@ -24,3 +24,18 @@ church_numeral : Nat -> EndomorphismApplier
 church_numeral Z = church_zero
 church_numeral (S k) = church_succ (church_numeral k)
 
+church_numeral_1_to_1: (n : Nat) -> (church_numeral n) Nat S Z = n
+church_numeral_1_to_1 Z = Refl
+church_numeral_1_to_1 (S k) = cong {f=S} $ church_numeral_1_to_1 k
+
+church_plus : EndomorphismApplier -> EndomorphismApplier -> EndomorphismApplier
+church_plus ea1 ea2 t f x = ea1 t f $ ea2 t f x
+
+church_plus_example : (church_plus (church_numeral 3) (church_numeral 4)) Nat S Z = 7
+church_plus_example = Refl
+
+church_mult : EndomorphismApplier -> EndomorphismApplier -> EndomorphismApplier
+church_mult ea1 ea2 t f = ea1 t $ ea2 t f
+
+church_mult_example : (church_mult (church_numeral 2) (church_numeral 3)) Nat S Z = 6
+church_mult_example = Refl
