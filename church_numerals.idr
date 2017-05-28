@@ -47,3 +47,27 @@ church_mult ea1 ea2 t f = ea1 t $ ea2 t f
 
 church_mult_example : (church_mult (church_numeral 2) (church_numeral 3)) Nat S Z = 6
 church_mult_example = Refl
+
+mult_0 : (k : Nat) -> mult k 0 = 0
+mult_0 Z = Refl
+mult_0 (S k) = mult_0 k
+
+lemma1 : (k : Nat) -> church_numeral k Nat (church_zero Nat S) 0 = 0
+lemma1 Z = Refl
+lemma1 (S k) = lemma1 k
+
+lemma2 : (n : Nat) -> (k : Nat) -> mult (S k) n = plus n (mult k n)
+lemma2 n k = Refl
+
+lemma3:(k : Nat) -> (m : Nat) ->  church_numeral k Nat (church_numeral m Nat S) 0 = mult k m
+lemma3 Z m = Refl
+lemma3 (S k) m = rewrite lemma3 k m in church_plus_lemma m (mult k m)
+
+church_mult_s_lemma : (k : Nat) -> (m : Nat) -> church_numeral m Nat S (church_numeral k Nat (church_numeral m Nat S) 0) = plus m (mult k m)
+church_mult_s_lemma k m = rewrite lemma3 k m in church_plus_lemma m (mult k m)
+
+church_mult_2_nat_mult: (n : Nat) -> (m : Nat) -> church_mult (church_numeral n) (church_numeral m) Nat S Z = n * m
+church_mult_2_nat_mult Z m = Refl
+church_mult_2_nat_mult (S k) m = church_mult_s_lemma k m
+
+
