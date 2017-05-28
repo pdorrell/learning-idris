@@ -34,6 +34,14 @@ church_plus ea1 ea2 t f x = ea1 t f $ ea2 t f x
 church_plus_example : (church_plus (church_numeral 3) (church_numeral 4)) Nat S Z = 7
 church_plus_example = Refl
 
+church_plus_lemma : (k : Nat) -> (m : Nat) -> church_numeral k Nat S m = plus k m
+church_plus_lemma Z m = Refl
+church_plus_lemma (S k) m = cong {f=S} $ church_plus_lemma k m
+
+church_plus_2_nat_plus: (n : Nat) -> (m : Nat) -> church_plus (church_numeral n) (church_numeral m) Nat S Z = n + m
+church_plus_2_nat_plus Z m = church_numeral_1_to_1 m
+church_plus_2_nat_plus (S k) m = cong {f=S} $ rewrite church_numeral_1_to_1 m in church_plus_lemma k m
+
 church_mult : EndomorphismApplier -> EndomorphismApplier -> EndomorphismApplier
 church_mult ea1 ea2 t f = ea1 t $ ea2 t f
 
