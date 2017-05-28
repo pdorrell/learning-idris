@@ -31,5 +31,9 @@ functions_have_same_results {t1} {t2} f1 f2 = (x : t1) -> f1 x = f2 x
 fun1_fun3_are_equal : functions_have_same_results Main.fun1 Main.fun3
 fun1_fun3_are_equal = fun1_same_results_as_fun3
 
+fun_respects_eq : Eq t1 => Eq t2 => {t1 : Type} -> {t2 : Type} -> (f1 : t1 -> t2) -> (f2 : t1 -> t2) -> Type
+fun_respects_eq {t1} {t2} f1 f2 = (x : t1) -> (y : t1) -> ((x == y) = True) -> ?hole -- ((f1 x) == (f2 x)) = True
+
+
 one_equal_to_two: 1 = 2 -> Void
 one_equal_to_two Refl impossible
