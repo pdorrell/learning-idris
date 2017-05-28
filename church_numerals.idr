@@ -11,8 +11,8 @@ repeat_reconstructs_a_nat (S k) = Refl
 -- An EndomorphismApplier is a thing, which for any type,
 -- and given an endormorphism on that type and an initial value of that type,
 -- returns a value of the same type.
--- (Note: EndomorphismApplier may contain things other than Church numerals,
---  or even if it doesn't, it is not obvious to me to prove that
+-- (Note: EndomorphismApplier might in principle contain things other than Church numerals,
+--  but Parametricity possibly prevents this in practice, even though we can't prove that.)
 EndomorphismApplier : Type
 EndomorphismApplier = (t: Type) -> (t -> t) -> t -> t
 
