@@ -79,11 +79,12 @@ repeat_signed_nat (Plus k) (f, f') y = repeat_int k f y
 
 BidirectionalRepeater SignedNat where
   repeat = repeat_signed_nat
-  
-
 
 peanoInt2SignedNat: PeanoInteger -> SignedNat
 peanoInt2SignedNat x = repeat_peano_int x (plus_one, minus_one) (Plus Z)
+
+Eq PeanoInteger where
+  (==) x y = peanoInt2SignedNat x == peanoInt2SignedNat y
 
 p_of_normalized : PeanoInteger -> PeanoInteger
 p_of_normalized Z = P Z
@@ -126,4 +127,6 @@ signed_int Zero n = Z
 signed_int Positive Z = Z
 signed_int Positive (S n) = S (signed_int Positive n)
 
-
+signedNatToPeanoInt : SignedNat -> PeanoInteger
+signedNatToPeanoInt (Minus k) = signed_int Negative k
+signedNatToPeanoInt (Plus k) = signed_int Positive k
