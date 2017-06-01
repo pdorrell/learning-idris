@@ -77,14 +77,15 @@ are_inverses_plus_and_minus_one = (plus_one_is_inverse_of_minus_one, minus_one_i
 data FunctionAndInverse : (a : Type) -> Type where
   FunAndInverse : Eq a => (f : a -> a) -> (f' : a -> a) -> (are_inverses f f') -> FunctionAndInverse a
   
-apply_fun : FunctionAndInverse a -> a -> a
-apply_fun (FunAndInverse f f' prf) y = f y
-
-unapply_fun : FunctionAndInverse a -> a -> a
-unapply_fun (FunAndInverse f f' prf) y = f' y
-
 interface BidirectionalRepeater t where
    repeat : t -> (a -> a, a -> a) -> a -> a
+   
+bi_repeat : BidirectionalRepeater t => t -> FunctionAndInverse a -> a -> a
+bi_repeat r (FunAndInverse f f' y) x = repeat r (f, f') x
+
+equal_bi_repeaters : (BidirectionalRepeater t1, BidirectionalRepeater  t2) => (r1 : t1) -> (r2 : t2) -> Type
+equal_bi_repeaters r1 r2 = (a : Type) -> (fai : FunctionAndInverse a) -> (x : a) -> bi_repeat r1 fai x == bi_repeat r2 fai x = True
+
 
 repeat_peano_int : PeanoInteger -> (a -> a, a -> a) -> a -> a
 repeat_peano_int Z (f, f') y = y
