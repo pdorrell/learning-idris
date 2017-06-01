@@ -44,10 +44,35 @@ signedNat2PeanoInt (Minus k) = minusNat2PeanoInt k
 signedNat2PeanoInt (Plus k) = nat2PeanoInt k
 
 is_inverse_of: Eq a => (a -> a) -> (a -> a) -> Type
-is_inverse_of {a} f f' = (x : a) -> (f (f' x)) = x
+is_inverse_of {a} f f' = (x : a) -> (f (f' x)) == x = True
 
 are_inverses : Eq a => (a -> a) -> (a -> a) -> Type
 are_inverses f f' = (is_inverse_of f f', is_inverse_of f' f)
+
+nat_eq_reflexive : (n : Nat) -> n == n = True
+nat_eq_reflexive Z = Refl
+nat_eq_reflexive (S k) = nat_eq_reflexive k
+
+signed_nat_eq_reflexive : (x : SignedNat) -> x == x = True
+signed_nat_eq_reflexive (Minus k) = nat_eq_reflexive k
+signed_nat_eq_reflexive (Plus k) = nat_eq_reflexive k
+
+plus_one_is_inverse_of_minus_one: is_inverse_of Integers.plus_one Integers.minus_one
+plus_one_is_inverse_of_minus_one x = lemma x where
+  lemma: (y : SignedNat) -> plus_one (minus_one y) == y = True
+  lemma (Minus k) = nat_eq_reflexive k
+  lemma (Plus Z) = Refl
+  lemma (Plus (S k)) = nat_eq_reflexive k
+
+minus_one_is_inverse_of_plus_one: is_inverse_of Integers.minus_one Integers.plus_one
+minus_one_is_inverse_of_plus_one x = lemma x where
+  lemma: (y : SignedNat) -> minus_one (plus_one y) == y = True
+  lemma (Minus Z) = Refl
+  lemma (Minus (S k)) = nat_eq_reflexive k
+  lemma (Plus k) = nat_eq_reflexive k
+
+are_inverses_plus_and_minus_one : are_inverses Integers.plus_one Integers.minus_one
+are_inverses_plus_and_minus_one = (plus_one_is_inverse_of_minus_one, minus_one_is_inverse_of_plus_one)
 
 data FunctionAndInverse : (a : Type) -> Type where
   FunAndInverse : Eq a => (f : a -> a) -> (f' : a -> a) -> (are_inverses f f') -> FunctionAndInverse a
