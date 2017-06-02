@@ -16,5 +16,4 @@ bi_repeat : BidirectionalRepeater t => t -> FunctionAndInverse a -> a -> a
 bi_repeat r (FunAndInverse f f' y) x = repeat r (f, f') x
 
 equal_bi_repeaters : (BidirectionalRepeater t1, BidirectionalRepeater  t2) => (r1 : t1) -> (r2 : t2) -> Type
-equal_bi_repeaters r1 r2 = (a : Type) -> (fai : FunctionAndInverse a) -> (x : a) -> bi_repeat r1 fai x == bi_repeat r2 fai x = True
-
+equal_bi_repeaters r1 r2 = (a : Type) -> Eq a -> (fai : FunctionAndInverse a) -> (x : a) -> bi_repeat r1 fai x == bi_repeat r2 fai x = True
