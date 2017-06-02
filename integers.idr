@@ -111,25 +111,25 @@ peanoInt2SignedNat x = repeat_peano_int x (plus_one, minus_one) (Plus Z)
 Eq PeanoInteger where
   (==) x y = peanoInt2SignedNat x == peanoInt2SignedNat y
 
-p_of_normalized : PeanoInteger -> PeanoInteger
-p_of_normalized Z = P Z
-p_of_normalized (P x) = P (P x)
-p_of_normalized (S x) = x
+p_of_canonical : PeanoInteger -> PeanoInteger
+p_of_canonical Z = P Z
+p_of_canonical (P x) = P (P x)
+p_of_canonical (S x) = x
 
-s_of_normalized : PeanoInteger -> PeanoInteger
-s_of_normalized Z = S Z
-s_of_normalized (S x) = S (S x)
-s_of_normalized (P x) = x
+s_of_canonical : PeanoInteger -> PeanoInteger
+s_of_canonical Z = S Z
+s_of_canonical (S x) = S (S x)
+s_of_canonical (P x) = x
 
-normalize : PeanoInteger -> PeanoInteger
-normalize Z = Z
-normalize (P x) = p_of_normalized (normalize x)
-normalize (S x) = s_of_normalized (normalize x)
+canonical : PeanoInteger -> PeanoInteger
+canonical Z = Z
+canonical (P x) = p_of_canonical (canonical x)
+canonical (S x) = s_of_canonical (canonical x)
 
 data Sign = Negative | Zero | Positive
 
 sign_of : PeanoInteger -> Sign
-sign_of x with (normalize x)
+sign_of x with (canonical x)
   | Z = Zero
   | (S y) = Positive
   | (P y) = Negative
@@ -143,7 +143,7 @@ sign_of_examples : (sign_of (P (S Z)) = Zero, sign_of(S (S Z)) = Positive, sign_
 sign_of_examples = (Refl, Refl, Refl)
 
 abs : PeanoInteger -> Nat
-abs x = depth_of_peano_integer $ normalize x
+abs x = depth_of_peano_integer $ canonical x
 
 signed_int : Sign -> Nat -> PeanoInteger
 signed_int Negative Z = Z
