@@ -34,16 +34,10 @@ LawfulEq Bool where
   eq_is_symmetric = bool_equality_lemmas.symmetric
   eq_is_transitive = bool_equality_lemmas.transitive
   
---eq_implies_equality : (eqa : Eq a) => {a : Type} -> Type
---eq_implies_equality a = (x : a) -> (y : a) -> x==y = True -> x = y
-
 eq_implies_equality : {a : Type} -> (eq : a -> a -> Bool) -> Type
 eq_implies_equality {a} eq = (x : a) -> (y : a) -> eq x y = True -> x = y
 
-bool_eq : Bool -> Bool -> Bool
-bool_eq x y = x == y
-
-bool_eq_implies_equality : eq_implies_equality {a=Bool} LawfulEquality.bool_eq
+bool_eq_implies_equality : eq_implies_equality {a=Bool} (==)
 bool_eq_implies_equality False False prf = Refl
 bool_eq_implies_equality False True prf = prf
 bool_eq_implies_equality True False prf = sym prf
