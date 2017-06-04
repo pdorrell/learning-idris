@@ -110,3 +110,20 @@ peanoInt2SignedNat x = repeat_peano_int x (plus_one, minus_one) (Plus Z)
 
 Eq PeanoInteger where
   (==) x y = peanoInt2SignedNat x == peanoInt2SignedNat y
+  
+repeat_minus_0 : (fai : FunctionAndInverse a) -> (x : a) -> bi_repeat (Minus 0) fai x = x
+repeat_minus_0 (FunAndInverse f f' y) x = Refl
+
+repeat_integer_0 : (fai : FunctionAndInverse a) -> (x : a) -> bi_repeat Integers.Z fai x = x
+repeat_integer_0 (FunAndInverse f f' y) x = Refl
+
+zeroes_lemma: equal_bi_repeaters (Minus Z) Integers.Z
+zeroes_lemma = ?zeroes_lemma_rhs
+
+lemma1 : (n : Nat) -> equal_bi_repeaters (Minus n) (signedNat2PeanoInt (Minus n))
+lemma1 Z = ?lemma1_rhs_1
+lemma1 (S k) = ?lemma1_rhs_2
+
+signedNat2PeanoInt_preserves_bi_repeat : (sn : SignedNat) -> equal_bi_repeaters sn (signedNat2PeanoInt sn)
+signedNat2PeanoInt_preserves_bi_repeat (Minus k) = ?signedNat2PeanoInt_preserves_bi_repeat_rhs_1
+signedNat2PeanoInt_preserves_bi_repeat (Plus k) = ?signedNat2PeanoInt_preserves_bi_repeat_rhs_2
