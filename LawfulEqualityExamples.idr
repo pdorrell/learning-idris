@@ -6,29 +6,6 @@ import LawfulEquality
 
 data ABC = A | B | C
 
-namespace bool_equality_lemmas
-  
-  reflexive : (x : Bool) -> x == x = True
-  reflexive False = Refl
-  reflexive True = Refl
-
-  symmetric : (x : Bool) -> (y : Bool) -> x == y = y == x
-  symmetric False False = Refl
-  symmetric False True = Refl
-  symmetric True False = Refl
-  symmetric True True = Refl
-
-  transitive : (x : Bool) -> (y : Bool) -> (z : Bool) -> x == y = True -> x == z = y == z
-  transitive False False z Refl = Refl
-  transitive False True _ Refl impossible
-  transitive True False _ Refl impossible
-  transitive True True z Refl = Refl
-  
-LawfulEq Bool where
-  eq_is_reflexive = bool_equality_lemmas.reflexive
-  eq_is_symmetric = bool_equality_lemmas.symmetric
-  eq_is_transitive = bool_equality_lemmas.transitive
-  
 is_a_or_b : ABC -> Bool
 is_a_or_b A = True
 is_a_or_b B = True
