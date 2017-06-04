@@ -37,13 +37,13 @@ LawfulEq Bool where
 --eq_implies_equality : (eqa : Eq a) => {a : Type} -> Type
 --eq_implies_equality a = (x : a) -> (y : a) -> x==y = True -> x = y
 
-eq_fun_implies_equality : {a : Type} -> (eq_fun : a -> a -> Bool) -> Type
-eq_fun_implies_equality {a} eq_fun = (x : a) -> (y : a) -> eq_fun x y = True -> x = y
+eq_implies_equality : {a : Type} -> (eq : a -> a -> Bool) -> Type
+eq_implies_equality {a} eq = (x : a) -> (y : a) -> eq x y = True -> x = y
 
 bool_eq : Bool -> Bool -> Bool
 bool_eq x y = x == y
 
-bool_eq_implies_equality : eq_fun_implies_equality {a=Bool} LawfulEquality.bool_eq
+bool_eq_implies_equality : eq_implies_equality {a=Bool} LawfulEquality.bool_eq
 bool_eq_implies_equality False False prf = Refl
 bool_eq_implies_equality False True prf = prf
 bool_eq_implies_equality True False prf = sym prf
