@@ -1,14 +1,11 @@
-module EqualityExamples
+module LawfulEqualityExamples
+
+import LawfulEquality
 
 %default total
 
 data ABC = A | B | C
 
-interface Eq t => LawfulEq t where
-  eq_is_reflexive : (x : t) -> x == x = True
-  eq_is_symmetric : (x : t) -> (y : t) -> x == y = y == x
-  eq_is_transitive : (x : t) -> (y : t) -> (z : t) -> x == y = True -> x == z = y == z
-  
 namespace bool_equality_lemmas
   
   reflexive : (x : Bool) -> x == x = True
