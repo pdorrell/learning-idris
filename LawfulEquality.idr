@@ -3,10 +3,22 @@ module LawfulEquality
 %default total
 
 public export
+is_reflexive : (t -> t -> Bool) -> Type
+is_reflexive {t} rel = (x : t) -> rel x x = True
+
+public export
+is_symmetric : (t -> t -> Bool) -> Type
+is_symmetric {t} rel = (x : t) -> (y : t) -> rel x y = rel y x
+
+public export
+is_transitive : (t -> t -> Bool) -> Type
+is_transitive {t} rel = (x : t) -> (y : t) -> (z : t) -> rel x y = True -> rel x z = rel y z
+
+public export
 interface Eq t => LawfulEq t where
-  eq_is_reflexive : (x : t) -> x == x = True
-  eq_is_symmetric : (x : t) -> (y : t) -> x == y = y == x
-  eq_is_transitive : (x : t) -> (y : t) -> (z : t) -> x == y = True -> x == z = y == z
+  eq_is_reflexive : is_reflexive {t} (==)
+  eq_is_symmetric : is_symmetric {t} (==)
+  eq_is_transitive : is_transitive {t} (==)
 
 -- some useful implementations ...  
 
@@ -42,3 +54,5 @@ bool_eq_implies_equality False False prf = Refl
 bool_eq_implies_equality False True prf = prf
 bool_eq_implies_equality True False prf = sym prf
 bool_eq_implies_equality True True prf = Refl
+
+
