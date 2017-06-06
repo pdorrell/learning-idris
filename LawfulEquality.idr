@@ -81,8 +81,8 @@ implies_equality_converse {x=x} {y=y} {value} rel implies_equality_rel x_is_not_
               void void_value
     False => Refl
     
-rel_has_value : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (value: Bool ** rel x y = value)
-rel_has_value rel x y = 
+has_value_dpair : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (value: Bool ** rel x y = value)
+has_value_dpair rel x y = 
    let value = rel x y in
    (value ** Refl)
 
@@ -91,15 +91,24 @@ lemma_f rel x y is_reflexive_rel implies_equality_rel rel_x_y_is_false =
   let x_is_not_equal_to_y = reflexive_rel_false_implies_not_equal {x=x} {y=y} rel is_reflexive_rel rel_x_y_is_false in
   let y_is_not_equal_to_x = inequality_symmetric x y x_is_not_equal_to_y in
   let value_is_false = implies_equality_converse rel implies_equality_rel y_is_not_equal_to_x in
-  let has_value_dpair = rel_has_value rel y x in
-  let has_value = snd has_value_dpair in
-  let rel_y_x_is_false = value_is_false has_value in 
+  let rel_has_value_dpair = has_value_dpair rel y x in
+  let rel_has_value = snd rel_has_value_dpair in
+  let rel_y_x_is_false = value_is_false rel_has_value in 
   trans rel_x_y_is_false $ sym rel_y_x_is_false
+  
+elim_t_or_f: {prop: Type} -> (value: Bool) -> (value = False -> prop, value = True -> prop) -> prop
+elim_t_or_f {prop = prop} False true_or_false_implies_prop = fst true_or_false_implies_prop Refl
+elim_t_or_f {prop = prop} True true_or_false_implies_prop = snd true_or_false_implies_prop Refl
+
+elim_t_or_f_rel: {prop: Type} -> (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (value : Bool ** rel x y = value) -> (rel x y = False -> prop, rel x y = True -> prop) -> prop
+elim_t_or_f_rel {prop = prop} rel x y (value ** rel_x_y_equals_value) true_or_false_implies_prop = ?elim_t_or_f_rhs_1
 
 lemma : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = rel y x
 lemma rel x y is_reflexive_rel implies_equality_rel = 
-  let rel_x_y = rel x y in 
-     ?lemma_rhs
+  let rel_has_value_dpair = has_value_dpair rel y x in
+  let rel_has_value = snd rel_has_value_dpair in
+  let the_value = fst rel_has_value_dpair in 
+    ?hole
 
 symmetric_eq_from_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> is_symmetric rel
 symmetric_eq_from_equal {t} rel is_reflexive_rel implies_equality_rel x y =
