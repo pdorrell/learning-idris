@@ -70,9 +70,13 @@ inequality_symmetric : (x : t) -> (y : t) -> ((x = y) -> Void) -> ((y = x) -> Vo
 inequality_symmetric x y x_not_equal_to_y y_equals_x = x_not_equal_to_y $ sym y_equals_x
 
 implies_equality_converse: {t : Type} -> (rel : t -> t -> Bool) -> implies_equality rel -> ((x = y) -> Void) -> rel x y = value -> value = False
-implies_equality_converse {x=x} {y=y} rel implies_equality_rel x_is_not_equal_to_y = 
+implies_equality_converse {x=x} {y=y} {value} rel implies_equality_rel x_is_not_equal_to_y rel_x_y_value = 
   let rel_x_y = rel x y in
-  ?hole
+  case value of
+    True => let x_equals_y = implies_equality_rel x y rel_x_y_value in 
+            let void_value = x_is_not_equal_to_y x_equals_y in
+              void void_value
+    False => Refl
 
 lemma_f : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = False -> rel x y = rel y x
 lemma_f rel x y is_reflexive_rel implies_equality_rel relxy_false = 
