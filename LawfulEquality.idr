@@ -101,7 +101,8 @@ elim_t_or_f {prop = prop} False true_or_false_implies_prop = fst true_or_false_i
 elim_t_or_f {prop = prop} True true_or_false_implies_prop = snd true_or_false_implies_prop Refl
 
 elim_t_or_f_rel: {prop: Type} -> (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (value : Bool ** rel x y = value) -> (rel x y = False -> prop, rel x y = True -> prop) -> prop
-elim_t_or_f_rel {prop = prop} rel x y (value ** rel_x_y_equals_value) true_or_false_implies_prop = ?elim_t_or_f_rhs_1
+elim_t_or_f_rel {prop = prop} rel x y (False ** rel_x_y_equals_value) true_or_false_implies_prop = fst true_or_false_implies_prop $ rel_x_y_equals_value
+elim_t_or_f_rel {prop = prop} rel x y (True ** rel_x_y_equals_value) true_or_false_implies_prop = snd true_or_false_implies_prop $ rel_x_y_equals_value
 
 lemma : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = rel y x
 lemma rel x y is_reflexive_rel implies_equality_rel = 
