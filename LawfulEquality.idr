@@ -46,27 +46,51 @@ LawfulEq Bool where
   eq_is_symmetric = bool_equality_lemmas.symmetric
   eq_is_transitive = bool_equality_lemmas.transitive
   
-eq_implies_equality : {t : Type} -> (eq : t -> t -> Bool) -> Type
-eq_implies_equality {t} eq = (x : t) -> (y : t) -> eq x y = True -> x = y
-
-lemma : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> x = y -> rel x y = rel x x
-lemma rel x y prf = rewrite prf in Refl
+implies_equality : {t : Type} -> (eq : t -> t -> Bool) -> Type
+implies_equality {t} eq = (x : t) -> (y : t) -> eq x y = True -> x = y
 
 false_is_not_true: False = True -> Void
 false_is_not_true Refl impossible
 
-reflexive_eq_false_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> rel x y = False -> x = y -> Void
-reflexive_eq_false_implies_not_equal {t} {x} {y} rel is_refl_prf x_y_not_eq x_equals_y = 
+reflexive_rel_false_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> rel x y = False -> x = y -> Void
+reflexive_rel_false_implies_not_equal {t} {x} {y} rel is_refl_prf x_y_not_eq x_equals_y = 
   let x_eq_x = is_refl_prf x in
   let lemma2 = lemma rel x y x_equals_y in 
   let lemma3 = trans (sym x_y_not_eq) $ trans lemma2 x_eq_x in
-    false_is_not_true lemma3
+    false_is_not_true lemma3 where
+      lemma : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> x = y -> rel x y = rel x x
+      lemma rel x y prf = rewrite prf in Refl
 
-symmetric_eq_from_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> eq_implies_equality rel -> is_symmetric rel
-symmetric_eq_from_equal {t} rel prf1 prf2 x y =
+lemma_t : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = True -> rel x y = rel y x
+lemma_t rel x y is_reflexive_rel implies_equality_rel relxy_true = 
+  let lemma2 = implies_equality_rel x y relxy_true in
+    rewrite lemma2 in Refl 
+    
+inequality_symmetric : (x : t) -> (y : t) -> ((x = y) -> Void) -> ((y = x) -> Void)
+inequality_symmetric x y x_not_equal_to_y y_equals_x = x_not_equal_to_y $ sym y_equals_x
+
+implies_equality_converse: {t : Type} -> (rel : t -> t -> Bool) -> implies_equality rel -> ((x = y) -> Void) -> rel x y = value -> value = False
+implies_equality_converse {x=x} {y=y} rel implies_equality_rel x_is_not_equal_to_y = 
+  let rel_x_y = rel x y in
   ?hole
 
-bool_eq_implies_equality : eq_implies_equality {t=Bool} (==)
+lemma_f : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = False -> rel x y = rel y x
+lemma_f rel x y is_reflexive_rel implies_equality_rel relxy_false = 
+  let x_is_not_equal_to_y = reflexive_rel_false_implies_not_equal {x=x} {y=y} rel is_reflexive_rel relxy_false in
+  let y_is_not_equal_to_x = inequality_symmetric x y x_is_not_equal_to_y in
+  ?hole
+
+lemma : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = rel y x
+lemma rel x y is_reflexive_rel implies_equality_rel = 
+  let rel_x_y = rel x y in 
+     ?lemma_rhs
+
+
+symmetric_eq_from_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> is_symmetric rel
+symmetric_eq_from_equal {t} rel is_reflexive_rel implies_equality_rel x y =
+  ?symmetric_eq_from_equal_rhs
+
+bool_eq_implies_equality : implies_equality {t=Bool} (==)
 bool_eq_implies_equality False False prf = Refl
 bool_eq_implies_equality False True prf = prf
 bool_eq_implies_equality True False prf = sym prf
