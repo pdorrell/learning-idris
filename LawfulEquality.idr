@@ -103,10 +103,11 @@ elim_t_or_f_rel {prop = prop} rel x y (True ** rel_x_y_equals_value) true_or_fal
 
 lemma : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = rel y x
 lemma rel x y is_reflexive_rel implies_equality_rel = 
-  let rel_has_value_dpair = has_value_dpair rel y x in
-  let rel_has_value = snd rel_has_value_dpair in
-  let the_value = fst rel_has_value_dpair in 
-    ?hole
+  let rel_has_value_dpair = has_value_dpair rel x y in
+  let t_hyp = lemma_t rel x y is_reflexive_rel implies_equality_rel in
+  let f_hyp = lemma_f rel x y is_reflexive_rel implies_equality_rel in
+  let f_t_hyps = (f_hyp, t_hyp) in 
+  elim_t_or_f_rel {prop=(rel x y = rel y x)} rel x y rel_has_value_dpair f_t_hyps
 
 symmetric_eq_from_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> is_symmetric rel
 symmetric_eq_from_equal {t} rel is_reflexive_rel implies_equality_rel x y =
@@ -118,3 +119,5 @@ bool_eq_implies_equality False True prf = prf
 bool_eq_implies_equality True False prf = sym prf
 bool_eq_implies_equality True True prf = Refl
 
+bool_eq_is_symmetric : (x : Bool) -> (y : Bool) -> x == y = y == x
+bool_eq_is_symmetric = symmetric_eq_from_equal (==) bool_equality_lemmas.reflexive bool_eq_implies_equality
