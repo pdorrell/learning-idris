@@ -16,11 +16,16 @@ implies_equality {t} rel = (x : t) -> (y : t) -> rel x y = True -> x = y
 false_is_not_true: False = True -> Void
 false_is_not_true Refl impossible
 
-implies : (prop1 : Type) -> (prop2 : Type) -> Type
-implies prop1 prop2 = prop1 -> prop2
-
 contrapositive: (prop1 -> prop2) -> ((prop2 -> Void) -> (prop1 -> Void))
 contrapositive prop1_implies_prop2 not_prop2 prop1_prf = not_prop2 $ prop1_implies_prop2 $ prop1_prf
+
+has_value_dpair : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (value: Bool ** rel x y = value)
+has_value_dpair rel x y = (rel x y ** Refl)
+
+not_rel_x_y_is_true_implies_its_false : (rel : t -> t -> Bool) -> ((rel x y = True) -> Void) -> rel x y = False
+not_rel_x_y_is_true_implies_its_false rel {x} {y} rel_x_y_is_not_true with (has_value_dpair rel x y)
+  | (True ** rel_x_y_is_value) = void $ rel_x_y_is_not_true rel_x_y_is_value
+  | (False ** rel_x_y_is_value) = rel_x_y_is_value
 
 reflexive_rel_false_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> rel x y = False -> x = y -> Void
 reflexive_rel_false_implies_not_equal {t} {x} {y} rel is_reflexive_rel rel_x_y_is_false x_is_y = 
@@ -46,9 +51,6 @@ implies_equality_contrapositive {x} {y} {value} rel implies_equality_rel x_is_no
               void void_value
     False => Refl
     
-has_value_dpair : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (value: Bool ** rel x y = value)
-has_value_dpair rel x y = (rel x y ** Refl)
-
 lemma_f : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = False -> rel x y = rel y x
 lemma_f rel x y is_reflexive_rel implies_equality_rel rel_x_y_is_false = 
   let x_is_not_y = reflexive_rel_false_implies_not_equal {x} {y} rel is_reflexive_rel rel_x_y_is_false in
