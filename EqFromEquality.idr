@@ -16,13 +16,19 @@ implies_equality {t} rel = (x : t) -> (y : t) -> rel x y = True -> x = y
 false_is_not_true: False = True -> Void
 false_is_not_true Refl impossible
 
+implies : (prop1 : Type) -> (prop2 : Type) -> Type
+implies prop1 prop2 = prop1 -> prop2
+
+contrapositive: (prop1 -> prop2) -> ((prop2 -> Void) -> (prop1 -> Void))
+contrapositive prop1_implies_prop2 not_prop2 prop1_prf = not_prop2 $ prop1_implies_prop2 $ prop1_prf
+
 reflexive_rel_false_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> rel x y = False -> x = y -> Void
 reflexive_rel_false_implies_not_equal {t} {x} {y} rel is_reflexive_rel rel_x_y_is_false x_is_y = 
   let rel_x_x_is_true = is_reflexive_rel x in
   let rel_x_y_is_rel_x_x = cong {f= \z => rel x z} $ sym x_is_y in 
   let false_is_true = trans (sym rel_x_y_is_false) $ trans rel_x_y_is_rel_x_x rel_x_x_is_true in
     false_is_not_true false_is_true
-
+    
 lemma_t : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = True -> rel x y = rel y x
 lemma_t rel x y is_reflexive_rel implies_equality_rel rel_x_y_is_true = 
   let x_is_y = implies_equality_rel x y rel_x_y_is_true in
