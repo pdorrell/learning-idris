@@ -22,11 +22,11 @@ contrapositive prop1_implies_prop2 not_prop2 prop1_prf = not_prop2 $ prop1_impli
 has_value_dpair : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (value: Bool ** rel x y = value)
 has_value_dpair rel x y = (rel x y ** Refl)
 
-not_rel_x_y_is_true_implies_its_false : (rel : t -> t -> Bool) -> ((rel x y = True) -> Void) -> rel x y = False
-not_rel_x_y_is_true_implies_its_false rel {x} {y} rel_x_y_is_not_true with (has_value_dpair rel x y)
+rel_x_y_is_not_true_implies_its_false : (rel : t -> t -> Bool) -> ((rel x y = True) -> Void) -> rel x y = False
+rel_x_y_is_not_true_implies_its_false rel {x} {y} rel_x_y_is_not_true with (has_value_dpair rel x y)
   | (True ** rel_x_y_is_value) = void $ rel_x_y_is_not_true rel_x_y_is_value
   | (False ** rel_x_y_is_value) = rel_x_y_is_value
-
+    
 reflexive_rel_false_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> rel x y = False -> x = y -> Void
 reflexive_rel_false_implies_not_equal {t} {x} {y} rel is_reflexive_rel rel_x_y_is_false x_is_y = 
   let rel_x_x_is_true = is_reflexive_rel x in
@@ -42,23 +42,16 @@ lemma_t rel x y is_reflexive_rel implies_equality_rel rel_x_y_is_true =
 inequality_symmetric : (x : t) -> (y : t) -> ((x = y) -> Void) -> ((y = x) -> Void)
 inequality_symmetric x y x_is_not_y y_is_x = x_is_not_y $ sym y_is_x
 
-implies_equality_contrapositive: {t : Type} -> (rel : t -> t -> Bool) -> implies_equality rel -> ((x = y) -> Void) -> rel x y = value -> value = False
-implies_equality_contrapositive {x} {y} {value} rel implies_equality_rel x_is_not_y rel_x_y_value = 
-  let rel_x_y = rel x y in
-  case value of
-    True => let x_is_y = implies_equality_rel x y rel_x_y_value in 
-            let void_value = x_is_not_y x_is_y in
-              void void_value
-    False => Refl
-    
+implies_equality_contrapositive: {t : Type} -> (rel : t -> t -> Bool) -> implies_equality rel -> ((x = y) -> Void) -> rel x y = False
+implies_equality_contrapositive rel implies_equality_rel {x} {y} x_is_not_y = 
+  let rel_x_y_is_not_true = (contrapositive $ implies_equality_rel x y) x_is_not_y in
+  rel_x_y_is_not_true_implies_its_false rel rel_x_y_is_not_true
+
 lemma_f : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = False -> rel x y = rel y x
 lemma_f rel x y is_reflexive_rel implies_equality_rel rel_x_y_is_false = 
   let x_is_not_y = reflexive_rel_false_implies_not_equal {x} {y} rel is_reflexive_rel rel_x_y_is_false in
   let y_is_not_x = inequality_symmetric x y x_is_not_y in
-  let value_is_false = implies_equality_contrapositive rel implies_equality_rel y_is_not_x in
-  let rel_has_value_dpair = has_value_dpair rel y x in
-  let rel_has_value = snd rel_has_value_dpair in
-  let rel_y_x_is_false = value_is_false rel_has_value in 
+  let rel_y_x_is_false = implies_equality_contrapositive rel implies_equality_rel y_is_not_x in
   trans rel_x_y_is_false $ sym rel_y_x_is_false
   
 elim_t_or_f_rel: {prop: Type} -> (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (rel x y = False -> prop, rel x y = True -> prop) -> prop
