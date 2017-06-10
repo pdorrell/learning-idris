@@ -16,6 +16,9 @@ implies_equality {t} rel = (x : t) -> (y : t) -> rel x y = True -> x = y
 false_is_not_true: False = True -> Void
 false_is_not_true Refl impossible
 
+reflexive_x_is_y_lemma: {rel : t -> t -> Bool} -> is_reflexive rel -> (x : t) -> (y : t) -> x = y -> rel x y = True
+reflexive_x_is_y_lemma {rel} is_reflexive_rel y y Refl = is_reflexive_rel y
+
 contrapositive: (prop1 -> prop2) -> ((prop2 -> Void) -> (prop1 -> Void))
 contrapositive prop1_implies_prop2 not_prop2 prop1_prf = not_prop2 $ prop1_implies_prop2 $ prop1_prf
 
