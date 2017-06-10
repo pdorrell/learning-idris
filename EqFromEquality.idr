@@ -71,15 +71,11 @@ elim_t_or_f_rel {prop} rel x y t_or_f_implies_prop with (has_value_dpair rel x y
   | (False ** rel_x_y_is_value) = fst t_or_f_implies_prop $ rel_x_y_is_value
   | (True ** rel_x_y_is_value) = snd t_or_f_implies_prop $ rel_x_y_is_value
 
-lemma : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> (x : t) -> (y : t) -> rel x y = rel y x
-lemma rel is_reflexive_rel implies_equality_rel x y = 
+symmetric_eq_from_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> is_symmetric rel
+symmetric_eq_from_equal {t} rel is_reflexive_rel implies_equality_rel x y =
   let t_hyp = lemma_t rel is_reflexive_rel implies_equality_rel x y in
   let f_hyp = lemma_f rel is_reflexive_rel implies_equality_rel x y in
     elim_t_or_f_rel {prop=(rel x y = rel y x)} rel x y (f_hyp, t_hyp)
-
-symmetric_eq_from_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> is_symmetric rel
-symmetric_eq_from_equal {t} rel is_reflexive_rel implies_equality_rel x y =
-  lemma {t} rel is_reflexive_rel implies_equality_rel x y
 
 -- an example involving Eq Bool
 
