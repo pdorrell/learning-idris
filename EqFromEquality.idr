@@ -99,3 +99,6 @@ bool_eq_implies_equality True True prf = Refl
 
 bool_eq_is_symmetric : (x : Bool) -> (y : Bool) -> x == y = y == x
 bool_eq_is_symmetric = symmetric_eq_from_equal (==) bool_is_reflexive bool_eq_implies_equality
+
+bool_eq_is_transitive : (x : Bool) -> (y : Bool) -> (z : Bool) -> x == y = True -> x == z = y == z
+bool_eq_is_transitive = transitive_eq_from_equal (==) bool_is_reflexive bool_eq_implies_equality
