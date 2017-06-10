@@ -29,9 +29,16 @@ rel_x_y_is_not_true_implies_its_false : (rel : t -> t -> Bool) -> ((rel x y = Tr
 rel_x_y_is_not_true_implies_its_false rel {x} {y} rel_x_y_is_not_true with (has_value_dpair rel x y)
   | (True ** rel_x_y_is_value) = void $ rel_x_y_is_not_true rel_x_y_is_value
   | (False ** rel_x_y_is_value) = rel_x_y_is_value
-    
+  
+reflexive_rel_not_true_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> (rel x y = True -> Void) -> x = y -> Void
+reflexive_rel_not_true_implies_not_equal {x} {y} rel is_reflexive_rel rel_not_true = 
+  let x_is_y_lemma = reflexive_x_is_y_lemma {rel} is_reflexive_rel x y in 
+  let x_is_y_lemma_contra = contrapositive x_is_y_lemma in
+  x_is_y_lemma_contra rel_not_true
+
 reflexive_rel_false_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> rel x y = False -> x = y -> Void
 reflexive_rel_false_implies_not_equal {t} {x} {y} rel is_reflexive_rel rel_x_y_is_false x_is_y = 
+  let rel_x_y_is_not_true_implies_x_is_not_y = contrapositive $ reflexive_x_is_y_lemma {rel} is_reflexive_rel x y in
   let rel_x_x_is_true = is_reflexive_rel x in
   let rel_x_y_is_rel_x_x = cong {f= \z => rel x z} $ sym x_is_y in 
   let false_is_true = trans (sym rel_x_y_is_false) $ trans rel_x_y_is_rel_x_x rel_x_x_is_true in
