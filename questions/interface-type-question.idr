@@ -23,3 +23,20 @@ example_of_example2 = example2 Nat eq_nat 3 3
 
 eq_example: Eq Nat
 eq_example = eq_nat
+
+example3 : (a : Type) -> Eq a -> Eq a -> (x : a) -> (y : a) -> Type
+example3 a eqa1 eqa2 x y = 
+  --let fun = (==) in
+  let value = x == y in 
+  let equality_type = x == y = True in
+  ?hole
+
+example4 : (a : Type) -> Eq a -> (x : a) -> (y : a) -> Type
+example4 a eqa1 x y = 
+  let fun = (==) in
+  let value = x == y in 
+  let equality_type = x == y = True in
+  ?hole2
+
+
+--x == y = True
