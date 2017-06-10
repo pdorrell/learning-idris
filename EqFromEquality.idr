@@ -37,8 +37,8 @@ reflexive_rel_false_implies_not_equal {t} {x} {y} rel is_reflexive_rel rel_x_y_i
   let false_is_true = trans (sym rel_x_y_is_false) $ trans rel_x_y_is_rel_x_x rel_x_x_is_true in
     false_is_not_true false_is_true
     
-lemma_t : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = True -> rel x y = rel y x
-lemma_t rel x y is_reflexive_rel implies_equality_rel rel_x_y_is_true = 
+lemma_t : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> (x : t) -> (y : t) -> rel x y = True -> rel x y = rel y x
+lemma_t rel is_reflexive_rel implies_equality_rel x y rel_x_y_is_true = 
   let x_is_y = implies_equality_rel x y rel_x_y_is_true in
   rewrite x_is_y in Refl
     
@@ -50,8 +50,8 @@ implies_equality_contrapositive rel implies_equality_rel {x} {y} x_is_not_y =
   let rel_x_y_is_not_true = (contrapositive $ implies_equality_rel x y) x_is_not_y in
   rel_x_y_is_not_true_implies_its_false rel rel_x_y_is_not_true
 
-lemma_f : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = False -> rel x y = rel y x
-lemma_f rel x y is_reflexive_rel implies_equality_rel rel_x_y_is_false = 
+lemma_f : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> (x : t) -> (y : t) -> rel x y = False -> rel x y = rel y x
+lemma_f rel is_reflexive_rel implies_equality_rel x y rel_x_y_is_false = 
   let x_is_not_y = reflexive_rel_false_implies_not_equal {x} {y} rel is_reflexive_rel rel_x_y_is_false in
   let y_is_not_x = inequality_symmetric x y x_is_not_y in
   let rel_y_x_is_false = implies_equality_contrapositive rel implies_equality_rel y_is_not_x in
@@ -62,16 +62,15 @@ elim_t_or_f_rel {prop} rel x y t_or_f_implies_prop with (has_value_dpair rel x y
   | (False ** rel_x_y_is_value) = fst t_or_f_implies_prop $ rel_x_y_is_value
   | (True ** rel_x_y_is_value) = snd t_or_f_implies_prop $ rel_x_y_is_value
 
-lemma : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> is_reflexive rel -> implies_equality rel -> rel x y = rel y x
-lemma rel x y is_reflexive_rel implies_equality_rel = 
-  let t_hyp = lemma_t rel x y is_reflexive_rel implies_equality_rel in
-  let f_hyp = lemma_f rel x y is_reflexive_rel implies_equality_rel in
+lemma : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> (x : t) -> (y : t) -> rel x y = rel y x
+lemma rel is_reflexive_rel implies_equality_rel x y = 
+  let t_hyp = lemma_t rel is_reflexive_rel implies_equality_rel x y in
+  let f_hyp = lemma_f rel is_reflexive_rel implies_equality_rel x y in
   elim_t_or_f_rel {prop=(rel x y = rel y x)} rel x y (f_hyp, t_hyp)
 
 symmetric_eq_from_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> is_symmetric rel
 symmetric_eq_from_equal {t} rel is_reflexive_rel implies_equality_rel x y =
-  lemma {t} rel x y is_reflexive_rel implies_equality_rel
-  
+  lemma {t} rel is_reflexive_rel implies_equality_rel x y
 
 -- an example involving Eq Bool
 
