@@ -10,6 +10,9 @@ is_reflexive {t} rel = (x : t) -> rel x x = True
 is_symmetric : (t -> t -> Bool) -> Type
 is_symmetric {t} rel = (x : t) -> (y : t) -> rel x y = rel y x
 
+is_transitive : (t -> t -> Bool) -> Type
+is_transitive {t} rel = (x : t) -> (y : t) -> (z : t) -> rel x y = True -> rel x z = rel y z
+
 implies_equality : {t : Type} -> (rel : t -> t -> Bool) -> Type
 implies_equality {t} rel = (x : t) -> (y : t) -> rel x y = True -> x = y
 
@@ -76,6 +79,11 @@ symmetric_eq_from_equal {t} rel is_reflexive_rel implies_equality_rel x y =
   let t_hyp = lemma_t rel is_reflexive_rel implies_equality_rel x y in
   let f_hyp = lemma_f rel is_reflexive_rel implies_equality_rel x y in
     elim_t_or_f_rel {prop=(rel x y = rel y x)} rel x y (f_hyp, t_hyp)
+    
+transitive_eq_from_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> is_transitive rel
+transitive_eq_from_equal {t} rel is_reflexive_rel implies_equality_rel x y z rel_x_y_is_true = 
+  let x_is_y = implies_equality_rel x y rel_x_y_is_true in 
+  rewrite x_is_y in Refl
 
 -- an example involving Eq Bool
 
