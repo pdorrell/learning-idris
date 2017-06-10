@@ -51,8 +51,8 @@ lemma_t rel is_reflexive_rel implies_equality_rel x y rel_x_y_is_true =
   let x_is_y = implies_equality_rel x y rel_x_y_is_true in
     rewrite x_is_y in Refl
     
-inequality_symmetric : (x : t) -> (y : t) -> ((x = y) -> Void) -> ((y = x) -> Void)
-inequality_symmetric x y x_is_not_y y_is_x = x_is_not_y $ sym y_is_x
+inequality_symmetric : {x : t} -> {y : t} -> ((x = y) -> Void) -> ((y = x) -> Void)
+inequality_symmetric {t} {x} {y} = contrapositive $ sym {a=t} {b=t}
 
 implies_equality_contrapositive: {t : Type} -> (rel : t -> t -> Bool) -> implies_equality rel -> ((x = y) -> Void) -> rel x y = False
 implies_equality_contrapositive rel implies_equality_rel {x} {y} x_is_not_y = 
@@ -62,7 +62,7 @@ implies_equality_contrapositive rel implies_equality_rel {x} {y} x_is_not_y =
 lemma_f : (rel : t -> t -> Bool) -> is_reflexive rel -> implies_equality rel -> (x : t) -> (y : t) -> rel x y = False -> rel x y = rel y x
 lemma_f rel is_reflexive_rel implies_equality_rel x y rel_x_y_is_false = 
   let x_is_not_y = reflexive_rel_false_implies_not_equal {x} {y} rel is_reflexive_rel rel_x_y_is_false in
-  let y_is_not_x = inequality_symmetric x y x_is_not_y in
+  let y_is_not_x = inequality_symmetric {x} {y} x_is_not_y in
   let rel_y_x_is_false = implies_equality_contrapositive rel implies_equality_rel y_is_not_x in
     trans rel_x_y_is_false $ sym rel_y_x_is_false
   
