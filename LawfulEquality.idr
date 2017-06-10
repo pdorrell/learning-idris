@@ -32,6 +32,9 @@ interface Eq t => LawfulEq t where
   eq_is_reflexive : is_reflexive {t} (==)
   eq_is_symmetric : is_symmetric {t} (==)
   eq_is_transitive : is_transitive {t} (==)
+  
+lawful_eq_is_transitive_from_right: LawfulEq t => is_transitive_from_right {t} (==)
+lawful_eq_is_transitive_from_right {t} = is_transitive_from_right_lemma (==) eq_is_symmetric eq_is_transitive
 
 -- some useful implementations ...  
 
