@@ -15,6 +15,19 @@ is_transitive : (t -> t -> Bool) -> Type
 is_transitive {t} rel = (x : t) -> (y : t) -> (z : t) -> rel x y = True -> rel x z = rel y z
 
 public export
+is_transitive_from_right : (t -> t -> Bool) -> Type
+is_transitive_from_right {t} rel = (x : t) -> (y : t) -> (z : t) -> rel x y = True -> rel z x = rel z y
+
+-- If we have is_symmetric & is_transitive in LawfulEq, we don't have to include is_transitive_from_right, 
+-- because it is implied by the first two ...
+is_transitive_from_right_lemma : (rel : t -> t -> Bool) -> is_symmetric rel -> is_transitive rel -> is_transitive_from_right rel
+is_transitive_from_right_lemma {t} rel is_symmetric_rel is_transitive_rel x y z rel_x_y_is_true = 
+  let rel_z_x_is_rel_x_z = is_symmetric_rel {x=z} {y=x} in
+  let rel_y_z_is_rel_z_y = is_symmetric_rel {x=y} {y=z} in
+  let trans_rel_x_y_z = is_transitive_rel {x} {y} {z} rel_x_y_is_true in
+  trans rel_z_x_is_rel_x_z $ trans trans_rel_x_y_z rel_y_z_is_rel_z_y
+
+public export
 interface Eq t => LawfulEq t where
   eq_is_reflexive : is_reflexive {t} (==)
   eq_is_symmetric : is_symmetric {t} (==)
