@@ -1,3 +1,5 @@
+%default total
+
 interface Computer a where
   compute : a -> Nat
   
