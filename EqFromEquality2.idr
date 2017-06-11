@@ -28,6 +28,9 @@ rel_true_implies_equality {t} rel = (x : t) -> (y : t) -> rel x y = True -> x = 
 rel_false_implies_inequality : {t : Type} -> (rel : t -> t -> Bool) -> Type
 rel_false_implies_inequality {t} rel = (x : t) -> (y : t) -> rel x y = False -> (x = y -> Void)
 
+rel_value_determines_equality : {t : Type} -> (rel : t -> t -> Bool) -> Type
+rel_value_determines_equality {t} rel = (rel_true_implies_equality {t} rel, rel_false_implies_inequality {t} rel)
+
 
 -- Re-expressing is_reflexive as a function of two values x & y, given a proof that they are equal
 reflexive_x_is_y_lemma: {rel : t -> t -> Bool} -> is_reflexive rel -> (x : t) -> (y : t) -> x = y -> rel x y = True
@@ -114,20 +117,23 @@ bool_is_reflexive : (x : Bool) -> x == x = True
 bool_is_reflexive False = Refl
 bool_is_reflexive True = Refl
 
-bool_eq_rel_true_implies_equality : rel_true_implies_equality {t=Bool} (==)
-bool_eq_rel_true_implies_equality False False prf = Refl
-bool_eq_rel_true_implies_equality False True prf = prf
-bool_eq_rel_true_implies_equality True False prf = sym prf
-bool_eq_rel_true_implies_equality True True prf = Refl
+bool_eq_true_implies_equality : rel_true_implies_equality {t=Bool} (==)
+bool_eq_true_implies_equality False False prf = Refl
+bool_eq_true_implies_equality False True prf = prf
+bool_eq_true_implies_equality True False prf = sym prf
+bool_eq_true_implies_equality True True prf = Refl
 
-bool_eq_rel_false_implies_inequality : rel_false_implies_inequality {t=Bool} (==)
-bool_eq_rel_false_implies_inequality False False prf prf2 = trueNotFalse prf
-bool_eq_rel_false_implies_inequality False True prf prf2 = trueNotFalse $ sym prf2
-bool_eq_rel_false_implies_inequality True False prf prf2 = trueNotFalse prf2
-bool_eq_rel_false_implies_inequality True True prf prf2 = trueNotFalse prf
+bool_eq_false_implies_inequality : rel_false_implies_inequality {t=Bool} (==)
+bool_eq_false_implies_inequality False False prf prf2 = trueNotFalse prf
+bool_eq_false_implies_inequality False True prf prf2 = trueNotFalse $ sym prf2
+bool_eq_false_implies_inequality True False prf prf2 = trueNotFalse prf2
+bool_eq_false_implies_inequality True True prf prf2 = trueNotFalse prf
+
+bool_eq_value_determines_equality : rel_value_determines_equality {t=Bool} (==)
+bool_eq_value_determines_equality = (bool_eq_true_implies_equality, bool_eq_false_implies_inequality)
 
 bool_eq_is_symmetric : (x : Bool) -> (y : Bool) -> x == y = y == x
-bool_eq_is_symmetric = symmetric_eq_from_equal (==) bool_is_reflexive bool_eq_rel_true_implies_equality
+bool_eq_is_symmetric = symmetric_eq_from_equal (==) bool_is_reflexive bool_eq_true_implies_equality
 
 bool_eq_is_transitive : (x : Bool) -> (y : Bool) -> (z : Bool) -> x == y = True -> x == z = y == z
-bool_eq_is_transitive = transitive_eq_from_equal (==) bool_is_reflexive bool_eq_rel_true_implies_equality
+bool_eq_is_transitive = transitive_eq_from_equal (==) bool_is_reflexive bool_eq_true_implies_equality
