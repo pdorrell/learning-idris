@@ -1,18 +1,20 @@
 %default total
 
-repeat : Nat -> (t -> t) -> t -> t
+-- repeatedly apply function f to an initial value x n times
+repeat : (n : Nat) -> (f: t -> t) -> (x : t) -> t
 repeat Z f x = x
 repeat (S k) f x = f (repeat k f x)
 
-repeat_reconstructs_a_nat: (n: Nat) -> repeat Z S n = n
+-- use 'repeat' to reconstruct a Nat n by applying S to Z n times
+repeat_reconstructs_a_nat: (n: Nat) -> repeat n S Z = n
 repeat_reconstructs_a_nat Z = Refl
-repeat_reconstructs_a_nat (S k) = Refl
+repeat_reconstructs_a_nat (S k) = cong {f=S} $ repeat_reconstructs_a_nat k
 
 -- An EndomorphismApplier is a thing, which for any type,
 -- and given an endormorphism on that type and an initial value of that type,
 -- returns a value of the same type.
 -- (Note: EndomorphismApplier might in principle contain things other than Church numerals,
---  but Parametricity possibly prevents this in practice, even though we can't prove that.)
+--  but Parametricity possibly prevents this in practice, even though we can't prove that inside Idris.)
 EndomorphismApplier : Type
 EndomorphismApplier = (t: Type) -> (t -> t) -> t -> t
 
@@ -64,30 +66,11 @@ church_mult ea1 ea2 t f = ea1 t $ ea2 t f
 church_mult_example : church_numeral_to_nat (church_mult (church_numeral 2) (church_numeral 3)) = 6
 church_mult_example = Refl
 
--- Multiplication of Nat*0 = 0
-mult_0 : (k : Nat) -> mult k 0 = 0
-mult_0 Z = Refl
-mult_0 (S k) = mult_0 k
-
--- Multiplication lemma, more-or-less Church numeral * 0 = 0
-lemma1 : (k : Nat) -> church_numeral k Nat (church_zero Nat S) 0 = 0
-lemma1 Z = Refl
-lemma1 (S k) = lemma1 k
-
--- Multiplication lemma (k+1)*n = n + (k*n)
-lemma2 : (n : Nat) -> (k : Nat) -> mult (S k) n = plus n (mult k n)
-lemma2 n k = Refl
-
 -- Churchified k*m = Nat k*m
-lemma3:(k : Nat) -> (m : Nat) ->  church_numeral k Nat (church_numeral m Nat S) 0 = mult k m
-lemma3 Z m = Refl
-lemma3 (S k) m = rewrite lemma3 k m in church_plus_lemma m (mult k m)
-
--- Churchified m + (k * m) = Nat m + (k * m)
-church_mult_s_lemma : (k : Nat) -> (m : Nat) -> church_numeral m Nat S (church_numeral k Nat (church_numeral m Nat S) 0) = plus m (mult k m)
-church_mult_s_lemma k m = rewrite lemma3 k m in church_plus_lemma m (mult k m)
+n_times_m_lemma: (n : Nat) -> (m : Nat) ->  church_numeral n Nat (church_numeral m Nat S) 0 = mult n m
+n_times_m_lemma Z m = Refl
+n_times_m_lemma (S k) m = rewrite n_times_m_lemma k m in church_plus_lemma m (mult k m)
 
 -- Church numeral multiplication gives the same result as Nat multiplication
 church_mult_2_nat_mult: (n : Nat) -> (m : Nat) -> church_numeral_to_nat (church_mult (church_numeral n) (church_numeral m)) = n * m
-church_mult_2_nat_mult Z m = Refl
-church_mult_2_nat_mult (S k) m = church_mult_s_lemma k m
+church_mult_2_nat_mult n m = n_times_m_lemma n m
