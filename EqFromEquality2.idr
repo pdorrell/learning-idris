@@ -18,6 +18,10 @@ is_symmetric {t} rel = (x : t) -> (y : t) -> rel x y = rel y x
 is_transitive : (t -> t -> Bool) -> Type
 is_transitive {t} rel = (x : t) -> (y : t) -> (z : t) -> rel x y = True -> rel x z = rel y z
 
+-- for rel x y, provide both the computed value, and the proposition that it is equal to the value (as a dependent pair)
+has_value_dpair : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (value: Bool ** rel x y = value)
+has_value_dpair rel x y = (rel x y ** Refl)
+
 -- A relationship implies (intensional) equality if x relates to y only if x = y.
 -- Not all 'equality' relationships we want to consider will have this property,
 -- but in cases where they do, we should be able to immediately prove certain
@@ -31,6 +35,9 @@ rel_false_implies_inequality {t} rel = (x : t) -> (y : t) -> rel x y = False -> 
 rel_value_determines_equality : {t : Type} -> (rel : t -> t -> Bool) -> Type
 rel_value_determines_equality {t} rel = (rel_true_implies_equality {t} rel, rel_false_implies_inequality {t} rel)
 
+rel_value_determines_equality_implies_symmetric : {rel : t -> t -> Bool} -> rel_value_determines_equality rel -> is_reflexive rel
+rel_value_determines_equality_implies_symmetric x = ?rel_value_determines_equality_implies_symmetric_rhs
+
 
 -- Re-expressing is_reflexive as a function of two values x & y, given a proof that they are equal
 reflexive_x_is_y_lemma: {rel : t -> t -> Bool} -> is_reflexive rel -> (x : t) -> (y : t) -> x = y -> rel x y = True
@@ -39,10 +46,6 @@ reflexive_x_is_y_lemma {rel} is_reflexive_rel y y Refl = is_reflexive_rel y
 -- (constructive) law of contrapositive
 contrapositive: (prop1 -> prop2) -> (Not prop2 -> Not prop1)
 contrapositive prop1_implies_prop2 not_prop2 prop1_prf = not_prop2 $ prop1_implies_prop2 $ prop1_prf
-
--- for rel x y, provide both the computed value, and the proposition that it is equal to the value (as a dependent pair)
-has_value_dpair : (rel : t -> t -> Bool) -> (x : t) -> (y : t) -> (value: Bool ** rel x y = value)
-has_value_dpair rel x y = (rel x y ** Refl)
 
 -- Lemma: rel x y not equal to True implies that it is equal to False
 rel_x_y_is_not_true_implies_its_false : (rel : t -> t -> Bool) -> (rel x y = True -> Void) -> rel x y = False
