@@ -67,9 +67,15 @@ rel_x_y_is_false_implies_its_not_true rel rel_x_y_is_false rel_x_y_is_true =
 -- 
 rel_true_implies_equality_contra : rel_true_implies_equality rel -> inequality_implies_rel_false rel
 rel_true_implies_equality_contra rel_true_implies_equality_rel {rel} x y x_is_not_y = 
-   let x_is_not_y_implies_rel_x_y_is_not_true = contrapositive $ rel_true_implies_equality_rel x y in
-   let rel_x_y_is_false = x_is_not_y_implies_rel_x_y_is_not_true x_is_not_y in
-   rel_x_y_is_not_true_implies_its_false rel {x} {y} rel_x_y_is_false
+  let x_is_not_y_implies_rel_x_y_is_not_true = contrapositive $ rel_true_implies_equality_rel x y in
+  let rel_x_y_is_false = x_is_not_y_implies_rel_x_y_is_not_true x_is_not_y in
+    rel_x_y_is_not_true_implies_its_false rel {x} {y} rel_x_y_is_false
+   
+rel_false_implies_inequality_contra : rel_false_implies_inequality rel -> equality_implies_rel_true rel
+rel_false_implies_inequality_contra rel_false_implies_inequality_rel {rel} x y x_is_y with (has_value_dpair rel x y)
+  | (True ** rel_x_y_is_value) = rel_x_y_is_value
+  | (False ** rel_x_y_is_value) = void $ rel_false_implies_inequality_rel x y rel_x_y_is_value x_is_y
+  
 
 -- For a reflexive relationship, rel x y not equal to True implies x and y are not equal
 reflexive_rel_not_true_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> (rel x y = True -> Void) -> x = y -> Void
