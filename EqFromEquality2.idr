@@ -64,6 +64,12 @@ rel_x_y_is_false_implies_its_not_true rel rel_x_y_is_false rel_x_y_is_true =
   let false_is_true = trans (sym rel_x_y_is_false) rel_x_y_is_true in 
     trueNotFalse $ sym false_is_true
 
+-- Lemma: rel x y equal to True implies that it is not equal to False
+rel_x_y_is_true_implies_its_not_false : (rel : t -> t -> Bool) -> rel x y = True -> (rel x y = False -> Void)
+rel_x_y_is_true_implies_its_not_false rel rel_x_y_is_true rel_x_y_is_false = 
+  let true_is_false = trans (sym rel_x_y_is_true) rel_x_y_is_false in
+    trueNotFalse true_is_false
+
 -- 
 rel_true_implies_equality_contra : rel_true_implies_equality rel -> inequality_implies_rel_false rel
 rel_true_implies_equality_contra rel_true_implies_equality_rel {rel} x y x_is_not_y = 
@@ -76,12 +82,23 @@ rel_false_implies_inequality_contra rel_false_implies_inequality_rel {rel} x y x
   | (True ** rel_x_y_is_value) = rel_x_y_is_value
   | (False ** rel_x_y_is_value) = void $ rel_false_implies_inequality_rel x y rel_x_y_is_value x_is_y
   
+not_not_equals : {x : t} -> {y : t} -> (((x = y) -> Void) -> Void) -> Void
+not_not_equals x_is_not_not_y = ?not_not_equals_rhs
+
+inequality_implies_rel_false_contra : inequality_implies_rel_false rel -> rel_true_implies_equality rel
+inequality_implies_rel_false_contra inequality_implies_rel_false_rel {rel} x y rel_x_y_is_true 
+  let x_is_not_y_implies_rel_x_y_is_false = inequality_implies_rel_false_rel x y in 
+  let rel_x_y_is_not_false_implies_x_is_not_not_y = contrapositive x_is_not_y_implies_rel_x_y_is_false in
+  let rel_x_y_is_not_false = rel_x_y_is_true_implies_its_not_false rel {x} {y} rel_x_y_is_true in
+  let x_is_not_not_y = rel_x_y_is_not_false . x_is_not_y_implies_rel_x_y_is_false in 
+  ?rhs
+  
 equality_implies_rel_true_contra : equality_implies_rel_true rel -> rel_false_implies_inequality rel
 equality_implies_rel_true_contra equality_implies_rel_true_rel {rel} x y rel_x_y_is_false x_is_y = 
   let rel_x_y_is_true = equality_implies_rel_true_rel x y x_is_y in
   let true_is_false = trans (sym rel_x_y_is_true) rel_x_y_is_false in
     trueNotFalse true_is_false
-
+    
 -- For a reflexive relationship, rel x y not equal to True implies x and y are not equal
 reflexive_rel_not_true_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> (rel x y = True -> Void) -> x = y -> Void
 reflexive_rel_not_true_implies_not_equal {x} {y} rel is_reflexive_rel rel_not_true = 
