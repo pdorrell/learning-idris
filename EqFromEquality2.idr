@@ -76,6 +76,11 @@ rel_false_implies_inequality_contra rel_false_implies_inequality_rel {rel} x y x
   | (True ** rel_x_y_is_value) = rel_x_y_is_value
   | (False ** rel_x_y_is_value) = void $ rel_false_implies_inequality_rel x y rel_x_y_is_value x_is_y
   
+equality_implies_rel_true_contra : equality_implies_rel_true rel -> rel_false_implies_inequality rel
+equality_implies_rel_true_contra equality_implies_rel_true_rel {rel} x y rel_x_y_is_false x_is_y = 
+  let rel_x_y_is_true = equality_implies_rel_true_rel x y x_is_y in
+  let true_is_false = trans (sym rel_x_y_is_true) rel_x_y_is_false in
+    trueNotFalse true_is_false
 
 -- For a reflexive relationship, rel x y not equal to True implies x and y are not equal
 reflexive_rel_not_true_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> (rel x y = True -> Void) -> x = y -> Void
