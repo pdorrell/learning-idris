@@ -2,6 +2,21 @@
 data ProvableFromDoubleNeg : Type -> Type where
   ProveFromDoubleNeg : (prop : Type) -> (((prop -> Void) -> Void) -> prop) -> ProvableFromDoubleNeg prop
   
+prop_implies_not_not_prop : {prop : Type} -> prop -> Not (Not prop)
+prop_implies_not_not_prop p not_p = not_p p
+
+-- (constructive) law of contrapositive
+contrapositive: (prop1 -> prop2) -> (Not prop2 -> Not prop1)
+contrapositive prop1_implies_prop2 not_prop2 prop1_prf = not_prop2 $ prop1_implies_prop2 $ prop1_prf
+
+negations_provable_from_double_neg : (prop : Type) -> ProvableFromDoubleNeg (Not prop)
+negations_provable_from_double_neg prop = ProveFromDoubleNeg (Not prop) not_not_not_prop_implies_not_prop where
+  not_not_not_prop_implies_not_prop : (Not (Not (Not prop))) -> (Not prop)
+  not_not_not_prop_implies_not_prop not_not_not_prop p = 
+    let not_not_prop = prop_implies_not_not_prop p in
+      not_not_not_prop not_not_prop
+
+
 DecImpliesProvableFromDoubleNeg : Dec prop -> ProvableFromDoubleNeg prop
 DecImpliesProvableFromDoubleNeg (Yes prop_is_true) = ProveFromDoubleNeg prop not_not_p_implies_p where
   not_not_p_implies_p : ((prop -> Void) -> Void) -> prop
