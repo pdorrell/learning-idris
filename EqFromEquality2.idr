@@ -82,17 +82,21 @@ rel_false_implies_inequality_contra rel_false_implies_inequality_rel {rel} x y x
   | (True ** rel_x_y_is_value) = rel_x_y_is_value
   | (False ** rel_x_y_is_value) = void $ rel_false_implies_inequality_rel x y rel_x_y_is_value x_is_y
   
-inequality_implies_rel_false_contra : inequality_implies_rel_false rel -> rel_true_implies_equality rel
-inequality_implies_rel_false_contra inequality_implies_rel_false_rel {rel} x y rel_x_y_is_true with (has_value_dpair rel x y)
+rel_x_y_is_true_rel_x_y_is_not_false: (rel : t -> t -> Bool) -> rel x y = True -> rel x y = False -> Void
+rel_x_y_is_true_rel_x_y_is_not_false rel rel_x_y_is_true rel_x_y_is_false = 
+  let true_is_false = trans (sym rel_x_y_is_true) rel_x_y_is_false in
+    trueNotFalse true_is_false
+
+inequality_implies_rel_false_contra : {rel : t -> t -> Bool} -> inequality_implies_rel_false rel -> rel_true_implies_equality rel
+inequality_implies_rel_false_contra inequality_implies_rel_false_rel {t} {rel} x y rel_x_y_is_true with (has_value_dpair rel x y)
   | (True ** rel_x_y_is_value) = 
-    let lemma = inequality_implies_rel_false_rel x y in
+    let x_is_not_y_implies_rel_x_y_is_false = inequality_implies_rel_false_rel x y in
+    let rel_x_y_is_not_false = rel_x_y_is_true_rel_x_y_is_not_false {t} {x} {y} rel rel_x_y_is_true in
+    let x_is_not_not_y = rel_x_y_is_not_false . x_is_not_y_implies_rel_x_y_is_false in
        ?hole1
   | (False ** rel_x_y_is_value) = 
     let true_is_false = trans (sym rel_x_y_is_true) rel_x_y_is_value in 
        void $ trueNotFalse true_is_false
-
-not_not_equals : {x : t} -> {y : t} -> ((x = y -> Void) -> Void) -> x = y
-not_not_equals x_is_not_not_y = ?not_not_equals_rhs_1
 
 equality_implies_rel_true_contra : equality_implies_rel_true rel -> rel_false_implies_inequality rel
 equality_implies_rel_true_contra equality_implies_rel_true_rel {rel} x y rel_x_y_is_false x_is_y = 
