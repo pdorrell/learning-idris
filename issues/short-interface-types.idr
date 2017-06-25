@@ -3,6 +3,9 @@
 interface Computer a where
   compute : a -> Nat
   
+Computer Nat where
+  compute n = n * n
+  
 [DoubleIt] Computer Nat where
   compute n = n + n
 
@@ -15,3 +18,6 @@ compute_from_two_compute_params k computer1 computer2 = compute k
 -- Apparently the second 'Computer Nat' param determines the result ...
 example_compute_on_4 : compute_from_two_compute_params 4 DoubleIt IncrementIt = 5
 example_compute_on_4 = Refl
+
+example2_compute_on_4 : compute_from_two_compute_params 4 DoubleIt %implementation = 16
+example2_compute_on_4 = Refl
