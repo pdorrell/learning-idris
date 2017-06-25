@@ -2,6 +2,7 @@ module Stability
 
 %default total
 
+public export
 data Stable : Type -> Type where
   ProveFromDoubleNeg : {prop : Type} -> (((prop -> Void) -> Void) -> prop) -> Stable prop
 
