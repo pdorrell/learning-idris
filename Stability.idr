@@ -16,6 +16,7 @@ negations_are_stable prop = ProveFromDoubleNeg not_not_not_prop_implies_not_prop
     let not_not_prop = prop_implies_not_not_prop p in
       not_not_not_prop not_not_prop
 
+public export
 dec_implies_stable : Dec prop -> Stable prop
 dec_implies_stable (Yes prop_is_true) = ProveFromDoubleNeg not_not_p_implies_p where
   not_not_p_implies_p : ((prop -> Void) -> Void) -> prop
