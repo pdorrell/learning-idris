@@ -114,18 +114,31 @@ nat2DPNat (S k) = nextPNatDpair (nat2DPNat k)
 examples_dpnat : List DPNat
 examples_dpnat = [(Even ** PZ), nat2DPNat 5]
 
-namespace dpnat_arithmetic
+-- Note: We can't implement an interface for DPNat, so here I define the somewhat similar
+-- DPNatGadt as a GADT, which _can_ implement an interface.
+
+data DPNatGadt : Type where
+  MkDPNat : (p : Parity) -> PNat p -> DPNatGadt
+
+namespace dpnat_gadt_arithmetic
   
-  plus: DPNat -> DPNat -> DPNat
-  plus (p1 ** pn1) (p2 ** pn2) = (p1+p2 ** (pnat_plus pn1 pn2))
+  plus: DPNatGadt -> DPNatGadt -> DPNatGadt
+  plus (MkDPNat p1 pn1) (MkDPNat p2 pn2) = (MkDPNat (p1+p2) (pnat_plus pn1 pn2))
 
-  mult: DPNat -> DPNat -> DPNat
-  mult (p1 ** pn1) (p2 ** pn2) = (p1*p2 ** (pnat_mult pn1 pn2))
-
-Num DPNat where
-  (+) = dpnat_arithmetic.plus
-  (*) = dpnat_arithmetic.mult
-  fromInteger = nat2DPNat . fromInteger
+  mult: DPNatGadt -> DPNatGadt -> DPNatGadt
+  mult (MkDPNat p1 pn1) (MkDPNat p2 pn2) = (MkDPNat (p1*p2) (pnat_mult pn1 pn2))
+  
+  succ : DPNatGadt -> DPNatGadt
+  succ (MkDPNat p x) = MkDPNat (opposite p) (PS x)
+  
+  from_nat : Nat -> DPNatGadt
+  from_nat Z = MkDPNat Even PZ
+  from_nat (S k) = succ (from_nat k)
+  
+Num DPNatGadt where
+  (+) = dpnat_gadt_arithmetic.plus
+  (*) = dpnat_gadt_arithmetic.mult
+  fromInteger = from_nat . fromInteger
 
 -- Steps to prove parityOf_gets_parity ...
 fst_of_dpair: PNat p -> fst (p**pn) = p
