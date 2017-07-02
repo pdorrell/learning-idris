@@ -1,5 +1,8 @@
 module EqFromEquality
 
+import Stability
+import StableEquality
+
 %default total
 
 -- Proof: if an instance Eq corresponds to intensional equality, then (==) is symmetric
@@ -86,14 +89,18 @@ rel_x_y_is_true_rel_x_y_is_not_false: (rel : t -> t -> Bool) -> rel x y = True -
 rel_x_y_is_true_rel_x_y_is_not_false rel rel_x_y_is_true rel_x_y_is_false = 
   let true_is_false = trans (sym rel_x_y_is_true) rel_x_y_is_false in
     trueNotFalse true_is_false
-
-inequality_implies_rel_false_contra : {rel : t -> t -> Bool} -> inequality_implies_rel_false rel -> rel_true_implies_equality rel
-inequality_implies_rel_false_contra inequality_implies_rel_false_rel {t} {rel} x y rel_x_y_is_true with (has_value_dpair rel x y)
+    
+inequality_implies_rel_false_contra : {rel : t -> t -> Bool} -> EqualityIsStable t -> 
+                                          inequality_implies_rel_false rel -> rel_true_implies_equality rel
+inequality_implies_rel_false_contra {t} {rel} eq_is_stable_t inequality_implies_rel_false_rel x y rel_x_y_is_true with (has_value_dpair rel x y)
   | (True ** rel_x_y_is_value) = 
     let x_is_not_y_implies_rel_x_y_is_false = inequality_implies_rel_false_rel x y in
     let rel_x_y_is_not_false = rel_x_y_is_true_rel_x_y_is_not_false {t} {x} {y} rel rel_x_y_is_true in
     let x_is_not_not_y = rel_x_y_is_not_false . x_is_not_y_implies_rel_x_y_is_false in
-       ?hole1
+    let ProveIsStable eq_is_stable_lemma = eq_is_stable_t in
+    let stable_x_is_y = eq_is_stable_lemma x y in 
+    let ProveFromDoubleNeg x_is_not_not_y_implies_x_is_y = stable_x_is_y in
+       x_is_not_not_y_implies_x_is_y x_is_not_not_y
   | (False ** rel_x_y_is_value) = 
     let true_is_false = trans (sym rel_x_y_is_true) rel_x_y_is_value in 
        void $ trueNotFalse true_is_false

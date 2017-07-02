@@ -4,6 +4,7 @@ import Stability
 
 %default total
 
+public export
 data EqualityIsStable : Type -> Type where
   ProveIsStable : ((x : t) -> (y : t) -> Stable (x = y)) -> EqualityIsStable t
   
