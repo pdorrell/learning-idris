@@ -110,6 +110,13 @@ equality_implies_rel_true_contra equality_implies_rel_true_rel {rel} x y rel_x_y
   let true_is_false = trans (sym rel_x_y_is_true) rel_x_y_is_false in
     trueNotFalse true_is_false
     
+--
+
+rel_determines_equality_implies_converse : rel_determines_equality rel -> equality_determines_rel rel
+rel_determines_equality_implies_converse {rel} (rel_true_implies_equality, rel_false_implies_inequality) = 
+   (rel_false_implies_inequality_contra {rel} rel_false_implies_inequality,
+    rel_true_implies_equality_contra {rel} rel_true_implies_equality)
+
 -- For a reflexive relationship, rel x y not equal to True implies x and y are not equal
 reflexive_rel_not_true_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> (rel x y = True -> Void) -> x = y -> Void
 reflexive_rel_not_true_implies_not_equal {x} {y} rel is_reflexive_rel rel_not_true = 
