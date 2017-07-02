@@ -116,6 +116,12 @@ rel_determines_equality_implies_converse : rel_determines_equality rel -> equali
 rel_determines_equality_implies_converse {rel} (rel_true_implies_equality, rel_false_implies_inequality) = 
    (rel_false_implies_inequality_contra {rel} rel_false_implies_inequality,
     rel_true_implies_equality_contra {rel} rel_true_implies_equality)
+    
+equality_determines_rel_converse_if_stable : {rel : t -> t -> Bool} -> EqualityIsStable t -> 
+                                                     equality_determines_rel rel -> rel_determines_equality rel
+equality_determines_rel_converse_if_stable {rel} eq_is_stable_t (equality_implies_rel_true, inequality_implies_rel_false) = 
+   (inequality_implies_rel_false_contra {rel} eq_is_stable_t inequality_implies_rel_false,
+    equality_implies_rel_true_contra {rel} equality_implies_rel_true)
 
 -- For a reflexive relationship, rel x y not equal to True implies x and y are not equal
 reflexive_rel_not_true_implies_not_equal : (rel : t -> t -> Bool) -> is_reflexive rel -> (rel x y = True -> Void) -> x = y -> Void
