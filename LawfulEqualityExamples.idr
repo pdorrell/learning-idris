@@ -30,6 +30,6 @@ bad_equals_abc _ _ = False
 [BadEquality] Eq ABC where
   (==) = bad_equals_abc
 
-bad_equals_abc_not_reflexive : bad_equals_abc A B = not $ bad_equals_abc B A
-bad_equals_abc_not_reflexive = Refl
+bad_equals_abc_not_symmetric : bad_equals_abc A B = not $ bad_equals_abc B A
+bad_equals_abc_not_symmetric = Refl
 
