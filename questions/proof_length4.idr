@@ -18,9 +18,6 @@ eq_self_is_true B = Refl
 eq_self_is_true C = Refl
 eq_self_is_true D = Refl
 
-eq_self_false_implies_void : (x : ABCD) -> x == x = False -> Void
-eq_self_false_implies_void x x_eq_x_is_false = true_false_conflict (x==x) x_eq_x_is_false (eq_self_is_true x) 
-
 x_is_y_implies_x_eq_y_is_true : (x : ABCD) -> (y : ABCD) -> x = y -> x == y = True
 x_is_y_implies_x_eq_y_is_true x y x_is_y = rewrite (sym x_is_y) in eq_self_is_true x
 
