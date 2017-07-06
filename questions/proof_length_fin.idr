@@ -1,13 +1,40 @@
+import Data.Fin
+import Data.Vect
+
 %default total
 
 data ABCD = A | B | C | D
 
+abcd2Fin : ABCD -> Fin 4
+abcd2Fin A = FZ
+abcd2Fin B = (FS FZ)
+abcd2Fin C = (FS (FS FZ))
+abcd2Fin D = (FS (FS (FS FZ)))
+
+interface FiniteType t where
+  size : Nat
+  values : Vect size t
+  toFin : t -> Fin size
+  fromFin : Fin size -> t
+  toAndFromFin : (x : t) -> fromFin (toFin x) = x
+  fromAndToFin : (y : Fin size) -> toFin (fromFin y) = y
+  
+FiniteType ABCD where
+  size = 4
+  values = [A, B, C, D]
+  toFin = abcd2Fin
+  fromFin n = index n values
+  toAndFromFin A = Refl
+  toAndFromFin B = Refl
+  toAndFromFin C = Refl
+  toAndFromFin D = Refl
+  fromAndToFin FZ = Refl
+  fromAndToFin (FS FZ) = Refl
+  fromAndToFin (FS (FS FZ)) = Refl
+  fromAndToFin (FS (FS (FS FZ))) = Refl
+  
 Eq ABCD where
-  A == A = True
-  B == B = True
-  C == C = True
-  D == D = True
-  _ == _ = False
+  x == y = toFin x == toFin y
   
 true_false_conflict : {expr : Bool} -> expr = False -> expr = True -> Void
 true_false_conflict {expr} expr_is_false expr_is_true = void $ trueNotFalse $ trans (sym expr_is_true) expr_is_false
