@@ -34,7 +34,8 @@ Eq ABCD where
   x == y = toFin x == toFin y
   
 true_false_conflict : {expr : Bool} -> expr = False -> expr = True -> Void
-true_false_conflict {expr} expr_is_false expr_is_true = void $ trueNotFalse $ trans (sym expr_is_true) expr_is_false
+true_false_conflict {expr} expr_is_false expr_is_true = 
+     void $ trueNotFalse $ trans (sym expr_is_true) expr_is_false
 
 fin_eq_self_is_true : (n : Fin m) -> n == n = True
 fin_eq_self_is_true FZ = Refl
@@ -59,19 +60,6 @@ fin_eq_true_implies_equal (FS x') (FS y') x_eq_y_is_true =
   cong {f=FS} $ fin_eq_true_implies_equal x' y' $ the (x' == y' = True) x_eq_y_is_true
 
 eq_true_implies_equal : (x : ABCD) -> (y : ABCD) -> x == y = True -> x = y
-eq_true_implies_equal A A x_eq_y_is_true = Refl
-eq_true_implies_equal A B Refl impossible
-eq_true_implies_equal A C Refl impossible
-eq_true_implies_equal A D Refl impossible
-eq_true_implies_equal B A Refl impossible
-eq_true_implies_equal B B x_eq_y_is_true = Refl
-eq_true_implies_equal B C Refl impossible
-eq_true_implies_equal B D Refl impossible
-eq_true_implies_equal C A Refl impossible
-eq_true_implies_equal C B Refl impossible
-eq_true_implies_equal C C x_eq_y_is_true = Refl
-eq_true_implies_equal C D Refl impossible
-eq_true_implies_equal D A Refl impossible
-eq_true_implies_equal D B Refl impossible
-eq_true_implies_equal D C Refl impossible
-eq_true_implies_equal D D x_eq_y_is_true = Refl
+eq_true_implies_equal x y x_eq_y_is_true = 
+  let lemma = fin_eq_true_implies_equal (toFin x) (toFin y) $ x_eq_y_is_true in 
+  ?eq_true_implies_equal_rhs
