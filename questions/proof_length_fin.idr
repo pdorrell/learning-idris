@@ -51,6 +51,13 @@ eq_false_implies_not_equal x y x_eq_y_is_false x_is_y =
   let x_eq_y_is_true = x_is_y_implies_x_eq_y_is_true x y x_is_y in
   true_false_conflict x_eq_y_is_false x_eq_y_is_true
   
+fin_eq_true_implies_equal : (x : Fin m) -> (y : Fin m) -> x == y = True -> x = y
+fin_eq_true_implies_equal FZ FZ x_eq_y_is_true = Refl
+fin_eq_true_implies_equal FZ (FS x) Refl impossible
+fin_eq_true_implies_equal (FS x) FZ Refl impossible
+fin_eq_true_implies_equal (FS x') (FS y') x_eq_y_is_true = 
+  cong {f=FS} $ fin_eq_true_implies_equal x' y' $ the (x' == y' = True) x_eq_y_is_true
+
 eq_true_implies_equal : (x : ABCD) -> (y : ABCD) -> x == y = True -> x = y
 eq_true_implies_equal A A x_eq_y_is_true = Refl
 eq_true_implies_equal A B Refl impossible
