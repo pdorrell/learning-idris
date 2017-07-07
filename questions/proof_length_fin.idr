@@ -5,12 +5,6 @@ import Data.Vect
 
 data ABCD = A | B | C | D
 
-abcd2Fin : ABCD -> Fin 4
-abcd2Fin A = FZ
-abcd2Fin B = (FS FZ)
-abcd2Fin C = (FS (FS FZ))
-abcd2Fin D = (FS (FS (FS FZ)))
-
 interface FiniteType t where
   size : Nat
   values : Vect size t
@@ -22,7 +16,10 @@ interface FiniteType t where
 FiniteType ABCD where
   size = 4
   values = [A, B, C, D]
-  toFin = abcd2Fin
+  toFin A = FZ
+  toFin B = (FS FZ)
+  toFin C = (FS (FS FZ))
+  toFin D = (FS (FS (FS FZ)))
   fromFin n = index n values
   toAndFromFin A = Refl
   toAndFromFin B = Refl
@@ -39,8 +36,12 @@ Eq ABCD where
 true_false_conflict : {expr : Bool} -> expr = False -> expr = True -> Void
 true_false_conflict {expr} expr_is_false expr_is_true = void $ trueNotFalse $ trans (sym expr_is_true) expr_is_false
 
+fin_eq_self_is_true : (n : Fin m) -> n == n = True
+fin_eq_self_is_true FZ = Refl
+fin_eq_self_is_true (FS x) = fin_eq_self_is_true x
+
 eq_self_is_true : (x : ABCD) -> x == x = True
-eq_self_is_true x = ?hole
+eq_self_is_true x = fin_eq_self_is_true $ toFin x
 
 x_is_y_implies_x_eq_y_is_true : (x : ABCD) -> (y : ABCD) -> x = y -> x == y = True
 x_is_y_implies_x_eq_y_is_true x y x_is_y = rewrite (sym x_is_y) in eq_self_is_true x
