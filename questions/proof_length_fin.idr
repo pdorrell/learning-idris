@@ -14,7 +14,7 @@ interface FiniteType t where
   fromAndToFin : (y : Fin size) -> toFin (fromFin y) = y
   
 FiniteType ABCD where
-  size = 4
+  size = the Nat 4
   values = [A, B, C, D]
   toFin A = FZ
   toFin B = (FS FZ)
@@ -62,4 +62,5 @@ fin_eq_true_implies_equal (FS x') (FS y') x_eq_y_is_true =
 eq_true_implies_equal : (x : ABCD) -> (y : ABCD) -> x == y = True -> x = y
 eq_true_implies_equal x y x_eq_y_is_true = 
   let lemma = fin_eq_true_implies_equal (toFin x) (toFin y) $ x_eq_y_is_true in 
+  -- let lemma2 = cong {f=fromFin} lemma in
   ?eq_true_implies_equal_rhs
