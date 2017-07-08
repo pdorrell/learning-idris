@@ -1,10 +1,9 @@
 data IsSorted : {a: Type} -> (ltRel: a -> a -> Type) -> List a -> Type where
-  IsSortedZero : IsSorted {a=a} ltRel Nil
+  IsSortedZero : IsSorted {a} ltRel Nil
   IsSortedOne : (x: a) -> IsSorted ltRel [x]
-  IsSortedMany : (x: a) -> (y: a) -> IsSorted rel (y::ys) -> (rel x y) -> IsSorted rel (x::y::ys)
+  IsSortedMany : (x: a) -> (y: a) -> IsSorted ltRel (y::ys) -> (ltRel x y) -> IsSorted ltRel (x::y::ys)
 
-example1 : IsSorted rel list_of_a -> something
-example1 IsSortedZero = ?rhs3a
-example1 (IsSortedOne x) = ?rhs3b
-example1 (IsSortedMany x y z w) = ?rhs3c
-
+example : IsSorted ltRel list_of_a -> something
+example IsSortedZero = ?rhs1
+example (IsSortedOne x) = ?rhs2
+example (IsSortedMany x y xs x_lt_y) = ?rhs3
