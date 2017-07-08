@@ -18,6 +18,5 @@ is_sorted ltRel (x :: y :: xs) = (ltRel x y) & (is_sorted ltRel (y :: xs))
 is_sorted_true_elim : {x : a} -> is_sorted ltRel (x :: y :: xs) = True -> (ltRel x y = True, 
                                                                            is_sorted ltRel (y :: xs) = True)
 is_sorted_true_elim {x} {y} {xs} {ltRel} is_sorted_x_y_xs = 
-  let lemma = the (is_sorted ltRel (x :: y :: xs) = (ltRel x y) & (is_sorted ltRel (y :: xs))) Refl in
-    elim_and {x=ltRel x y} $ trans (sym lemma) is_sorted_x_y_xs
+    elim_and $ trans Refl is_sorted_x_y_xs
 
