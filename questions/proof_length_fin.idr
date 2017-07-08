@@ -30,6 +30,15 @@ FiniteType ABCD where
   fromAndToFin (FS (FS FZ)) = Refl
   fromAndToFin (FS (FS (FS FZ))) = Refl
   
+test : toFin A = FZ
+test = Refl
+
+--test2 : (x : ABCD) -> (y : ABCD) -> Type
+--test2 x y = fromFin (toFin x) = fromFin (toFin y)
+
+test3 : (x : Fin 4) -> (y : Fin 4) -> Type
+test3 x y = fromFin x = fromFin y
+
 Eq ABCD where
   x == y = toFin x == toFin y
   
@@ -62,5 +71,7 @@ fin_eq_true_implies_equal (FS x') (FS y') x_eq_y_is_true =
 eq_true_implies_equal : (x : ABCD) -> (y : ABCD) -> x == y = True -> x = y
 eq_true_implies_equal x y x_eq_y_is_true = 
   let lemma = fin_eq_true_implies_equal (toFin x) (toFin y) $ x_eq_y_is_true in 
-  -- let lemma2 = cong {f=fromFin} lemma in
+--  let z = fromFin $ toFin x in
+  --let z = fromFin (toFin x) in
+  --let lemma2 = the (fromFin (toFin x) = fromFin (toFin y)) $ cong {f=fromFin} lemma in
   ?eq_true_implies_equal_rhs
