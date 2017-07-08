@@ -59,7 +59,6 @@ fin_eq_true_implies_equal (FS x) FZ Refl impossible
 fin_eq_true_implies_equal (FS x') (FS y') x_eq_y_is_true = 
   cong {f=FS} $ fin_eq_true_implies_equal x' y' $ the (x' == y' = True) x_eq_y_is_true
   
-  
 toFin_injective : FiniteType t => (x : t) -> (y : t) -> toFin x = toFin y -> x = y
 toFin_injective {t} x y tofin_x_is_tofin_y = 
   let x_to_and_from_fin_is_y_to_and_from_fin = cong {f=fromFin} tofin_x_is_tofin_y in
@@ -67,6 +66,5 @@ toFin_injective {t} x y tofin_x_is_tofin_y =
 
 eq_true_implies_equal : (x : ABCD) -> (y : ABCD) -> x == y = True -> x = y
 eq_true_implies_equal x y x_eq_y_is_true = 
-  let lemma = fin_eq_true_implies_equal (toFin x) (toFin y) $ x_eq_y_is_true in 
---  let lemma2 = the (the ABCD (fromFin (toFin x)) = the ABCD (fromFin (toFin y))) $ cong lemma in 
-  ?eq_true_implies_equal_rhs
+  let tofin_x_is_tofin_y = fin_eq_true_implies_equal (toFin x) (toFin y) $ x_eq_y_is_true in 
+    toFin_injective x y tofin_x_is_tofin_y
