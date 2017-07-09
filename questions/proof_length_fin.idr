@@ -13,10 +13,15 @@ interface FiniteType t where
   toAndFromFin : (x : t) -> the t (fromFin (toFin x)) = x
   fromAndToFin : (y : Fin size) -> toFin (fromFin y) = y
   
+  fromFin n = index n values
+  
 toFin_injective : FiniteType t => (x : t) -> (y : t) -> toFin x = toFin y -> x = y
 toFin_injective {t} x y tofin_x_is_tofin_y = 
   let x_to_and_from_fin_is_y_to_and_from_fin = cong {f=fromFin} tofin_x_is_tofin_y in
     trans (trans (sym $ toAndFromFin x) x_to_and_from_fin_is_y_to_and_from_fin) (toAndFromFin y)
+    
+eq_from_fin : FiniteType t => t -> t -> Bool
+eq_from_fin x y = toFin x == toFin y
 
 -- lemmas
 
@@ -46,7 +51,6 @@ FiniteType ABCD where
   toFin B = (FS FZ)
   toFin C = (FS (FS FZ))
   toFin D = (FS (FS (FS FZ)))
-  fromFin n = index n values
   toAndFromFin A = Refl
   toAndFromFin B = Refl
   toAndFromFin C = Refl
@@ -57,8 +61,14 @@ FiniteType ABCD where
   fromAndToFin (FS (FS (FS FZ))) = Refl
   
 Eq ABCD where
-  x == y = toFin x == toFin y
+  (==) = eq_from_fin
   
+data FiniteTypeWithEqFromFin : (t : Type) -> Type where
+  EqIsFromFin : (FiniteType t, Eq t) => the (t -> t -> Bool) (==) = eq_from_fin -> FiniteTypeWithEqFromFin t
+  
+abcd_eq_is_from_fin : FiniteTypeWithEqFromFin ABCD
+abcd_eq_is_from_fin = EqIsFromFin Refl
+
 eq_self_is_true : (x : ABCD) -> x == x = True
 eq_self_is_true x = fin_eq_self_is_true $ toFin x
 
