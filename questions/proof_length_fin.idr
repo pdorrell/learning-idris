@@ -3,7 +3,7 @@ import Data.Vect
 
 %default total
 
-data ABCD = A | B | C | D
+-- the FiniteType interface, representing a type with a finite number of possible values
 
 interface FiniteType t where
   size : Nat
@@ -13,6 +13,32 @@ interface FiniteType t where
   toAndFromFin : (x : t) -> the t (fromFin (toFin x)) = x
   fromAndToFin : (y : Fin size) -> toFin (fromFin y) = y
   
+toFin_injective : FiniteType t => (x : t) -> (y : t) -> toFin x = toFin y -> x = y
+toFin_injective {t} x y tofin_x_is_tofin_y = 
+  let x_to_and_from_fin_is_y_to_and_from_fin = cong {f=fromFin} tofin_x_is_tofin_y in
+    trans (trans (sym $ toAndFromFin x) x_to_and_from_fin_is_y_to_and_from_fin) (toAndFromFin y)
+
+-- lemmas
+
+fin_eq_true_implies_equal : (x : Fin m) -> (y : Fin m) -> x == y = True -> x = y
+fin_eq_true_implies_equal FZ FZ x_eq_y_is_true = Refl
+fin_eq_true_implies_equal FZ (FS x) Refl impossible
+fin_eq_true_implies_equal (FS x) FZ Refl impossible
+fin_eq_true_implies_equal (FS x') (FS y') x_eq_y_is_true = 
+  cong {f=FS} $ fin_eq_true_implies_equal x' y' $ the (x' == y' = True) x_eq_y_is_true
+  
+true_false_conflict : {expr : Bool} -> expr = False -> expr = True -> Void
+true_false_conflict {expr} expr_is_false expr_is_true = 
+     void $ trueNotFalse $ trans (sym expr_is_true) expr_is_false
+
+fin_eq_self_is_true : (n : Fin m) -> n == n = True
+fin_eq_self_is_true FZ = Refl
+fin_eq_self_is_true (FS x) = fin_eq_self_is_true x
+
+-- ABCD example
+
+data ABCD = A | B | C | D
+
 FiniteType ABCD where
   size = the Nat 4
   values = [A, B, C, D]
@@ -33,14 +59,6 @@ FiniteType ABCD where
 Eq ABCD where
   x == y = toFin x == toFin y
   
-true_false_conflict : {expr : Bool} -> expr = False -> expr = True -> Void
-true_false_conflict {expr} expr_is_false expr_is_true = 
-     void $ trueNotFalse $ trans (sym expr_is_true) expr_is_false
-
-fin_eq_self_is_true : (n : Fin m) -> n == n = True
-fin_eq_self_is_true FZ = Refl
-fin_eq_self_is_true (FS x) = fin_eq_self_is_true x
-
 eq_self_is_true : (x : ABCD) -> x == x = True
 eq_self_is_true x = fin_eq_self_is_true $ toFin x
 
@@ -52,18 +70,6 @@ eq_false_implies_not_equal x y x_eq_y_is_false x_is_y =
   let x_eq_y_is_true = x_is_y_implies_x_eq_y_is_true x y x_is_y in
   true_false_conflict x_eq_y_is_false x_eq_y_is_true
   
-fin_eq_true_implies_equal : (x : Fin m) -> (y : Fin m) -> x == y = True -> x = y
-fin_eq_true_implies_equal FZ FZ x_eq_y_is_true = Refl
-fin_eq_true_implies_equal FZ (FS x) Refl impossible
-fin_eq_true_implies_equal (FS x) FZ Refl impossible
-fin_eq_true_implies_equal (FS x') (FS y') x_eq_y_is_true = 
-  cong {f=FS} $ fin_eq_true_implies_equal x' y' $ the (x' == y' = True) x_eq_y_is_true
-  
-toFin_injective : FiniteType t => (x : t) -> (y : t) -> toFin x = toFin y -> x = y
-toFin_injective {t} x y tofin_x_is_tofin_y = 
-  let x_to_and_from_fin_is_y_to_and_from_fin = cong {f=fromFin} tofin_x_is_tofin_y in
-    trans (trans (sym $ toAndFromFin x) x_to_and_from_fin_is_y_to_and_from_fin) (toAndFromFin y)
-
 eq_true_implies_equal : (x : ABCD) -> (y : ABCD) -> x == y = True -> x = y
 eq_true_implies_equal x y x_eq_y_is_true = 
   let tofin_x_is_tofin_y = fin_eq_true_implies_equal (toFin x) (toFin y) $ x_eq_y_is_true in 
