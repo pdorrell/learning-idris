@@ -47,6 +47,28 @@ fin_eq_self_is_true : (n : Fin m) -> n == n = True
 fin_eq_self_is_true FZ = Refl
 fin_eq_self_is_true (FS x) = fin_eq_self_is_true x
 
+-- interface EqFromFinEq
+  
+interface (FiniteType t, Eq t) => EqFromFinEq t where
+  eq_is_from_fin : (x : t) -> (y : t) -> x == y = eq_from_fin x y
+  
+eq_self_is_true : EqFromFinEq t => (x : t) -> x == x = True
+eq_self_is_true x = trans (eq_is_from_fin x x) (eq_from_fin_reflexive x)
+  
+x_is_y_implies_x_eq_y_is_true : EqFromFinEq t => (x : t) -> (y : t) -> x = y -> x == y = True
+x_is_y_implies_x_eq_y_is_true x y x_is_y = rewrite (sym x_is_y) in eq_self_is_true x
+
+eq_false_implies_not_equal : EqFromFinEq t => (x : t) -> (y : t) -> x == y = False -> x = y -> Void
+eq_false_implies_not_equal x y x_eq_y_is_false x_is_y = 
+  let x_eq_y_is_true = x_is_y_implies_x_eq_y_is_true x y x_is_y in
+  true_false_conflict x_eq_y_is_false x_eq_y_is_true
+  
+eq_true_implies_equal : EqFromFinEq t => (x : t) -> (y : t) -> x == y = True -> x = y
+eq_true_implies_equal x y x_eq_y_is_true = 
+  let eq_from_fin_x_y_is_true = trans (sym (eq_is_from_fin x y)) x_eq_y_is_true in
+  let tofin_x_is_to_fin_y = fin_eq_true_implies_equal (toFin x) (toFin y) $ eq_from_fin_x_y_is_true in
+    toFin_injective x y tofin_x_is_to_fin_y
+
 -- ABCD example
 
 data ABCD = A | B | C | D
@@ -70,34 +92,14 @@ FiniteType ABCD where
 Eq ABCD where
   (==) = eq_from_fin
   
-interface (FiniteType t, Eq t) => EqFromFinEq t where
-  eq_is_from_fin : (x : t) -> (y : t) -> x == y = eq_from_fin x y
-  
 EqFromFinEq ABCD where
   eq_is_from_fin = \x, y => Refl
   
-eq_self_is_true : EqFromFinEq t => (x : t) -> x == x = True
-eq_self_is_true x = 
-  let lemma = eq_is_from_fin x x in
-  let lemma2 = eq_from_fin_reflexive x in
-  let lemma3 = trans lemma lemma2 in
-  lemma3
-  
 abcd_eq_self_is_true : (x : ABCD) -> x == x = True
-abcd_eq_self_is_true x = eq_self_is_true x
+abcd_eq_self_is_true = eq_self_is_true
 
-x_is_y_implies_x_eq_y_is_true : (x : ABCD) -> (y : ABCD) -> x = y -> x == y = True
-x_is_y_implies_x_eq_y_is_true x y x_is_y = rewrite (sym x_is_y) in eq_self_is_true x
+abcd_eq_false_implies_not_equal : (x : ABCD) -> (y : ABCD) -> x == y = False -> x = y -> Void
+abcd_eq_false_implies_not_equal = eq_false_implies_not_equal
 
-x_is_y_implies_x_eq_y_is_true2 : EqFromFinEq t => (x : t) -> (y : t) -> x = y -> x == y = True
-x_is_y_implies_x_eq_y_is_true2 x y x_is_y = rewrite (sym x_is_y) in eq_self_is_true x
-
-eq_false_implies_not_equal : (x : ABCD) -> (y : ABCD) -> x == y = False -> x = y -> Void
-eq_false_implies_not_equal x y x_eq_y_is_false x_is_y = 
-  let x_eq_y_is_true = x_is_y_implies_x_eq_y_is_true x y x_is_y in
-  true_false_conflict x_eq_y_is_false x_eq_y_is_true
-  
-eq_true_implies_equal : (x : ABCD) -> (y : ABCD) -> x == y = True -> x = y
-eq_true_implies_equal x y x_eq_y_is_true = 
-  let tofin_x_is_tofin_y = fin_eq_true_implies_equal (toFin x) (toFin y) $ x_eq_y_is_true in 
-    toFin_injective x y tofin_x_is_tofin_y
+abcd_eq_true_implies_equal : (x : ABCD) -> (y : ABCD) -> x == y = True -> x = y
+abcd_eq_true_implies_equal = eq_true_implies_equal
