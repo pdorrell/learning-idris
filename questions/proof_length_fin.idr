@@ -23,6 +23,13 @@ toFin_injective {t} x y tofin_x_is_tofin_y =
 eq_from_fin : FiniteType t => t -> t -> Bool
 eq_from_fin x y = toFin x == toFin y
 
+fin_eq_reflexive : (x : Fin n) -> x == x = True
+fin_eq_reflexive FZ = Refl
+fin_eq_reflexive (FS x) = fin_eq_reflexive x
+
+eq_from_fin_reflexive : FiniteType t => (x : t) -> eq_from_fin x x = True
+eq_from_fin_reflexive x = fin_eq_reflexive $ toFin x
+
 -- lemmas
 
 fin_eq_true_implies_equal : (x : Fin m) -> (y : Fin m) -> x == y = True -> x = y
@@ -63,17 +70,27 @@ FiniteType ABCD where
 Eq ABCD where
   (==) = eq_from_fin
   
-data FiniteTypeWithEqFromFin : (t : Type) -> Type where
-  EqIsFromFin : (FiniteType t, Eq t) => the (t -> t -> Bool) (==) = eq_from_fin -> FiniteTypeWithEqFromFin t
+interface (FiniteType t, Eq t) => EqFromFinEq t where
+  eq_is_from_fin : (x : t) -> (y : t) -> x == y = eq_from_fin x y
   
-abcd_eq_is_from_fin : FiniteTypeWithEqFromFin ABCD
-abcd_eq_is_from_fin = EqIsFromFin Refl
-
-eq_self_is_true : (x : ABCD) -> x == x = True
-eq_self_is_true x = fin_eq_self_is_true $ toFin x
+EqFromFinEq ABCD where
+  eq_is_from_fin = \x, y => Refl
+  
+eq_self_is_true : EqFromFinEq t => (x : t) -> x == x = True
+eq_self_is_true x = 
+  let lemma = eq_is_from_fin x x in
+  let lemma2 = eq_from_fin_reflexive x in
+  let lemma3 = trans lemma lemma2 in
+  lemma3
+  
+abcd_eq_self_is_true : (x : ABCD) -> x == x = True
+abcd_eq_self_is_true x = eq_self_is_true x
 
 x_is_y_implies_x_eq_y_is_true : (x : ABCD) -> (y : ABCD) -> x = y -> x == y = True
 x_is_y_implies_x_eq_y_is_true x y x_is_y = rewrite (sym x_is_y) in eq_self_is_true x
+
+x_is_y_implies_x_eq_y_is_true2 : EqFromFinEq t => (x : t) -> (y : t) -> x = y -> x == y = True
+x_is_y_implies_x_eq_y_is_true2 x y x_is_y = rewrite (sym x_is_y) in eq_self_is_true x
 
 eq_false_implies_not_equal : (x : ABCD) -> (y : ABCD) -> x == y = False -> x = y -> Void
 eq_false_implies_not_equal x y x_eq_y_is_false x_is_y = 
