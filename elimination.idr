@@ -19,3 +19,7 @@ abcd_elim Prop prop_a prop_b prop_c prop_d A = prop_a
 abcd_elim Prop prop_a prop_b prop_c prop_d B = prop_b
 abcd_elim Prop prop_a prop_b prop_c prop_d C = prop_c
 abcd_elim Prop prop_a prop_b prop_c prop_d D = prop_d
+
+nat_elim : (Prop : Nat -> Type) -> Prop Z -> ((n : Nat) -> Prop n -> Prop (S n)) -> (x : Nat) -> Prop x
+nat_elim Prop prop_z prop_s Z = prop_z
+nat_elim Prop prop_z prop_s (S k) = prop_s k $ nat_elim Prop prop_z prop_s k
