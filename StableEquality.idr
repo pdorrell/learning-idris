@@ -24,8 +24,5 @@ dec_eq_implies_stable_eq = ProveIsStable dec_eq_stable_lemma where
   dec_eq_stable_lemma : DecEq t => (x : t) -> (y : t) -> Stable (x = y)
   dec_eq_stable_lemma x y = dec_implies_stable $ decEq x y
 
-zeroNotSucc : (n : Nat) -> Z = S(n) -> Void
-zeroNotSucc _ Refl impossible
-
 nat_equality_is_stable : EqualityIsStable Nat
 nat_equality_is_stable = dec_eq_implies_stable_eq {t=Nat}
