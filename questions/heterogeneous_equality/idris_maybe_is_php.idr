@@ -3,5 +3,8 @@ Num String where
   (*) x y = y
   fromInteger n = "2"
 
-idris_not_php : 2 ~=~ "2"
-idris_not_php = the (the String 2 = "2") Refl
+Two_string_equals_type : Type
+Two_string_equals_type = the String 2 = "2"
+
+idris_not_php : Two_string_equals_type
+idris_not_php = Refl
