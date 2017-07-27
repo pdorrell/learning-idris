@@ -8,15 +8,18 @@ interface HasEquality  t where
   
 record HasEqualityRec t where
   constructor MkHasEquality
-  (=.) : t -> t -> Type
-  refl_eq : (x : t) -> x =. x
+  eq : t -> t -> Type
+  refl_eq : (x : t) -> eq x x
   
 HasEquality Nat where
   x =. y = x = y
   refl_eq x = Refl
   
 NatEq : HasEqualityRec Nat
-NatEq = MkHasEquality (\x,y => x = y) refl_eq
+NatEq = MkHasEquality (\x, y => x = y)  refl_eq
+
+data EqualPair : (t : Type) -> (eq_type: HasEqualityRec t) -> Type where
+  MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair t eq_type
 
 refl_lemma : HasEquality t => (x : t) -> (y : t) -> x = y -> x =.y
 refl_lemma x x Refl = refl_eq x
