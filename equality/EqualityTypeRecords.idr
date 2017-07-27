@@ -1,0 +1,55 @@
+%default total
+
+record HasEqualityRec t where
+  constructor MkHasEquality
+  eq : t -> t -> Type
+  refl_eq : (x : t) -> eq x x
+  
+NatEquality : HasEqualityRec Nat
+NatEquality = MkHasEquality nat_eq nat_refl_eq where
+    nat_eq : Nat -> Nat -> Type
+    nat_eq x y = x = y
+    nat_refl_eq : (x : Nat) -> nat_eq x x
+    nat_refl_eq x = Refl
+
+data EqualPair : (t : Type) -> (eq_type: HasEqualityRec t) -> Type where
+  MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair t eq_type
+  
+Nat'' : Type
+Nat'' = EqualPair Nat NatEquality
+
+nat''3 : Nat''
+nat''3 = MkEqualPair 3 3 Refl
+  
+double_it_rec : Nat'' -> Nat''
+double_it_rec (MkEqualPair x y x_is_y) = MkEqualPair (x + x) (y + y) (cong {f=\x => x + x} x_is_y)
+
+data Integer_ : Type where
+  MkInteger : (x : Nat) -> (y : Nat) -> Integer_
+  
+namespace nat_lemmas
+
+  zero_right_ident : (x : Nat) -> x = x + 0
+  zero_right_ident Z = Refl
+  zero_right_ident (S k) = rewrite zero_right_ident k in Refl
+  
+  s_on_right_addend : (x : Nat) -> (y : Nat) -> S (x + y) = x + S y
+  s_on_right_addend Z y = Refl
+  s_on_right_addend (S k) y = rewrite s_on_right_addend k y in Refl
+
+  plus_commutative : (x : Nat) -> (y : Nat) -> x + y = y + x
+  plus_commutative Z y = zero_right_ident y
+  plus_commutative (S k) y =
+    let s_of_y_plus_k_is_y_plus_sk = s_on_right_addend y k in
+    let s_of_k_plus_y_is_s_of_y_plus_k = cong {f=S} $ plus_commutative k y in
+    trans s_of_k_plus_y_is_s_of_y_plus_k s_of_y_plus_k_is_y_plus_sk
+
+IntegerEquality : HasEqualityRec Integer_
+IntegerEquality = MkHasEquality int_eq int_refl_eq where
+    int_eq : Integer_ -> Integer_ -> Type
+    int_eq (MkInteger x1 x2) (MkInteger y1 y2) = x1 + y2 = x2 + y1
+    int_refl_eq : (x : Integer_) -> int_eq x x
+    int_refl_eq (MkInteger x1 x2) = nat_lemmas.plus_commutative x1 x2
+    
+Integer'' : Type
+Integer'' = EqualPair Integer_ IntegerEquality
