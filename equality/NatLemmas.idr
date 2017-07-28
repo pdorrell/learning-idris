@@ -14,6 +14,10 @@ namespace nat_lemmas
   plus_commutative : (x : Nat) -> (y : Nat) -> x + y = y + x
   plus_commutative Z y = zero_right_ident y
   plus_commutative (S k) y =
-    let s_of_y_plus_k_is_y_plus_sk = s_on_right_addend y k in
-    let s_of_k_plus_y_is_s_of_y_plus_k = cong {f=S} $ plus_commutative k y in
-    trans s_of_k_plus_y_is_s_of_y_plus_k s_of_y_plus_k_is_y_plus_sk
+    let e1 = the (S (y + k) = y + S k) $  s_on_right_addend y k
+        e2 = the (S (k + y) = S (y + k)) $ cong {f=S} $ plus_commutative k y
+    in the (S (k + y) = y + S k) $ trans e2 e1
+
+  plus_assoc : (x : Nat) -> (y : Nat) -> (z : Nat) -> (x + y) + z = x + (y + z)
+  plus_assoc Z y z = Refl
+  plus_assoc (S k) y z = ?plus_assoc_rhs_2
