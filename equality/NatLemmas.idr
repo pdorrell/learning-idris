@@ -20,4 +20,4 @@ namespace nat_lemmas
 
   plus_assoc : (x : Nat) -> (y : Nat) -> (z : Nat) -> (x + y) + z = x + (y + z)
   plus_assoc Z y z = Refl
-  plus_assoc (S k) y z = ?plus_assoc_rhs_2
+  plus_assoc (S k) y z = cong {f=S} $ plus_assoc k y z
