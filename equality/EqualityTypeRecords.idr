@@ -18,7 +18,7 @@ NatEquality = MkHasEquality nat_eq nat_refl_eq nat_symm_eq nat_trans_eq where
     nat_symm_eq : (x : Nat) -> (y : Nat) -> nat_eq x y -> nat_eq y x
     nat_symm_eq x y x_eq_y = sym $ the (x = y) x_eq_y
     nat_trans_eq : (x : Nat) -> (y : Nat) -> (z : Nat) -> nat_eq x y -> nat_eq y z -> nat_eq x z
-    nat_trans_eq = ?hole1
+    nat_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
 
 data EqualPair : (t : Type) -> (eq_type: HasEquality t) -> Type where
   MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair t eq_type
