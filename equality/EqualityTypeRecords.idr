@@ -39,7 +39,11 @@ IntegerEquality = MkHasEquality int_eq int_refl_eq int_symm_eq where
     int_refl_eq : (x : Integer_) -> int_eq x x
     int_refl_eq (MkInteger x1 x2) = nat_lemmas.plus_commutative x1 x2
     int_symm_eq : (x : Integer_) -> (y : Integer_) -> int_eq x y -> int_eq y x
-    int_symm_eq (MkInteger x1 x2) (MkInteger y1 y2) x_is_y = ?int_symm_eq_rhs_2
+    int_symm_eq (MkInteger x1 x2) (MkInteger y1 y2) x_is_y = 
+      let e1 = the (y2 + x1 = x1 + y2) $ nat_lemmas.plus_commutative y2 x1 in
+      let e2 = the (x2 + y1 = y1 + x2) $ nat_lemmas.plus_commutative x2 y1 in
+      let e3 = the (x1 + y2 = x2 + y1) $ x_is_y in
+      sym $ trans e1 $ trans e3 e2
     
 Integer'' : Type
 Integer'' = EqualPair Integer_ IntegerEquality
