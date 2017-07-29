@@ -11,13 +11,28 @@ namespace nat_lemmas
   s_on_right_addend Z y = Refl
   s_on_right_addend (S k) y = rewrite s_on_right_addend k y in Refl
 
-  plus_commutative : (x : Nat) -> (y : Nat) -> x + y = y + x
-  plus_commutative Z y = zero_right_ident y
-  plus_commutative (S k) y =
+  plus_comm : (x : Nat) -> (y : Nat) -> x + y = y + x
+  plus_comm Z y = zero_right_ident y
+  plus_comm (S k) y =
     let e1 = the (S (y + k) = y + S k) $  s_on_right_addend y k
-        e2 = the (S (k + y) = S (y + k)) $ cong {f=S} $ plus_commutative k y
+        e2 = the (S (k + y) = S (y + k)) $ cong {f=S} $ plus_comm k y
     in the (S (k + y) = y + S k) $ trans e2 e1
 
   plus_assoc : (x : Nat) -> (y : Nat) -> (z : Nat) -> (x + y) + z = x + (y + z)
   plus_assoc Z y z = Refl
   plus_assoc (S k) y z = cong {f=S} $ plus_assoc k y z
+  
+  cancel_s : (x : Nat) -> (y : Nat) -> S x = S y -> x = y
+  cancel_s x _ Refl = Refl
+  
+  plus_left_cancel : (x : Nat) -> (y : Nat) -> (z : Nat) -> z + x = z + y -> x = y
+  plus_left_cancel x y Z z_plus_x_is_z_plus_y = z_plus_x_is_z_plus_y
+  plus_left_cancel x y (S k) z_plus_x_is_z_plus_y = 
+    let e1 = the (S (k + x) = S (k + y)) z_plus_x_is_z_plus_y
+        e2 = the (k + x = k + y) $ cancel_s (k + x) (k + y) e1
+    in plus_left_cancel x y k e2
+  
+  plus_right_cancel : (x : Nat) -> (y : Nat) -> (z : Nat) -> x + z = y + z -> x = y
+  plus_right_cancel x y z x_plus_z_is_y_plus_z = 
+    let e1 = the (z + x = z + y) $ trans (plus_comm z x) (trans x_plus_z_is_y_plus_z (plus_comm y z))
+    in plus_left_cancel x y z e1
