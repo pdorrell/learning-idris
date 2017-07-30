@@ -9,16 +9,19 @@ record HasEquality t where
   symm_eq : (x : t) -> (y : t) -> eq x y -> eq y x
   trans_eq : (x : t) -> (y : t) -> (z : t) -> eq x y -> eq y z -> eq x z
   
+IntensionalEquality : (t : Type) -> HasEquality t
+IntensionalEquality t = MkHasEquality t_eq t_refl_eq t_symm_eq t_trans_eq where
+    t_eq : t -> t -> Type
+    t_eq x y = x = y
+    t_refl_eq : (x : t) -> t_eq x x
+    t_refl_eq x = Refl
+    t_symm_eq : (x : t) -> (y : t) -> t_eq x y -> t_eq y x
+    t_symm_eq x y x_eq_y = sym $ the (x = y) x_eq_y
+    t_trans_eq : (x : t) -> (y : t) -> (z : t) -> t_eq x y -> t_eq y z -> t_eq x z
+    t_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
+    
 NatEquality : HasEquality Nat
-NatEquality = MkHasEquality nat_eq nat_refl_eq nat_symm_eq nat_trans_eq where
-    nat_eq : Nat -> Nat -> Type
-    nat_eq x y = x = y
-    nat_refl_eq : (x : Nat) -> nat_eq x x
-    nat_refl_eq x = Refl
-    nat_symm_eq : (x : Nat) -> (y : Nat) -> nat_eq x y -> nat_eq y x
-    nat_symm_eq x y x_eq_y = sym $ the (x = y) x_eq_y
-    nat_trans_eq : (x : Nat) -> (y : Nat) -> (z : Nat) -> nat_eq x y -> nat_eq y z -> nat_eq x z
-    nat_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
+NatEquality = IntensionalEquality Nat
 
 data EqualPair : (t : Type) -> (eq_type: HasEquality t) -> Type where
   MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair t eq_type
