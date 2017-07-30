@@ -35,8 +35,8 @@ nat'3 = eq_pair 3
 double_nat : Nat -> Nat
 double_nat x = x + x
 
-lift_fun_to_intensional_eq : (f : t -> t) -> 
-                         (EqualPair t (IntensionalEquality t) -> EqualPair t (IntensionalEquality t))
+lift_fun_to_intensional_eq : (f : t1 -> t2) -> 
+                         (EqualPair t1 (IntensionalEquality t1) -> EqualPair t2 (IntensionalEquality t2))
 lift_fun_to_intensional_eq f (MkEqualPair x y eq_x_y) = 
   MkEqualPair (f x) (f y) (cong {f} eq_x_y)
 
