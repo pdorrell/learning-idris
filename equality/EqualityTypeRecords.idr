@@ -20,20 +20,28 @@ IntensionalEquality t = MkHasEquality t_eq t_refl_eq t_symm_eq t_trans_eq where
     t_trans_eq : (x : t) -> (y : t) -> (z : t) -> t_eq x y -> t_eq y z -> t_eq x z
     t_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
     
-NatEquality : HasEquality Nat
-NatEquality = IntensionalEquality Nat
-
 data EqualPair : (t : Type) -> (eq_type: HasEquality t) -> Type where
   MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair t eq_type
   
 Nat' : Type
-Nat' = EqualPair Nat NatEquality
+Nat' = EqualPair Nat (IntensionalEquality Nat)
+
+mk_nat' : (x : Nat) -> Nat'
+mk_nat' x = MkEqualPair x x Refl
 
 nat'3 : Nat'
-nat'3 = MkEqualPair 3 3 Refl
-  
+nat'3 = mk_nat' 3
+
+double_nat : Nat -> Nat
+double_nat x = x + x
+
+lift_fun_to_intensional_eq : (f : t -> t) -> 
+                         (EqualPair t (IntensionalEquality t) -> EqualPair t (IntensionalEquality t))
+lift_fun_to_intensional_eq f (MkEqualPair x y eq_x_y) = 
+  MkEqualPair (f x) (f y) (cong {f} eq_x_y)
+
 double_it : Nat' -> Nat'
-double_it (MkEqualPair x y x_is_y) = MkEqualPair (x + x) (y + y) (cong {f=\x => x + x} x_is_y)
+double_it = lift_fun_to_intensional_eq double_nat
 
 data Integer_ : Type where
   MkInteger : (x : Nat) -> (y : Nat) -> Integer_
