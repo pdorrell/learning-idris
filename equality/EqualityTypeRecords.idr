@@ -26,11 +26,11 @@ data EqualPair : (t : Type) -> (eq_type: HasEquality t) -> Type where
 Nat' : Type
 Nat' = EqualPair Nat (IntensionalEquality Nat)
 
-mk_nat' : (x : Nat) -> Nat'
-mk_nat' x = MkEqualPair x x Refl
+eq_pair : (x : t) -> EqualPair t (IntensionalEquality t)
+eq_pair x = MkEqualPair x x Refl
 
 nat'3 : Nat'
-nat'3 = mk_nat' 3
+nat'3 = eq_pair 3
 
 double_nat : Nat -> Nat
 double_nat x = x + x
@@ -40,8 +40,11 @@ lift_fun_to_intensional_eq : (f : t -> t) ->
 lift_fun_to_intensional_eq f (MkEqualPair x y eq_x_y) = 
   MkEqualPair (f x) (f y) (cong {f} eq_x_y)
 
-double_it : Nat' -> Nat'
-double_it = lift_fun_to_intensional_eq double_nat
+double_nat' : Nat' -> Nat'
+double_nat' = lift_fun_to_intensional_eq double_nat
+
+double_nat'_example : double_nat' (eq_pair 5) = eq_pair 10
+double_nat'_example = Refl
 
 data Integer_ : Type where
   MkInteger : (x : Nat) -> (y : Nat) -> Integer_
