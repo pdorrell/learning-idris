@@ -29,6 +29,9 @@ Nat' = EqualPair Nat (IntensionalEquality Nat)
 eq_pair : (x : t) -> EqualPair t (IntensionalEquality t)
 eq_pair x = MkEqualPair x x Refl
 
+eq_pair2 : (x : t) -> (eq_type : HasEquality t) -> EqualPair t eq_type
+eq_pair2 x eq_type = MkEqualPair x x $ refl_eq eq_type x
+
 nat'3 : Nat'
 nat'3 = eq_pair 3
 
