@@ -35,10 +35,16 @@ nat'3 = eq_pair 3
 double_nat : Nat -> Nat
 double_nat x = x + x
 
-lift_fun_to_intensional_eq : (f : t1 -> t2) -> 
-                         (EqualPair t1 (IntensionalEquality t1) -> EqualPair t2 (IntensionalEquality t2))
-lift_fun_to_intensional_eq f (MkEqualPair x y eq_x_y) = 
-  MkEqualPair (f x) (f y) (cong {f} eq_x_y)
+lift_fun_to_intensional_eq : {eq_type_t2 : HasEquality t2} -> (f : t1 -> t2) -> 
+                         (EqualPair t1 (IntensionalEquality t1) -> EqualPair t2 eq_type_t2)
+lift_fun_to_intensional_eq {eq_type_t2} f (MkEqualPair x y eq_x_y) = 
+  MkEqualPair (f x) (f y) eq_fx_fy where
+     eq_fx_fy : eq eq_type_t2 (f x) (f y)
+     eq_fx_fy = 
+       let x_is_y = the (x = y) eq_x_y
+           fx_is_fy = cong {f=f} x_is_y
+           eq_fy_fy = refl_eq eq_type_t2 (f y)
+         in rewrite fx_is_fy in the (eq eq_type_t2 (f y) (f y)) eq_fy_fy
 
 double_nat' : Nat' -> Nat'
 double_nat' = lift_fun_to_intensional_eq double_nat
