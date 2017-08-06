@@ -29,15 +29,24 @@ data EqualPair : {t : Type} -> (eq_type: Setoid t) -> Type where
 identical_pair : {eq_type: Setoid t} -> (x : t) -> EqualPair eq_type
 identical_pair {eq_type} x = MkEqualPair x x (refl_eq eq_type x)
 
+eq_respects_binary_op: (eq_type : Setoid t) -> (op: t -> t -> t) -> Type
+eq_respects_binary_op {t} eq_type op = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
+                                        (eq eq_type x1 x2) -> (eq eq_type y1 y2) -> (eq eq_type (op x1 y1) (op x2 y2))
+
+eq_respects_unary_op: (eq_type : Setoid t) -> (op: t -> t) -> Type
+eq_respects_unary_op {t} eq_type op = (x1 : t) -> (x2 : t) -> 
+                                        (eq eq_type x1 x2) -> (eq eq_type (op x1) (op x2))
+
+
 -- The following defns of + & * may or may not be useful (depending if - & * respect 'eq'), 
 -- but this implementation of Num enables the use of fromInteger.
 (Num t) => Num (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
-   (MkEqualPair x1 _ _) + (MkEqualPair y1 _ _) = identical_pair (x1 + y1)
+   (MkEqualPair x1 x2 eq_x1_x2) + (MkEqualPair y1 y2 eq_y1_y2) = MkEqualPair (x1 + y1) (x2 + y2) ?hole
    (MkEqualPair x1 _ _) * (MkEqualPair y1 _ _) = identical_pair (x1 + y1)
    fromInteger x = identical_pair (fromInteger x)
   
 -- The following defns of may or may not all be useful (depending if - & abs respect 'eq'), 
--- but this implementation of Neg enables the use of '-' = 'negate' syntact sugar
+-- but this implementation of Neg enables the use of '-' = 'negate' syntactic sugar
 (Neg t) => Neg (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
    (MkEqualPair x1 _ _) - (MkEqualPair y1 _ _) = identical_pair (x1 - y1)
    negate (MkEqualPair x1 _ _) = identical_pair (negate x1)
