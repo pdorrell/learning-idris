@@ -13,10 +13,13 @@ IntensionalSetoid : (t : Type) -> Setoid t
 IntensionalSetoid t = MkSetoid t_eq t_refl_eq t_symm_eq t_trans_eq where
     t_eq : t -> t -> Type
     t_eq x y = x = y
+
     t_refl_eq : (x : t) -> t_eq x x
     t_refl_eq x = Refl
+    
     t_symm_eq : (x : t) -> (y : t) -> t_eq x y -> t_eq y x
     t_symm_eq x y x_eq_y = sym $ the (x = y) x_eq_y
+    
     t_trans_eq : (x : t) -> (y : t) -> (z : t) -> t_eq x y -> t_eq y z -> t_eq x z
     t_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
     
@@ -102,8 +105,10 @@ IntegerSetoid : Setoid Integer_
 IntegerSetoid = MkSetoid int_eq int_refl_eq int_symm_eq int_trans_eq where
     int_eq : Integer_ -> Integer_ -> Type
     int_eq (MkInteger x1 x2) (MkInteger y1 y2) = x1 + y2 = x2 + y1
+
     int_refl_eq : (x : Integer_) -> int_eq x x
     int_refl_eq (MkInteger x1 x2) = nat_lemmas.plus_comm x1 x2
+
     int_symm_eq : (x : Integer_) -> (y : Integer_) -> int_eq x y -> int_eq y x
     int_symm_eq (MkInteger x1 x2) (MkInteger y1 y2) x_eq_y = 
       let e1 = the (y2 + x1 = x1 + y2) $ nat_lemmas.plus_comm y2 x1
