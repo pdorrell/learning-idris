@@ -33,6 +33,13 @@ identical_pair {eq_type} x = MkEqualPair x x (refl_eq eq_type x)
    (MkEqualPair x1 _ _) * (MkEqualPair y1 _ _) = identical_pair (x1 + y1)
    fromInteger x = identical_pair (fromInteger x)
   
+-- The following defns of may or may not all be useful (depending if - & abs respect 'eq'), 
+-- but this implementation of Neg enables the use of '-' = 'negate' syntact sugar
+(Neg t) => Neg (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
+   (MkEqualPair x1 _ _) - (MkEqualPair y1 _ _) = identical_pair (x1 - y1)
+   negate (MkEqualPair x1 _ _) = identical_pair (negate x1)
+   abs (MkEqualPair x1 _ _) = identical_pair (abs x1)
+  
 Nat' : Type
 Nat' = EqualPair (IntensionalSetoid Nat)
 
@@ -128,5 +135,4 @@ Integer'6 : Integer'
 Integer'6 = 3 + 3
 
 Integer'minus3 : Integer'
-Integer'minus3 = ?hole --fromInteger -3
-
+Integer'minus3 = -3
