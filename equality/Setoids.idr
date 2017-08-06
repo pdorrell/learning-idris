@@ -61,7 +61,21 @@ double_nat'_example = Refl
 
 data Integer_ : Type where
   MkInteger : (x : Nat) -> (y : Nat) -> Integer_
+  
+Num Integer_ where
+  (MkInteger x1 x2) + (MkInteger y1 y2) = MkInteger (x1 + y1) (x2 + y2)
+  (MkInteger x1 x2) * (MkInteger y1 y2) = MkInteger (x1 * y1 + x2 * y2) (x1 * y2 + x2 * y1)
+  fromInteger x = if x < 0 
+                     then MkInteger 0 (fromInteger (- x))
+                     else MkInteger (fromInteger x) 0
 
+Neg Integer_ where
+  negate (MkInteger x1 x2) = MkInteger x2 x1
+  (MkInteger x1 x2) - (MkInteger y1 y2) = MkInteger (x1 + y2) (x2 + y1)
+  abs (MkInteger x1 x2) = if x1 > x2
+                            then MkInteger x1 x2
+                            else MkInteger x2 x1
+  
 bcd_lemma : (b : Nat) -> (c : Nat) -> (d : Nat) -> 
                 b + (c + d) = d + (b + c)
 bcd_lemma b c d = 
@@ -106,4 +120,13 @@ IntegerSetoid = MkSetoid int_eq int_refl_eq int_symm_eq int_trans_eq where
     
 Integer' : Type
 Integer' = EqualPair IntegerSetoid
+
+Integer'3 : Integer'
+Integer'3 = 3
+
+Integer'6 : Integer'
+Integer'6 = 3 + 3
+
+Integer'minus3 : Integer'
+Integer'minus3 = ?hole --fromInteger -3
 
