@@ -2,15 +2,15 @@ import NatLemmas
 
 %default total
 
-record HasEquality t where
-  constructor MkHasEquality
+record Setoid t where
+  constructor MkSetoid
   eq : t -> t -> Type
   refl_eq : (x : t) -> eq x x
   symm_eq : (x : t) -> (y : t) -> eq x y -> eq y x
   trans_eq : (x : t) -> (y : t) -> (z : t) -> eq x y -> eq y z -> eq x z
   
-IntensionalEquality : (t : Type) -> HasEquality t
-IntensionalEquality t = MkHasEquality t_eq t_refl_eq t_symm_eq t_trans_eq where
+IntensionalSetoid : (t : Type) -> Setoid t
+IntensionalSetoid t = MkSetoid t_eq t_refl_eq t_symm_eq t_trans_eq where
     t_eq : t -> t -> Type
     t_eq x y = x = y
     t_refl_eq : (x : t) -> t_eq x x
@@ -20,14 +20,14 @@ IntensionalEquality t = MkHasEquality t_eq t_refl_eq t_symm_eq t_trans_eq where
     t_trans_eq : (x : t) -> (y : t) -> (z : t) -> t_eq x y -> t_eq y z -> t_eq x z
     t_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
     
-data EqualPair : (t : Type) -> (eq_type: HasEquality t) -> Type where
-  MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair t eq_type
+data EqualPair : {t : Type} -> (eq_type: Setoid t) -> Type where
+  MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair eq_type
   
 Nat' : Type
-Nat' = EqualPair Nat (IntensionalEquality Nat)
+Nat' = EqualPair (IntensionalSetoid Nat)
 
-eq_pair : {eq_type : HasEquality t} -> (x : t) -> EqualPair t eq_type
-eq_pair {eq_type} x = MkEqualPair x x $ refl_eq eq_type x
+eq_pair : {t : Type} -> {eq_type : Setoid t} -> (x : t) -> EqualPair eq_type
+eq_pair {t} {eq_type} x = MkEqualPair x x $ refl_eq eq_type x
 
 nat'3 : Nat'
 nat'3 = eq_pair 3
@@ -35,8 +35,8 @@ nat'3 = eq_pair 3
 double_nat : Nat -> Nat
 double_nat x = x + x
 
-lift_fun_to_intensional_eq : {eq_type_t2 : HasEquality t2} -> (f : t1 -> t2) -> 
-                         (EqualPair t1 (IntensionalEquality t1) -> EqualPair t2 eq_type_t2)
+lift_fun_to_intensional_eq : {eq_type_t2 : Setoid t2} -> (f : t1 -> t2) -> 
+                         (EqualPair (IntensionalSetoid t1) -> EqualPair eq_type_t2)
 lift_fun_to_intensional_eq {eq_type_t2} f (MkEqualPair x y eq_x_y) = 
   MkEqualPair (f x) (f y) eq_fx_fy where
      eq_fx_fy : eq eq_type_t2 (f x) (f y)
@@ -70,8 +70,8 @@ abcd_lemma a b c d =
       e3 = the (a + (b + (c + d)) = a + (d + (b + c))) $ cong $ bcd_lemma b c d
     in the ((a + b) + (c + d) = (a + d) + (b + c)) $ trans e1 (trans e3 (sym e2))
 
-IntegerEquality : HasEquality Integer_
-IntegerEquality = MkHasEquality int_eq int_refl_eq int_symm_eq int_trans_eq where
+IntegerSetoid : Setoid Integer_
+IntegerSetoid = MkSetoid int_eq int_refl_eq int_symm_eq int_trans_eq where
     int_eq : Integer_ -> Integer_ -> Type
     int_eq (MkInteger x1 x2) (MkInteger y1 y2) = x1 + y2 = x2 + y1
     int_refl_eq : (x : Integer_) -> int_eq x x
@@ -98,5 +98,5 @@ IntegerEquality = MkHasEquality int_eq int_refl_eq int_symm_eq int_trans_eq wher
       in the ((x1 + z2) = (x2 + z1)) $ nat_lemmas.plus_right_cancel (x1 + z2) (x2 + z1) (y2 + y1) $ e9
     
 Integer' : Type
-Integer' = EqualPair Integer_ IntegerEquality
+Integer' = EqualPair IntegerSetoid
 
