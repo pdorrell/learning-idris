@@ -23,14 +23,21 @@ IntensionalSetoid t = MkSetoid t_eq t_refl_eq t_symm_eq t_trans_eq where
 data EqualPair : {t : Type} -> (eq_type: Setoid t) -> Type where
   MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair eq_type
   
+identical_pair : {eq_type: Setoid t} -> (x : t) -> EqualPair eq_type
+identical_pair {eq_type} x = MkEqualPair x x (refl_eq eq_type x)
+
+-- The following defns of + & * may or may not be useful (depending if - & * respect 'eq'), 
+-- but this implementation of Num enables the use of fromInteger.
+(Num t) => Num (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
+   (MkEqualPair x1 _ _) + (MkEqualPair y1 _ _) = identical_pair (x1 + y1)
+   (MkEqualPair x1 _ _) * (MkEqualPair y1 _ _) = identical_pair (x1 + y1)
+   fromInteger x = identical_pair (fromInteger x)
+  
 Nat' : Type
 Nat' = EqualPair (IntensionalSetoid Nat)
 
-eq_pair : {t : Type} -> {eq_type : Setoid t} -> (x : t) -> EqualPair eq_type
-eq_pair {t} {eq_type} x = MkEqualPair x x $ refl_eq eq_type x
-
 nat'3 : Nat'
-nat'3 = eq_pair 3
+nat'3 = 3
 
 double_nat : Nat -> Nat
 double_nat x = x + x
@@ -49,7 +56,7 @@ lift_fun_to_intensional_eq {eq_type_t2} f (MkEqualPair x y eq_x_y) =
 double_nat' : Nat' -> Nat'
 double_nat' = lift_fun_to_intensional_eq double_nat
 
-double_nat'_example : double_nat' (eq_pair 5) = eq_pair 10
+double_nat'_example : double_nat' 5 = 10
 double_nat'_example = Refl
 
 data Integer_ : Type where
