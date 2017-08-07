@@ -40,23 +40,38 @@ eq_respects_unary_op {t} eq_type op = (x1 : t) -> (x2 : t) ->
 
 -- The following defns of + & * may or may not be useful (depending if - & * respect 'eq'), 
 -- but this implementation of Num enables the use of fromInteger.
-(Num t) => Num (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
+{-(Num t) => Num (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
    (MkEqualPair x1 x2 eq_x1_x2) + (MkEqualPair y1 y2 eq_y1_y2) = MkEqualPair (x1 + y1) (x2 + y2) ?hole
    (MkEqualPair x1 _ _) * (MkEqualPair y1 _ _) = identical_pair (x1 + y1)
-   fromInteger x = identical_pair (fromInteger x)
+   fromInteger x = identical_pair (fromInteger x)-}
   
 -- The following defns of may or may not all be useful (depending if - & abs respect 'eq'), 
 -- but this implementation of Neg enables the use of '-' = 'negate' syntactic sugar
-(Neg t) => Neg (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
+{-(Neg t) => Neg (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
    (MkEqualPair x1 _ _) - (MkEqualPair y1 _ _) = identical_pair (x1 - y1)
    negate (MkEqualPair x1 _ _) = identical_pair (negate x1)
-   abs (MkEqualPair x1 _ _) = identical_pair (abs x1)
+   abs (MkEqualPair x1 _ _) = identical_pair (abs x1)-}
+   
+NatSetoid : Setoid Nat
+NatSetoid = IntensionalSetoid Nat
   
-Nat' : Type
-Nat' = EqualPair (IntensionalSetoid Nat)
-
+data Nat' : Type where
+  MkNat' : EqualPair NatSetoid -> Nat'
+  
+interface WrappedEqualPair t where
+  carrier_type : Type
+  setoid : Setoid carrier_type
+  wrap : EqualPair setoid -> t
+  unwrap : t -> EqualPair setoid
+  
+WrappedEqualPair Nat' where
+  carrier_type = Nat
+  setoid = NatSetoid
+  wrap pair = MkNat' pair
+  unwrap (MkNat' pair) = pair
+  
 nat'3 : Nat'
-nat'3 = 3
+nat'3 = ?hole3
 
 double_nat : Nat -> Nat
 double_nat x = x + x
@@ -72,11 +87,11 @@ lift_fun_to_intensional_eq {eq_type_t2} f (MkEqualPair x y eq_x_y) =
            eq_fy_fy = refl_eq eq_type_t2 (f y)
          in rewrite fx_is_fy in the (eq eq_type_t2 (f y) (f y)) eq_fy_fy
 
-double_nat' : Nat' -> Nat'
+{-double_nat' : Nat' -> Nat'
 double_nat' = lift_fun_to_intensional_eq double_nat
 
 double_nat'_example : double_nat' 5 = 10
-double_nat'_example = Refl
+double_nat'_example = Refl-}
 
 data Integer_ : Type where
   MkInteger : (x : Nat) -> (y : Nat) -> Integer_
@@ -139,14 +154,10 @@ IntegerSetoid = MkSetoid int_eq int_refl_eq int_symm_eq int_trans_eq where
           e9 = the ((x1 + z2) + (y2 + y1) = (x2 + z1) + (y2 + y1)) $ trans e7 e8
       in the ((x1 + z2) = (x2 + z1)) $ nat_lemmas.plus_right_cancel (x1 + z2) (x2 + z1) (y2 + y1) $ e9
     
-Integer' : Type
-Integer' = EqualPair IntegerSetoid
+data Integer' : Type where
+  MkInteger' : EqualPair IntegerSetoid -> Integer'
 
 Integer'3 : Integer'
-Integer'3 = 3
+Integer'3 = ?hole
 
-Integer'6 : Integer'
-Integer'6 = 3 + 3
 
-Integer'minus3 : Integer'
-Integer'minus3 = -3
