@@ -76,20 +76,16 @@ EqualIntensionalPair t = EqualPair (IntensionalSetoid t)
 BinaryOp : (t : Type) -> Type
 BinaryOp t = t -> t -> t
 
-lift_binary_to_intensional_setoid : (op : BinaryOp t) -> BinaryOp (EqualPair (IntensionalSetoid t))
-lift_binary_to_intensional_setoid {t} op (MkEqualPair x1 x2 x1_is_x2) (MkEqualPair y1 y2 y1_is_y2)  =
+lift_binary_op_to_intensional_setoid : (op : BinaryOp t) -> BinaryOp (EqualPair (IntensionalSetoid t))
+lift_binary_op_to_intensional_setoid {t} op (MkEqualPair x1 x2 x1_is_x2) (MkEqualPair y1 y2 y1_is_y2)  =
     let e1 = the (x1 = x2) x1_is_x2
         e2 = the (y1 = y2) y1_is_y2
         e3 = the (op x1 y1 = op x1 y1) Refl
     in MkEqualPair (op x1 y1) (op x2 y2) (the (op x1 y1 = op x2 y2) (rewrite e1 in rewrite e2 in Refl))
 
 Num Nat' where
-  (MkNat' (MkEqualPair x1 x2 eq_x1_x2)) + (MkNat' (MkEqualPair y1 y2 eq_y1_y2)) = 
-    let e1 = the (x1 = x2) eq_x1_x2
-        e2 = the (y1 = y2) eq_y1_y2
-        e3 = the (x1 + y1 = x1 + y1) Refl
-    in MkNat' (MkEqualPair (x1 + y1) (x2 + y2) (the (x1 + y1 = x2 + y2) (rewrite e1 in rewrite e2 in Refl)))
-  x * y = ?h2
+  (MkNat' x) + (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_setoid (+)) x y)
+  (MkNat' x) * (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_setoid (*)) x y)
   fromInteger x = ?h3
   
 nat'3 : Nat'
