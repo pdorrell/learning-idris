@@ -82,14 +82,14 @@ lift_binary_op_to_intensional_setoid {t} op (MkEqualPair x1 x2 x1_is_x2) (MkEqua
         e2 = the (y1 = y2) y1_is_y2
         e3 = the (op x1 y1 = op x1 y1) Refl
     in MkEqualPair (op x1 y1) (op x2 y2) (the (op x1 y1 = op x2 y2) (rewrite e1 in rewrite e2 in Refl))
-
+    
 Num Nat' where
   (MkNat' x) + (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_setoid (+)) x y)
   (MkNat' x) * (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_setoid (*)) x y)
-  fromInteger x = ?h3
+  fromInteger x = MkNat' (identical_pair (fromInteger x))
   
 nat'3 : Nat'
-nat'3 = ?hole3
+nat'3 = 3
 
 double_nat : Nat -> Nat
 double_nat x = x + x
