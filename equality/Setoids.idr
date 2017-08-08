@@ -69,6 +69,16 @@ WrappedEqualPair Nat' where
   setoid = NatSetoid
   wrap pair = MkNat' pair
   unwrap (MkNat' pair) = pair
+
+  
+Num Nat' where
+  (MkNat' (MkEqualPair x1 x2 eq_x1_x2)) + (MkNat' (MkEqualPair y1 y2 eq_y1_y2)) = 
+    let e1 = the (x1 = x2) eq_x1_x2
+        e2 = the (y1 = y2) eq_y1_y2
+        e3 = the (x1 + y1 = x1 + y1) Refl
+    in MkNat' (MkEqualPair (x1 + y1) (x2 + y2) (the (x1 + y1 = x2 + y2) (rewrite e1 in rewrite e2 in Refl)))
+  x * y = ?h2
+  fromInteger x = ?h3
   
 nat'3 : Nat'
 nat'3 = ?hole3
