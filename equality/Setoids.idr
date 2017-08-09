@@ -22,6 +22,7 @@ IntensionalSetoid t = MkSetoid t_eq t_refl_eq t_symm_eq t_trans_eq where
     
     t_trans_eq : (x : t) -> (y : t) -> (z : t) -> t_eq x y -> t_eq y z -> t_eq x z
     t_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
+
     
 data EqualPair : {t : Type} -> (eq_type: Setoid t) -> Type where
   MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair eq_type
@@ -69,7 +70,10 @@ lift_binary_op_to_intensional_equal_pair {t} op (MkEqualPair x1 x2 x1_is_x2) (Mk
     in MkEqualPair (op x1 y1) (op x2 y2) (the (op x1 y1 = op x2 y2) (rewrite e1 in rewrite e2 in Refl))
     
 Num Nat' where
-  (MkNat' x) + (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_equal_pair (+)) x y)
+  x + y = 
+    let unwrapped_x = unwrap x
+        unwrapped_y = unwrap y
+    in wrap ((lift_binary_op_to_intensional_equal_pair (+)) unwrapped_x unwrapped_y)
   (MkNat' x) * (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_equal_pair (*)) x y)
   fromInteger x = MkNat' (identical_pair (fromInteger x))
   
