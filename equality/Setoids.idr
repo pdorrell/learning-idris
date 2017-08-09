@@ -2,15 +2,16 @@ import NatLemmas
 
 %default total
 
-record Setoid t where
+record Setoid where
   constructor MkSetoid
-  eq : t -> t -> Type
-  refl_eq : (x : t) -> eq x x
-  symm_eq : (x : t) -> (y : t) -> eq x y -> eq y x
-  trans_eq : (x : t) -> (y : t) -> (z : t) -> eq x y -> eq y z -> eq x z
+  carrier : Type
+  eq : carrier -> carrier -> Type
+  refl_eq : (x : carrier) -> eq x x
+  symm_eq : (x : carrier) -> (y : carrier) -> eq x y -> eq y x
+  trans_eq : (x : carrier) -> (y : carrier) -> (z : carrier) -> eq x y -> eq y z -> eq x z
   
-IntensionalSetoid : (t : Type) -> Setoid t
-IntensionalSetoid t = MkSetoid t_eq t_refl_eq t_symm_eq t_trans_eq where
+IntensionalSetoid : (t : Type) -> Setoid
+IntensionalSetoid t = MkSetoid t t_eq t_refl_eq t_symm_eq t_trans_eq where
     t_eq : t -> t -> Type
     t_eq x y = x = y
 
@@ -24,34 +25,35 @@ IntensionalSetoid t = MkSetoid t_eq t_refl_eq t_symm_eq t_trans_eq where
     t_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
 
     
-data EqualPair : {t : Type} -> (eq_type: Setoid t) -> Type where
-  MkEqualPair : (x : t) -> (y : t) -> eq eq_type x y -> EqualPair eq_type
+data EqualPair : (eq_type: Setoid) -> Type where
+  MkEqualPair : (x : carrier eq_type) -> (y : carrier eq_type) -> eq eq_type x y -> EqualPair eq_type
   
-identical_pair : {eq_type: Setoid t} -> (x : t) -> EqualPair eq_type
+identical_pair : {eq_type: Setoid} -> (x : carrier eq_type) -> EqualPair eq_type
 identical_pair {eq_type} x = MkEqualPair x x (refl_eq eq_type x)
 
-eq_respects_binary_op: (eq_type : Setoid t) -> (op: t -> t -> t) -> Type
-eq_respects_binary_op {t} eq_type op = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
-                                        (eq eq_type x1 x2) -> (eq eq_type y1 y2) -> (eq eq_type (op x1 y1) (op x2 y2))
+eq_respects_binary_op: (eq_type : Setoid) -> (op: (carrier eq_type) -> (carrier eq_type) -> (carrier eq_type)) -> Type
+eq_respects_binary_op eq_type op = 
+  let t = carrier eq_type
+  in (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
+        (eq eq_type x1 x2) -> (eq eq_type y1 y2) -> (eq eq_type (op x1 y1) (op x2 y2))
 
-eq_respects_unary_op: (eq_type : Setoid t) -> (op: t -> t) -> Type
-eq_respects_unary_op {t} eq_type op = (x1 : t) -> (x2 : t) -> 
-                                        (eq eq_type x1 x2) -> (eq eq_type (op x1) (op x2))
+eq_respects_unary_op: (eq_type : Setoid) -> (op: carrier eq_type -> carrier eq_type) -> Type
+eq_respects_unary_op eq_type op =
+  let t = carrier eq_type
+  in (x1 : t) -> (x2 : t) -> (eq eq_type x1 x2) -> (eq eq_type (op x1) (op x2))
 
-NatSetoid : Setoid Nat
+NatSetoid : Setoid
 NatSetoid = IntensionalSetoid Nat
   
 data Nat' : Type where
   MkNat' : EqualPair NatSetoid -> Nat'
   
-interface WrappedEqualPair t where
-  carrier_type : Type
-  setoid : Setoid carrier_type
+interface WrappedEqualPair (t : Type) where
+  setoid : Setoid
   wrap : EqualPair setoid -> t
   unwrap : t -> EqualPair setoid
   
 WrappedEqualPair Nat' where
-  carrier_type = Nat
   setoid = NatSetoid
   wrap pair = MkNat' pair
   unwrap (MkNat' pair) = pair
@@ -69,21 +71,26 @@ lift_binary_op_to_intensional_equal_pair {t} op (MkEqualPair x1 x2 x1_is_x2) (Mk
         e3 = the (op x1 y1 = op x1 y1) Refl
     in MkEqualPair (op x1 y1) (op x2 y2) (the (op x1 y1 = op x2 y2) (rewrite e1 in rewrite e2 in Refl))
     
+--fun : (WrappedEqualPair wept) => BinaryOp (EqualPair Main.setoid) -> BinaryOp wept
+    
 Num Nat' where
   x + y = 
     let unwrapped_x = unwrap x
         unwrapped_y = unwrap y
     in wrap ((lift_binary_op_to_intensional_equal_pair (+)) unwrapped_x unwrapped_y)
+--  (MkNat' x) + (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_equal_pair (+)) x y)
   (MkNat' x) * (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_equal_pair (*)) x y)
   fromInteger x = MkNat' (identical_pair (fromInteger x))
   
 nat'3 : Nat'
 nat'3 = 3
 
+
+
 double_nat : Nat -> Nat
 double_nat x = x + x
 
-lift_fun_to_intensional_eq : {eq_type_t2 : Setoid t2} -> (f : t1 -> t2) -> 
+lift_fun_to_intensional_eq : {eq_type_t2 : Setoid} -> (f : t1 -> carrier eq_type_t2) -> 
                          (EqualPair (IntensionalSetoid t1) -> EqualPair eq_type_t2)
 lift_fun_to_intensional_eq {eq_type_t2} f (MkEqualPair x y eq_x_y) = 
   MkEqualPair (f x) (f y) eq_fx_fy where
@@ -126,8 +133,8 @@ abcd_lemma a b c d =
       e3 = the (a + (b + (c + d)) = a + (d + (b + c))) $ cong $ bcd_lemma b c d
     in the ((a + b) + (c + d) = (a + d) + (b + c)) $ trans e1 (trans e3 (sym e2))
 
-IntegerSetoid : Setoid Integer_
-IntegerSetoid = MkSetoid int_eq int_refl_eq int_symm_eq int_trans_eq where
+IntegerSetoid : Setoid
+IntegerSetoid = MkSetoid Integer_ int_eq int_refl_eq int_symm_eq int_trans_eq where
     int_eq : Integer_ -> Integer_ -> Type
     int_eq (MkInteger x1 x2) (MkInteger y1 y2) = x1 + y2 = x2 + y1
 
