@@ -37,21 +37,6 @@ eq_respects_unary_op: (eq_type : Setoid t) -> (op: t -> t) -> Type
 eq_respects_unary_op {t} eq_type op = (x1 : t) -> (x2 : t) -> 
                                         (eq eq_type x1 x2) -> (eq eq_type (op x1) (op x2))
 
-
--- The following defns of + & * may or may not be useful (depending if - & * respect 'eq'), 
--- but this implementation of Num enables the use of fromInteger.
-{-(Num t) => Num (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
-   (MkEqualPair x1 x2 eq_x1_x2) + (MkEqualPair y1 y2 eq_y1_y2) = MkEqualPair (x1 + y1) (x2 + y2) ?hole
-   (MkEqualPair x1 _ _) * (MkEqualPair y1 _ _) = identical_pair (x1 + y1)
-   fromInteger x = identical_pair (fromInteger x)-}
-  
--- The following defns of may or may not all be useful (depending if - & abs respect 'eq'), 
--- but this implementation of Neg enables the use of '-' = 'negate' syntactic sugar
-{-(Neg t) => Neg (EqualPair (MkSetoid {t} eq_t refl_eq_t symm_eq_t trans_eq_t))  where 
-   (MkEqualPair x1 _ _) - (MkEqualPair y1 _ _) = identical_pair (x1 - y1)
-   negate (MkEqualPair x1 _ _) = identical_pair (negate x1)
-   abs (MkEqualPair x1 _ _) = identical_pair (abs x1)-}
-   
 NatSetoid : Setoid Nat
 NatSetoid = IntensionalSetoid Nat
   
@@ -76,16 +61,16 @@ EqualIntensionalPair t = EqualPair (IntensionalSetoid t)
 BinaryOp : (t : Type) -> Type
 BinaryOp t = t -> t -> t
 
-lift_binary_op_to_intensional_setoid : (op : BinaryOp t) -> BinaryOp (EqualPair (IntensionalSetoid t))
-lift_binary_op_to_intensional_setoid {t} op (MkEqualPair x1 x2 x1_is_x2) (MkEqualPair y1 y2 y1_is_y2)  =
+lift_binary_op_to_intensional_equal_pair : (op : BinaryOp t) -> BinaryOp (EqualPair (IntensionalSetoid t))
+lift_binary_op_to_intensional_equal_pair {t} op (MkEqualPair x1 x2 x1_is_x2) (MkEqualPair y1 y2 y1_is_y2)  =
     let e1 = the (x1 = x2) x1_is_x2
         e2 = the (y1 = y2) y1_is_y2
         e3 = the (op x1 y1 = op x1 y1) Refl
     in MkEqualPair (op x1 y1) (op x2 y2) (the (op x1 y1 = op x2 y2) (rewrite e1 in rewrite e2 in Refl))
     
 Num Nat' where
-  (MkNat' x) + (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_setoid (+)) x y)
-  (MkNat' x) * (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_setoid (*)) x y)
+  (MkNat' x) + (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_equal_pair (+)) x y)
+  (MkNat' x) * (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_equal_pair (*)) x y)
   fromInteger x = MkNat' (identical_pair (fromInteger x))
   
 nat'3 : Nat'
@@ -104,12 +89,6 @@ lift_fun_to_intensional_eq {eq_type_t2} f (MkEqualPair x y eq_x_y) =
            fx_is_fy = cong {f=f} x_is_y
            eq_fy_fy = refl_eq eq_type_t2 (f y)
          in rewrite fx_is_fy in the (eq eq_type_t2 (f y) (f y)) eq_fy_fy
-
-{-double_nat' : Nat' -> Nat'
-double_nat' = lift_fun_to_intensional_eq double_nat
-
-double_nat'_example : double_nat' 5 = 10
-double_nat'_example = Refl-}
 
 data Integer_ : Type where
   MkInteger : (x : Nat) -> (y : Nat) -> Integer_
