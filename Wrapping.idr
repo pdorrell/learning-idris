@@ -19,3 +19,12 @@ Num WrappedNatPair where
 WrappedNatPair_example : WrappedNatPair
 WrappedNatPair_example = 4
 
+interface Wrapper t where
+  wrapped_type : Type
+  wrap : wrapped_type -> t
+  unwrap : t -> wrapped_type
+
+Wrapper WrappedNatPair where
+  wrapped_type = NatPair
+  wrap x = MkWrappedNatPair x
+  unwrap (MkWrappedNatPair x) = x
