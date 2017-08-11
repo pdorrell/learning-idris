@@ -167,5 +167,3 @@ data Integer' : Type where
 
 Integer'3 : Integer'
 Integer'3 = ?hole
-
-
