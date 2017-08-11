@@ -12,36 +12,40 @@ data WrappedNatPair : Type where
 equal_pair : t -> (t, t)
 equal_pair x = (x, x)
 
-Num WrappedNatPair where
-  (MkWrappedNatPair (x1, x2)) + (MkWrappedNatPair (y1, y2)) = MkWrappedNatPair (x1 + y1, x2 + y2)
-  (MkWrappedNatPair (x1, x2)) * (MkWrappedNatPair (y1, y2)) = MkWrappedNatPair (x1 * y1, x2 * y2)
-  fromInteger x = MkWrappedNatPair $ equal_pair (fromInteger x)
-
-WrappedNatPair_example : WrappedNatPair
-WrappedNatPair_example = 4
-
 BinaryOp : Type -> Type
 BinaryOp t = t -> t -> t
 
 lift_binary_op_to_pair : BinaryOp t -> BinaryOp (PairedType t)
 lift_binary_op_to_pair op (x1, x2) (y1, y2) = (op x1 y1, op x2 y2)
   
-[version2] Num WrappedNatPair where
-  (MkWrappedNatPair x) + (MkWrappedNatPair y) = MkWrappedNatPair $ ((lift_binary_op_to_pair (+)) x y)
-  (MkWrappedNatPair x) * (MkWrappedNatPair y) = MkWrappedNatPair $ ((lift_binary_op_to_pair (*)) x y)
-  fromInteger x = MkWrappedNatPair $ equal_pair (fromInteger x)
-
 interface Wrapper t where
-  wrapped_type : Type
-  wrap : wrapped_type -> t
-  unwrap : t -> wrapped_type
+  WrappedType : Type
+  wrap : WrappedType -> t
+  unwrap : t -> WrappedType
 
 Wrapper WrappedNatPair where
-  wrapped_type = NatPair
+  WrappedType = NatPair
   wrap x = MkWrappedNatPair x
   unwrap (MkWrappedNatPair x) = x
+  
+  
+lift_natpair_bin_op_to_wrapped : BinaryOp NatPair -> BinaryOp WrappedNatPair
+lift_natpair_bin_op_to_wrapped op x y = 
+    let unwrapped_x = unwrap x
+        unwrapped_y = unwrap y
+        in wrap $ op unwrapped_x unwrapped_y
+        
+{-lift_bin_op_to_wrapped : (Wrapper t) => BinaryOp Main.wrapped_type -> BinaryOp t
+lift_bin_op_to_wrapped op x y = 
+    let unwrapped_x = unwrap x
+        unwrapped_y = unwrap y
+        in wrap $ op unwrapped_x unwrapped_y
+-}
 
-[version3] Num WrappedNatPair where
-  x + y = ?h1
-  x * y = ?h2
+Num WrappedNatPair where
+  (+) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_pair (+))
+  (*) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_pair (*))
   fromInteger x = wrap $ equal_pair (the Nat (fromInteger x))
+
+WrappedNatPair_example : WrappedNatPair
+WrappedNatPair_example = 4
