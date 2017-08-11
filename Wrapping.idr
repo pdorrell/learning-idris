@@ -34,18 +34,15 @@ lift_natpair_bin_op_to_wrapped op x y =
     let unwrapped_x = unwrap x
         unwrapped_y = unwrap y
         in wrap $ op unwrapped_x unwrapped_y
-        
-{-lift_bin_op_to_wrapped : (Wrapper t) => BinaryOp Main.wrapped_type -> BinaryOp t
-lift_bin_op_to_wrapped op x y = 
-    let unwrapped_x = unwrap x
-        unwrapped_y = unwrap y
-        in wrap $ op unwrapped_x unwrapped_y
--}
 
+-- The following won't compile:        
+-- lift_bin_op_to_wrapped : Wrapper t => BinaryOp WrappedType -> BinaryOp t
+        
+        
 Num WrappedNatPair where
   (+) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_pair (+))
   (*) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_pair (*))
   fromInteger x = wrap $ equal_pair (the Nat (fromInteger x))
 
-WrappedNatPair_example : WrappedNatPair
-WrappedNatPair_example = 4
+WrappedNatPair_example : the WrappedNatPair 8 = (the WrappedNatPair 2) + (the WrappedNatPair 6)
+WrappedNatPair_example = Refl
