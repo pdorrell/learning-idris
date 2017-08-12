@@ -71,21 +71,16 @@ lift_binary_op_to_intensional_equal_pair {t} op (MkEqualPair x1 x2 x1_is_x2) (Mk
         e3 = the (op x1 y1 = op x1 y1) Refl
     in MkEqualPair (op x1 y1) (op x2 y2) (the (op x1 y1 = op x2 y2) (rewrite e1 in rewrite e2 in Refl))
     
---fun : (WrappedEqualPair wept) => BinaryOp (EqualPair Main.setoid) -> BinaryOp wept
+lift_natpair_bin_op_to_wrapped : BinaryOp (EqualPair NatSetoid) -> BinaryOp Nat'
+lift_natpair_bin_op_to_wrapped op x y = wrap $ op (unwrap x) (unwrap y)
     
 Num Nat' where
-  x + y = 
-    let unwrapped_x = unwrap x
-        unwrapped_y = unwrap y
-    in wrap ((lift_binary_op_to_intensional_equal_pair (+)) unwrapped_x unwrapped_y)
---  (MkNat' x) + (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_equal_pair (+)) x y)
-  (MkNat' x) * (MkNat' y) = MkNat' ((lift_binary_op_to_intensional_equal_pair (*)) x y)
-  fromInteger x = MkNat' (identical_pair (fromInteger x))
+  (+) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_intensional_equal_pair (+))
+  (*) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_intensional_equal_pair (*))
+  fromInteger x = wrap (identical_pair (fromInteger x))
   
 nat'3 : Nat'
 nat'3 = 3
-
-
 
 double_nat : Nat -> Nat
 double_nat x = x + x
