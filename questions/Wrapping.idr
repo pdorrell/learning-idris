@@ -63,10 +63,7 @@ Wrapper WrappedNatPair where
   unwrap (MkWrappedNatPair x) = x
   
 lift_natpair_bin_op_to_wrapped : BinaryOp NatPair -> BinaryOp WrappedNatPair
-lift_natpair_bin_op_to_wrapped op x y = 
-    let unwrapped_x = unwrap x
-        unwrapped_y = unwrap y
-        in wrap $ op unwrapped_x unwrapped_y
+lift_natpair_bin_op_to_wrapped op x y = wrap $ op (unwrap x) (unwrap y)
 
 Num WrappedNatPair where
   (+) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_pair (+))
@@ -77,4 +74,4 @@ WrappedNatPair_example : the WrappedNatPair 8 = (the WrappedNatPair 2) + (the Wr
 WrappedNatPair_example = Refl
 
 -- The following won't compile:        
--- lift_bin_op_to_wrapped : Wrapper t => BinaryOp WrappedType -> BinaryOp t
+--lift_bin_op_to_wrapped : Wrapper t => BinaryOp WrappedType -> BinaryOp t
