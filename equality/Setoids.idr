@@ -168,7 +168,9 @@ abcd_to_acbc_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (d : Nat) ->
 abcd_to_acbc_lemma a b c d = 
   let e1 = the ((a + b) + (c + d) = ((a + b) + c) + d) $ sym $ nat_lemmas.plus_assoc (a + b) c d
       e2 = the (((a + c) + b) + d = (a + c) + (b + d)) $ nat_lemmas.plus_assoc (a + c) b d
-  in ?abcd_to_acbc_lemma_rhs
+      e3 = the ((a + b) + c = (a + c) + b) $ abc_to_acb_lemma a b c
+      e4 = the (((a + b) + c) + d = ((a + c) + b) + d) $ cong {f=\x => x + d} e3
+  in trans e1 $ trans e4 e2
 
 integer_plus_respects_eq : binary_op_respects_eq (+) (eq IntegerSetoid)                                                         
 integer_plus_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) eq_w_x eq_y_z = 
