@@ -25,11 +25,11 @@ IntensionalSetoid t = MkSetoid t t_eq t_refl_eq t_symm_eq t_trans_eq where
     t_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
 
     
-data EqualPair : (eq_type: Setoid) -> Type where
-  MkEqualPair : (x : carrier eq_type) -> (y : carrier eq_type) -> eq eq_type x y -> EqualPair eq_type
+data EqualPair : (setoid: Setoid) -> Type where
+  MkEqualPair : (x : carrier setoid) -> (y : carrier setoid) -> eq setoid x y -> EqualPair setoid
   
-identical_pair : {eq_type: Setoid} -> (x : carrier eq_type) -> EqualPair eq_type
-identical_pair {eq_type} x = MkEqualPair x x (refl_eq eq_type x)
+identical_pair : {setoid: Setoid} -> (x : carrier setoid) -> EqualPair setoid
+identical_pair {setoid} x = MkEqualPair x x (refl_eq setoid x)
 
 BinaryOp : (t : Type) -> Type
 BinaryOp t = t -> t -> t
@@ -83,16 +83,16 @@ nat'3 = 3
 double_nat : Nat -> Nat
 double_nat x = x + x
 
-lift_fun_to_intensional_eq : {eq_type_t2 : Setoid} -> (f : t1 -> carrier eq_type_t2) -> 
-                         (EqualPair (IntensionalSetoid t1) -> EqualPair eq_type_t2)
-lift_fun_to_intensional_eq {eq_type_t2} f (MkEqualPair x y eq_x_y) = 
+lift_fun_to_intensional_eq : {setoid_t2 : Setoid} -> (f : t1 -> carrier setoid_t2) -> 
+                         (EqualPair (IntensionalSetoid t1) -> EqualPair setoid_t2)
+lift_fun_to_intensional_eq {setoid_t2} f (MkEqualPair x y eq_x_y) = 
   MkEqualPair (f x) (f y) eq_fx_fy where
-     eq_fx_fy : eq eq_type_t2 (f x) (f y)
+     eq_fx_fy : eq setoid_t2 (f x) (f y)
      eq_fx_fy = 
        let x_is_y = the (x = y) eq_x_y
            fx_is_fy = cong {f=f} x_is_y
-           eq_fy_fy = refl_eq eq_type_t2 (f y)
-         in rewrite fx_is_fy in the (eq eq_type_t2 (f y) (f y)) eq_fy_fy
+           eq_fy_fy = refl_eq setoid_t2 (f y)
+         in rewrite fx_is_fy in the (eq setoid_t2 (f y) (f y)) eq_fy_fy
 
 data Integer_ : Type where
   MkInteger : (x : Nat) -> (y : Nat) -> Integer_
