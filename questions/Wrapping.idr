@@ -30,6 +30,10 @@ then the type signature won't even compile, with error:
 
 (where the error location is just where the ':' is).
 
+I think the problem is that `t` doesn't appear anywhere in the
+type signature for the `Wrapper` interface `WrapperType` method,
+so `WrapperType` can't be invoked anywhere other than inside
+the interface definition itself.
 -}
 
 %default total
