@@ -48,19 +48,16 @@ NatSetoid = IntensionalSetoid Nat
 data Nat' : Type where
   MkNat' : EqualPair NatSetoid -> Nat'
   
-interface WrappedEqualPair (t : Type) where
+interface SetoidWrapper (t : Type) where
   setoid : Setoid
   wrap : EqualPair setoid -> t
   unwrap : t -> EqualPair setoid
   
-WrappedEqualPair Nat' where
+SetoidWrapper Nat' where
   setoid = NatSetoid
   wrap pair = MkNat' pair
   unwrap (MkNat' pair) = pair
   
-EqualIntensionalPair : (t : Type) -> Type
-EqualIntensionalPair t = EqualPair (IntensionalSetoid t)
-
 BinaryOp : (t : Type) -> Type
 BinaryOp t = t -> t -> t
 
