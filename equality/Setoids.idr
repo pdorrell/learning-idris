@@ -31,16 +31,12 @@ data EqualPair : (eq_type: Setoid) -> Type where
 identical_pair : {eq_type: Setoid} -> (x : carrier eq_type) -> EqualPair eq_type
 identical_pair {eq_type} x = MkEqualPair x x (refl_eq eq_type x)
 
-eq_respects_binary_op: (eq_type : Setoid) -> (op: (carrier eq_type) -> (carrier eq_type) -> (carrier eq_type)) -> Type
-eq_respects_binary_op eq_type op = 
-  let t = carrier eq_type
-  in (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
-        (eq eq_type x1 x2) -> (eq eq_type y1 y2) -> (eq eq_type (op x1 y1) (op x2 y2))
+BinaryOp : (t : Type) -> Type
+BinaryOp t = t -> t -> t
 
-eq_respects_unary_op: (eq_type : Setoid) -> (op: carrier eq_type -> carrier eq_type) -> Type
-eq_respects_unary_op eq_type op =
-  let t = carrier eq_type
-  in (x1 : t) -> (x2 : t) -> (eq eq_type x1 x2) -> (eq eq_type (op x1) (op x2))
+binary_op_respects_eq : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
+binary_op_respects_eq {t} op eq = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
+                               eq x1 x2 -> eq y1 y2 -> eq (op x1 y1) (op x2 y2)
 
 NatSetoid : Setoid
 NatSetoid = IntensionalSetoid Nat
@@ -58,11 +54,8 @@ SetoidWrapper Nat' where
   wrap pair = MkNat' pair
   unwrap (MkNat' pair) = pair
   
-BinaryOp : (t : Type) -> Type
-BinaryOp t = t -> t -> t
-
 lift_binary_op_to_equal_pair : (setoid : Setoid) -> (op : BinaryOp (carrier setoid)) -> 
-                                 (eq_respects_op : eq_respects_binary_op setoid op) -> BinaryOp (EqualPair setoid)
+                                 (eq_respects_op : binary_op_respects_eq op (eq setoid)) -> BinaryOp (EqualPair setoid)
 lift_binary_op_to_equal_pair setoid op eq_respects_op (MkEqualPair x1 x2 eq_x1_x2) (MkEqualPair y1 y2 eq_y1_y2) =
   let op_x1_y1 = op x1 y1
       op_x2_y2 = op x2 y2
