@@ -111,9 +111,9 @@ Neg Integer_ where
                             then MkInteger x1 x2
                             else MkInteger x2 x1
   
-bcd_lemma : (b : Nat) -> (c : Nat) -> (d : Nat) -> 
+bcd_to_dbc_lemma : (b : Nat) -> (c : Nat) -> (d : Nat) -> 
                 b + (c + d) = d + (b + c)
-bcd_lemma b c d = 
+bcd_to_dbc_lemma b c d = 
   let e1 = the (b + (c + d) = (b + c) + d) $ sym $ nat_lemmas.plus_assoc b c d
       e2 = the ((b + c) + d = d + (b + c)) $ nat_lemmas.plus_comm (b + c) d
   in the (b + (c + d) = d + (b + c)) $ trans e1 e2
@@ -123,7 +123,7 @@ abcd_to_adbc_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (d : Nat) ->
 abcd_to_adbc_lemma a b c d = 
   let e1 = the ((a + b) + (c + d) = a + (b + (c + d))) $ nat_lemmas.plus_assoc a b (c + d)
       e2 = the ((a + d) + (b + c) = a + (d + (b + c))) $ nat_lemmas.plus_assoc a d (b + c)
-      e3 = the (a + (b + (c + d)) = a + (d + (b + c))) $ cong $ bcd_lemma b c d
+      e3 = the (a + (b + (c + d)) = a + (d + (b + c))) $ cong $ bcd_to_dbc_lemma b c d
     in the ((a + b) + (c + d) = (a + d) + (b + c)) $ trans e1 (trans e3 (sym e2))
 
 IntegerSetoid : Setoid
@@ -154,7 +154,22 @@ IntegerSetoid = MkSetoid Integer_ int_eq int_refl_eq int_symm_eq int_trans_eq wh
           e8 = the ((x2 + z1) + (y1 + y2) = (x2 + z1) + (y2 + y1)) $ cong $ nat_lemmas.plus_comm y1 y2
           e9 = the ((x1 + z2) + (y2 + y1) = (x2 + z1) + (y2 + y1)) $ trans e7 e8
       in the ((x1 + z2) = (x2 + z1)) $ nat_lemmas.plus_right_cancel (x1 + z2) (x2 + z1) (y2 + y1) $ e9
-    
+      
+abc_to_acb_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (a + b) + c = (a + c) + b
+abc_to_acb_lemma a b c = 
+  let e1 = the ((a + b) + c = a + (b + c)) $ nat_lemmas.plus_assoc a b c
+      e2 = the (a + (c + b) = (a + c) + b) $ sym $ nat_lemmas.plus_assoc a c b
+      e3 = the (b + c = c + b) $ nat_lemmas.plus_comm b c
+      e4 = the (a + (b + c) = a + (c + b)) $ cong {f=\x => a + x} e3
+  in trans e1 $ trans e4 e2
+
+abcd_to_acbc_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (d : Nat) -> 
+                (a + b) + (c + d) = (a + c) + (b + d)
+abcd_to_acbc_lemma a b c d = 
+  let e1 = the ((a + b) + (c + d) = ((a + b) + c) + d) $ sym $ nat_lemmas.plus_assoc (a + b) c d
+      e2 = the (((a + c) + b) + d = (a + c) + (b + d)) $ nat_lemmas.plus_assoc (a + c) b d
+  in ?abcd_to_acbc_lemma_rhs
+
 integer_plus_respects_eq : binary_op_respects_eq (+) (eq IntegerSetoid)                                                         
 integer_plus_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) eq_w_x eq_y_z = 
   ?rhs
