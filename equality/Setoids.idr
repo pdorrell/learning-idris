@@ -61,6 +61,14 @@ SetoidWrapper Nat' where
 BinaryOp : (t : Type) -> Type
 BinaryOp t = t -> t -> t
 
+lift_binary_op_to_equal_pair : (setoid : Setoid) -> (op : BinaryOp (carrier setoid)) -> 
+                                 (eq_respects_op : eq_respects_binary_op setoid op) -> BinaryOp (EqualPair setoid)
+lift_binary_op_to_equal_pair setoid op eq_respects_op (MkEqualPair x1 x2 eq_x1_x2) (MkEqualPair y1 y2 eq_y1_y2) =
+  let op_x1_y1 = op x1 y1
+      op_x2_y2 = op x2 y2
+      eq_from_respect = eq_respects_op x1 x2 y1 y2 eq_x1_x2 eq_y1_y2
+  in MkEqualPair op_x1_y1 op_x2_y2 eq_from_respect
+
 lift_binary_op_to_intensional_equal_pair : (op : BinaryOp t) -> BinaryOp (EqualPair (IntensionalSetoid t))
 lift_binary_op_to_intensional_equal_pair {t} op (MkEqualPair x1 x2 x1_is_x2) (MkEqualPair y1 y2 y1_is_y2)  =
     let e1 = the (x1 = x2) x1_is_x2
@@ -166,4 +174,4 @@ lift_integerpair_bin_op_to_wrapped : BinaryOp (EqualPair IntegerSetoid) -> Binar
 lift_integerpair_bin_op_to_wrapped op x y = wrap $ op (unwrap x) (unwrap y)
 
 Integer'3 : Integer'
-Integer'3 = ?hole
+Integer'3 = ?integer3hole
