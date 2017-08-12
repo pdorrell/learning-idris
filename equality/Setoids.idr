@@ -156,6 +156,14 @@ IntegerSetoid = MkSetoid Integer_ int_eq int_refl_eq int_symm_eq int_trans_eq wh
     
 data Integer' : Type where
   MkInteger' : EqualPair IntegerSetoid -> Integer'
+  
+SetoidWrapper Integer' where
+  setoid = IntegerSetoid
+  wrap pair = MkInteger' pair
+  unwrap (MkInteger' pair) = pair
+
+lift_integerpair_bin_op_to_wrapped : BinaryOp (EqualPair IntegerSetoid) -> BinaryOp Integer'
+lift_integerpair_bin_op_to_wrapped op x y = wrap $ op (unwrap x) (unwrap y)
 
 Integer'3 : Integer'
 Integer'3 = ?hole
