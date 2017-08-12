@@ -103,7 +103,7 @@ Num Integer_ where
   fromInteger x = if x < 0 
                      then MkInteger 0 (fromInteger (- x))
                      else MkInteger (fromInteger x) 0
-
+                     
 Neg Integer_ where
   negate (MkInteger x1 x2) = MkInteger x2 x1
   (MkInteger x1 x2) - (MkInteger y1 y2) = MkInteger (x1 + y2) (x2 + y1)
@@ -118,9 +118,9 @@ bcd_lemma b c d =
       e2 = the ((b + c) + d = d + (b + c)) $ nat_lemmas.plus_comm (b + c) d
   in the (b + (c + d) = d + (b + c)) $ trans e1 e2
       
-abcd_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (d : Nat) -> 
+abcd_to_adbc_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (d : Nat) -> 
                 (a + b) + (c + d) = (a + d) + (b + c)
-abcd_lemma a b c d = 
+abcd_to_adbc_lemma a b c d = 
   let e1 = the ((a + b) + (c + d) = a + (b + (c + d))) $ nat_lemmas.plus_assoc a b (c + d)
       e2 = the ((a + d) + (b + c) = a + (d + (b + c))) $ nat_lemmas.plus_assoc a d (b + c)
       e3 = the (a + (b + (c + d)) = a + (d + (b + c))) $ cong $ bcd_lemma b c d
@@ -148,13 +148,17 @@ IntegerSetoid = MkSetoid Integer_ int_eq int_refl_eq int_symm_eq int_trans_eq wh
           e2 = the (y1 + z2 = y2 + z1) $ y_eq_z
           e3 = the ((x1 + y2) + (y1 + z2) = (x2 + y1) + (y1 + z2)) $ cong {f = \n => n + (y1 + z2)} e1
           e4 = the ((x1 + y2) + (y1 + z2) = (x2 + y1) + (y2 + z1)) $ rewrite sym e2 in e3
-          e5 = the ((x1 + y2) + (y1 + z2) = (x1 + z2) + (y2 + y1)) $ abcd_lemma x1 y2 y1 z2
-          e6 = the ((x2 + y1) + (y2 + z1) = (x2 + z1) + (y1 + y2)) $ abcd_lemma x2 y1 y2 z1
+          e5 = the ((x1 + y2) + (y1 + z2) = (x1 + z2) + (y2 + y1)) $ abcd_to_adbc_lemma x1 y2 y1 z2
+          e6 = the ((x2 + y1) + (y2 + z1) = (x2 + z1) + (y1 + y2)) $ abcd_to_adbc_lemma x2 y1 y2 z1
           e7 = the ((x1 + z2) + (y2 + y1) = (x2 + z1) + (y1 + y2)) $ trans (sym e5) $ trans e4 e6
           e8 = the ((x2 + z1) + (y1 + y2) = (x2 + z1) + (y2 + y1)) $ cong $ nat_lemmas.plus_comm y1 y2
           e9 = the ((x1 + z2) + (y2 + y1) = (x2 + z1) + (y2 + y1)) $ trans e7 e8
       in the ((x1 + z2) = (x2 + z1)) $ nat_lemmas.plus_right_cancel (x1 + z2) (x2 + z1) (y2 + y1) $ e9
     
+integer_plus_respects_eq : binary_op_respects_eq (+) (eq IntegerSetoid)                                                         
+integer_plus_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) eq_w_x eq_y_z = 
+  ?rhs
+
 data Integer' : Type where
   MkInteger' : EqualPair IntegerSetoid -> Integer'
   
