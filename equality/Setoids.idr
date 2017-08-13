@@ -34,8 +34,8 @@ identical_pair {setoid} x = MkEqualPair x x (refl_eq setoid x)
 BinaryOp : (t : Type) -> Type
 BinaryOp t = t -> t -> t
 
-binary_op_respects_eq : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
-binary_op_respects_eq {t} op eq = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
+bin_op_respects_eq : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
+bin_op_respects_eq {t} op eq = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
                                eq x1 x2 -> eq y1 y2 -> eq (op x1 y1) (op x2 y2)
 
 NatSetoid : Setoid
@@ -44,37 +44,35 @@ NatSetoid = IntensionalSetoid Nat
 data Nat' : Type where
   MkNat' : EqualPair NatSetoid -> Nat'
   
-interface SetoidWrapper (t : Type) where
-  setoid : Setoid
+interface WrapsSetoid (t : Type) (setoid : Setoid) | t where
   wrap : EqualPair setoid -> t
   unwrap : t -> EqualPair setoid
   
-SetoidWrapper Nat' where
-  setoid = NatSetoid
+WrapsSetoid Nat' NatSetoid where
   wrap pair = MkNat' pair
   unwrap (MkNat' pair) = pair
   
-lift_binary_op_to_equal_pair : (setoid : Setoid) -> (op : BinaryOp (carrier setoid)) -> 
-                                 (eq_respects_op : binary_op_respects_eq op (eq setoid)) -> BinaryOp (EqualPair setoid)
-lift_binary_op_to_equal_pair setoid op eq_respects_op (MkEqualPair x1 x2 eq_x1_x2) (MkEqualPair y1 y2 eq_y1_y2) =
+lift_bin_op_to_setoid_wrapper : WrapsSetoid t setoid => BinaryOp (EqualPair setoid) -> BinaryOp t
+lift_bin_op_to_setoid_wrapper op x y = wrap $ op (unwrap x) (unwrap y)
+
+lift_bin_op_to_equal_pair : (setoid : Setoid) -> (op : BinaryOp (carrier setoid)) -> 
+                                 (eq_respects_op : bin_op_respects_eq op (eq setoid)) -> BinaryOp (EqualPair setoid)
+lift_bin_op_to_equal_pair setoid op eq_respects_op (MkEqualPair x1 x2 eq_x1_x2) (MkEqualPair y1 y2 eq_y1_y2) =
   let op_x1_y1 = op x1 y1
       op_x2_y2 = op x2 y2
       eq_from_respect = eq_respects_op x1 x2 y1 y2 eq_x1_x2 eq_y1_y2
   in MkEqualPair op_x1_y1 op_x2_y2 eq_from_respect
 
-lift_binary_op_to_intensional_equal_pair : (op : BinaryOp t) -> BinaryOp (EqualPair (IntensionalSetoid t))
-lift_binary_op_to_intensional_equal_pair {t} op (MkEqualPair x1 x2 x1_is_x2) (MkEqualPair y1 y2 y1_is_y2)  =
+lift_bin_op_to_intensional_equal_pair : (op : BinaryOp t) -> BinaryOp (EqualPair (IntensionalSetoid t))
+lift_bin_op_to_intensional_equal_pair {t} op (MkEqualPair x1 x2 x1_is_x2) (MkEqualPair y1 y2 y1_is_y2)  =
     let e1 = the (x1 = x2) x1_is_x2
         e2 = the (y1 = y2) y1_is_y2
         e3 = the (op x1 y1 = op x1 y1) Refl
     in MkEqualPair (op x1 y1) (op x2 y2) (the (op x1 y1 = op x2 y2) (rewrite e1 in rewrite e2 in Refl))
     
-lift_natpair_bin_op_to_wrapped : BinaryOp (EqualPair NatSetoid) -> BinaryOp Nat'
-lift_natpair_bin_op_to_wrapped op x y = wrap $ op (unwrap x) (unwrap y)
-    
 Num Nat' where
-  (+) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_intensional_equal_pair (+))
-  (*) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_intensional_equal_pair (*))
+  (+) = lift_bin_op_to_setoid_wrapper (lift_bin_op_to_intensional_equal_pair {t=Nat} (+))
+  (*) = lift_bin_op_to_setoid_wrapper (lift_bin_op_to_intensional_equal_pair {t=Nat} (*))
   fromInteger x = wrap (identical_pair (fromInteger x))
   
 nat'3 : Nat'
@@ -172,7 +170,7 @@ abcd_to_acbd_lemma a b c d =
       e4 = the (((a + b) + c) + d = ((a + c) + b) + d) $ cong {f=\x => x + d} e3
   in trans e1 $ trans e4 e2
 
-integer_plus_respects_eq : binary_op_respects_eq (+) (eq IntegerSetoid)                                                         
+integer_plus_respects_eq : bin_op_respects_eq (+) (eq IntegerSetoid)                                                         
 integer_plus_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) eq_w_x eq_y_z = 
   let e1 = the ((w1 + y1) + (x2 + z2) = (w1 + x2) + (y1 + z2)) $ abcd_to_acbd_lemma w1 y1 x2 z2
       e2 = the ((w1 + x2) + (y1 + z2) = (w2 + x1) + (y1 + z2)) $ cong {f=\n => n + (y1 + z2)} eq_w_x
@@ -182,13 +180,9 @@ integer_plus_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (
 data Integer' : Type where
   MkInteger' : EqualPair IntegerSetoid -> Integer'
   
-SetoidWrapper Integer' where
-  setoid = IntegerSetoid
+WrapsSetoid Integer' IntegerSetoid where
   wrap pair = MkInteger' pair
   unwrap (MkInteger' pair) = pair
-
-lift_integerpair_bin_op_to_wrapped : BinaryOp (EqualPair IntegerSetoid) -> BinaryOp Integer'
-lift_integerpair_bin_op_to_wrapped op x y = wrap $ op (unwrap x) (unwrap y)
 
 Integer'3 : Integer'
 Integer'3 = ?integer3hole
