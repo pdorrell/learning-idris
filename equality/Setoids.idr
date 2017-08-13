@@ -37,6 +37,11 @@ BinaryOp t = t -> t -> t
 bin_op_respects_eq : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
 bin_op_respects_eq {t} op eq = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
                                eq x1 x2 -> eq y1 y2 -> eq (op x1 y1) (op x2 y2)
+                               
+bin_op_respects_intensional_eq : (op : BinaryOp t) -> bin_op_respects_eq op (eq (IntensionalSetoid t))
+bin_op_respects_intensional_eq {t} op x1 x2 y1 y2 eq_x1_x2 eq_y1_y2 = 
+  let e1 = the (op x2 y2 = op x2 y2) Refl
+  in rewrite eq_x1_x2 in rewrite eq_y1_y2 in e1
 
 NatSetoid : Setoid
 NatSetoid = IntensionalSetoid Nat
@@ -64,11 +69,7 @@ lift_bin_op_to_equal_pair setoid op eq_respects_op (MkEqualPair x1 x2 eq_x1_x2) 
   in MkEqualPair op_x1_y1 op_x2_y2 eq_from_respect
 
 lift_bin_op_to_intensional_equal_pair : (op : BinaryOp t) -> BinaryOp (EqualPair (IntensionalSetoid t))
-lift_bin_op_to_intensional_equal_pair {t} op (MkEqualPair x1 x2 x1_is_x2) (MkEqualPair y1 y2 y1_is_y2)  =
-    let e1 = the (x1 = x2) x1_is_x2
-        e2 = the (y1 = y2) y1_is_y2
-        e3 = the (op x1 y1 = op x1 y1) Refl
-    in MkEqualPair (op x1 y1) (op x2 y2) (the (op x1 y1 = op x2 y2) (rewrite e1 in rewrite e2 in Refl))
+lift_bin_op_to_intensional_equal_pair {t} op = lift_bin_op_to_equal_pair (IntensionalSetoid t) op (bin_op_respects_intensional_eq op)
     
 Num Nat' where
   (+) = lift_bin_op_to_setoid_wrapper (lift_bin_op_to_intensional_equal_pair {t=Nat} (+))
