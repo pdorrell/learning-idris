@@ -50,15 +50,15 @@ data Nat' : Type where
   MkNat' : EqualPair NatSetoid -> Nat'
   
 interface WrapsSetoid (t : Type) (setoid : Setoid) | t where
-  wrap : EqualPair setoid -> t
-  unwrap : t -> EqualPair setoid
+  wrap_pair : EqualPair setoid -> t
+  unwrap_pair : t -> EqualPair setoid
   
 WrapsSetoid Nat' NatSetoid where
-  wrap pair = MkNat' pair
-  unwrap (MkNat' pair) = pair
+  wrap_pair pair = MkNat' pair
+  unwrap_pair (MkNat' pair) = pair
   
 lift_bin_op_to_setoid_wrapper : WrapsSetoid t setoid => BinaryOp (EqualPair setoid) -> BinaryOp t
-lift_bin_op_to_setoid_wrapper op x y = wrap $ op (unwrap x) (unwrap y)
+lift_bin_op_to_setoid_wrapper op x y = wrap_pair $ op (unwrap_pair x) (unwrap_pair y)
 
 lift_bin_op_to_equal_pair : (setoid : Setoid) -> (op : BinaryOp (carrier setoid)) -> 
                                  (eq_respects_op : bin_op_respects_eq op (eq setoid)) -> BinaryOp (EqualPair setoid)
@@ -74,7 +74,7 @@ lift_bin_op_to_intensional_equal_pair {t} op = lift_bin_op_to_equal_pair (Intens
 Num Nat' where
   (+) = lift_bin_op_to_setoid_wrapper (lift_bin_op_to_intensional_equal_pair {t=Nat} (+))
   (*) = lift_bin_op_to_setoid_wrapper (lift_bin_op_to_intensional_equal_pair {t=Nat} (*))
-  fromInteger x = wrap (identical_pair (fromInteger x))
+  fromInteger x = wrap_pair (identical_pair (fromInteger x))
   
 nat'3 : Nat'
 nat'3 = 3
@@ -182,8 +182,8 @@ data Integer' : Type where
   MkInteger' : EqualPair IntegerSetoid -> Integer'
   
 WrapsSetoid Integer' IntegerSetoid where
-  wrap pair = MkInteger' pair
-  unwrap (MkInteger' pair) = pair
+  wrap_pair pair = MkInteger' pair
+  unwrap_pair (MkInteger' pair) = pair
 
 Integer'3 : Integer'
 Integer'3 = ?integer3hole
