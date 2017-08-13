@@ -56,26 +56,23 @@ BinaryOp t = t -> t -> t
 lift_binary_op_to_pair : BinaryOp t -> BinaryOp (PairedType t)
 lift_binary_op_to_pair op (x1, x2) (y1, y2) = (op x1 y1, op x2 y2)
   
-interface Wrapper t where
-  WrappedType : Type
-  wrap : WrappedType -> t
-  unwrap : t -> WrappedType
-
-Wrapper WrappedNatPair where
-  WrappedType = NatPair
-  wrap x = MkWrappedNatPair x
-  unwrap (MkWrappedNatPair x) = x
+interface Wraps (from : Type) (to : Type) | to where
+  wrap   : from -> to
+  unwrap : to   -> from
   
-lift_natpair_bin_op_to_wrapped : BinaryOp NatPair -> BinaryOp WrappedNatPair
-lift_natpair_bin_op_to_wrapped op x y = wrap $ op (unwrap x) (unwrap y)
+-- from https://stackoverflow.com/questions/45646004
+
+Wraps NatPair WrappedNatPair where
+  wrap = MkWrappedNatPair
+  unwrap (MkWrappedNatPair x) = x
+
+lift_bin_op_to_wrapped : Wraps from to  => BinaryOp from -> BinaryOp to
+lift_bin_op_to_wrapped op x y = wrap $ op (unwrap x) (unwrap y)
 
 Num WrappedNatPair where
-  (+) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_pair (+))
-  (*) = lift_natpair_bin_op_to_wrapped (lift_binary_op_to_pair (*))
-  fromInteger x = wrap $ equal_pair (fromInteger x)
-
+  (+) = lift_bin_op_to_wrapped (lift_binary_op_to_pair {t=Nat} (+))
+  (*) = lift_bin_op_to_wrapped (lift_binary_op_to_pair {t=Nat} (*))
+  fromInteger = wrap . equal_pair {t=Nat} . fromInteger
+  
 WrappedNatPair_example : the WrappedNatPair 8 = (the WrappedNatPair 2) + (the WrappedNatPair 6)
 WrappedNatPair_example = Refl
-
--- The following won't compile:        
---lift_bin_op_to_wrapped : Wrapper t => BinaryOp WrappedType -> BinaryOp t
