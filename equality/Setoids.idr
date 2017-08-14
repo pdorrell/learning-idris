@@ -177,6 +177,10 @@ integer_plus_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (
       e2 = the ((w1 + x2) + (y1 + z2) = (w2 + x1) + (y1 + z2)) $ cong {f=\n => n + (y1 + z2)} eq_w_x
       e3 = the ((w2 + x1) + (y1 + z2) = (w2 + x1) + (y2 + z1)) $ cong {f=\n => (w2 + x1) + n} eq_y_z
   in trans e1 $ trans e2 $ trans e3 $ abcd_to_acbd_lemma w2 x1 y2 z1
+  
+integer_times_respects_eq : bin_op_respects_eq (*) (eq IntegerSetoid)                                                         
+integer_times_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) eq_w_x eq_y_z = 
+  ?hole
 
 data Integer' : Type where
   MkInteger' : EqualPair IntegerSetoid -> Integer'
@@ -187,7 +191,7 @@ WrapsSetoid Integer' IntegerSetoid where
   
 Num Integer' where
   (+) = lift_bin_op_to_setoid_wrapper (lift_bin_op_to_equal_pair IntegerSetoid (+) integer_plus_respects_eq)
-  (*) = ?h2
+  (*) = lift_bin_op_to_setoid_wrapper (lift_bin_op_to_equal_pair IntegerSetoid (*) integer_times_respects_eq)
   fromInteger x = wrap_pair (identical_pair (fromInteger x))
 
 Integer'3 : Integer'
