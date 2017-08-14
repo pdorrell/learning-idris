@@ -184,6 +184,11 @@ data Integer' : Type where
 WrapsSetoid Integer' IntegerSetoid where
   wrap_pair pair = MkInteger' pair
   unwrap_pair (MkInteger' pair) = pair
+  
+Num Integer' where
+  (+) = lift_bin_op_to_setoid_wrapper (lift_bin_op_to_equal_pair IntegerSetoid (+) integer_plus_respects_eq)
+  (*) = ?h2
+  fromInteger x = wrap_pair (identical_pair (fromInteger x))
 
 Integer'3 : Integer'
-Integer'3 = ?integer3hole
+Integer'3 = 3
