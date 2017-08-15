@@ -38,6 +38,24 @@ bin_op_respects_eq : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
 bin_op_respects_eq {t} op eq = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
                                eq x1 x2 -> eq y1 y2 -> eq (op x1 y1) (op x2 y2)
                                
+bin_op_respects_eq_left : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
+bin_op_respects_eq_left {t} op eq = (x1 : t) -> (x2 : t) -> (y : t) -> 
+                               eq x1 x2 -> eq (op x1 y) (op x2 y)
+                               
+bin_op_respects_eq_right : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
+bin_op_respects_eq_right {t} op eq = (x : t) -> (y1 : t) -> (y2 : t) -> 
+                               eq y1 y2 -> eq (op x y1) (op x y2)
+                               
+transitive : (eq : t -> t -> Type) -> Type
+transitive {t} eq = (x : t) -> (y : t) -> (z : t) -> eq x y -> eq y z -> eq x z
+                               
+bin_op_respect_eq_from_lr : {t: Type} -> (op : BinaryOp t) -> (eq : t -> t -> Type) -> transitive eq -> 
+                             bin_op_respects_eq_left op eq -> bin_op_respects_eq_right op eq -> bin_op_respects_eq op eq
+bin_op_respect_eq_from_lr {t} op eq transitive_eq respects_left respects_right x1 x2 y1 y2 eq_x1_x2 e1_y1_y2 = 
+  let e1 = the (eq (op x1 y1) (op x2 y1)) $ respects_left x1 x2 y1 eq_x1_x2
+      e2 = the (eq (op x2 y1) (op x2 y2)) $ respects_right x2 y1 y2 e1_y1_y2
+  in transitive_eq (op x1 y1) (op x2 y1) (op x2 y2) e1 e2
+
 bin_op_respects_intensional_eq : (op : BinaryOp t) -> bin_op_respects_eq op (eq (IntensionalSetoid t))
 bin_op_respects_intensional_eq {t} op x1 x2 y1 y2 eq_x1_x2 eq_y1_y2 = 
   let e1 = the (op x2 y2 = op x2 y2) Refl
@@ -178,9 +196,15 @@ integer_plus_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (
       e3 = the ((w2 + x1) + (y1 + z2) = (w2 + x1) + (y2 + z1)) $ cong {f=\n => (w2 + x1) + n} eq_y_z
   in trans e1 $ trans e2 $ trans e3 $ abcd_to_acbd_lemma w2 x1 y2 z1
   
+integer_times_respects_eq_left : bin_op_respects_eq_left (*) (eq IntegerSetoid)
+integer_times_respects_eq_left (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) int_eq_x_y = ?left
+
+integer_times_respects_eq_right : bin_op_respects_eq_right (*) (eq IntegerSetoid)
+integer_times_respects_eq_right = ?right
+
 integer_times_respects_eq : bin_op_respects_eq (*) (eq IntegerSetoid)                                                         
-integer_times_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) eq_w_x eq_y_z = 
-  ?hole
+integer_times_respects_eq = bin_op_respect_eq_from_lr (*) (eq IntegerSetoid) (trans_eq IntegerSetoid) 
+                                 integer_times_respects_eq_left integer_times_respects_eq_right
 
 data Integer' : Type where
   MkInteger' : EqualPair IntegerSetoid -> Integer'

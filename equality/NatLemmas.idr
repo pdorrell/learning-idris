@@ -36,3 +36,14 @@ namespace nat_lemmas
   plus_right_cancel x y z x_plus_z_is_y_plus_z = 
     let e1 = the (z + x = z + y) $ trans (plus_comm z x) (trans x_plus_z_is_y_plus_z (plus_comm y z))
     in plus_left_cancel x y z e1
+
+  times_left_distr : (x : Nat) -> (y : Nat) -> (z : Nat) -> z * (x + y) = (z * x) + (z * y)
+  times_left_distr x y Z = Refl
+  times_left_distr x y (S k) = 
+    let e1 = the (k * (x + y) = k * x + k * y) $ times_left_distr x y k
+        e2 = the ((x + y) + (k * (x + y)) = (x + y) + (k * x + k * y)) $ cong {f=\w => (x + y) + w} e1
+    in the ((x + y) + (k * (x + y)) = (x + (k * x)) + (y + (k * y))) $ ?hole
+
+  times_right_distr : (x : Nat) -> (y : Nat) -> (z : Nat) -> (x + y) * z = (x * z) + (y * z)
+  times_right_distr x y z = ?rhs
+
