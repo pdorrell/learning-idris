@@ -46,6 +46,24 @@ namespace nat_lemmas
   plus_right_cancel x y z x_plus_z_is_y_plus_z = 
     let e1 = the (z + x = z + y) $ trans (plus_comm z x) (trans x_plus_z_is_y_plus_z (plus_comm y z))
     in plus_left_cancel x y z e1
+    
+  times_zero : (x : Nat) -> 0 = x * 0
+  times_zero Z = Refl
+  times_zero (S k) = rewrite times_zero k in Refl
+  
+  times_S_y_lemma : (x : Nat) -> (y : Nat) -> x * (S y) = x * y + x
+  times_S_y_lemma Z y = Refl
+  times_S_y_lemma (S k) y = 
+    let e1 = the ((S k) * y = y + k * y) Refl
+        e2 = times_S_y_lemma k y
+    in rewrite e2 in the (S (y + (k * y + k)) = (y + k * y) + S k) ?hole
+  
+  times_comm : (x : Nat) -> (y : Nat) -> x * y = y * x
+  times_comm Z y = times_zero y
+  times_comm (S k) y = 
+    let e1 = the (k * y = y * k) $ times_comm k y
+        e2 = the (y + (k * y) = y + (y * k)) $ rewrite e1 in Refl
+    in the (y + (k * y) = y * (S k)) $ ?hole
 
   times_left_distr : (x : Nat) -> (y : Nat) -> (z : Nat) -> z * (x + y) = (z * x) + (z * y)
   times_left_distr x y Z = Refl
