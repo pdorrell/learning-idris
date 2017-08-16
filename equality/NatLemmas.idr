@@ -25,6 +25,16 @@ namespace nat_lemmas
   cancel_s : (x : Nat) -> (y : Nat) -> S x = S y -> x = y
   cancel_s x _ Refl = Refl
   
+  abcd_to_acbd_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (d : Nat) -> 
+                (a + b) + (c + d) = (a + c) + (b + d)
+  abcd_to_acbd_lemma a b c d = 
+    let e1 = the ((a + b) + (c + d) = ((a + b) + c) + d) $ sym (plus_assoc (a + b) c d)
+        e2 = the (((a + b) + c) + d = (a + (b + c)) + d) $ rewrite (plus_assoc a b c) in Refl
+        e3 = the ((a + (b + c)) + d = (a + (c + b)) + d) $ rewrite (plus_comm b c) in Refl
+        e4 = the ((a + (c + b)) + d = ((a + c) + b) + d) $ rewrite (plus_assoc a c b) in Refl
+        e5 = the ((((a + c) + b) + d) = (a + c) + (b + d)) $ plus_assoc (a + c) b d
+    in trans e1 $ trans e2 $ trans e3 $ trans e4 e5
+
   plus_left_cancel : (x : Nat) -> (y : Nat) -> (z : Nat) -> z + x = z + y -> x = y
   plus_left_cancel x y Z z_plus_x_is_z_plus_y = z_plus_x_is_z_plus_y
   plus_left_cancel x y (S k) z_plus_x_is_z_plus_y = 
@@ -46,4 +56,3 @@ namespace nat_lemmas
 
   times_right_distr : (x : Nat) -> (y : Nat) -> (z : Nat) -> (x + y) * z = (x * z) + (y * z)
   times_right_distr x y z = ?rhs
-
