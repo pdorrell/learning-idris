@@ -51,8 +51,9 @@ namespace nat_lemmas
   times_left_distr x y Z = Refl
   times_left_distr x y (S k) = 
     let e1 = the (k * (x + y) = k * x + k * y) $ times_left_distr x y k
-        e2 = the ((x + y) + (k * (x + y)) = (x + y) + (k * x + k * y)) $ cong {f=\w => (x + y) + w} e1
-    in the ((x + y) + (k * (x + y)) = (x + (k * x)) + (y + (k * y))) $ ?hole
+        e2 = the ((x + y) + (k * (x + y)) = (x + y) + (k * x + k * y)) $ rewrite e1 in Refl
+        e3 = the ((x + y) + (k * x + k * y) = (x + k * x) + (y + k * y)) $ abcd_to_acbd_lemma x y (k * x) (k * y)
+    in the ((x + y) + (k * (x + y)) = (x + (k * x)) + (y + (k * y))) $ trans e2 e3
 
   times_right_distr : (x : Nat) -> (y : Nat) -> (z : Nat) -> (x + y) * z = (x * z) + (y * z)
   times_right_distr x y z = ?rhs
