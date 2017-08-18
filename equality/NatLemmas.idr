@@ -51,39 +51,23 @@ namespace nat_lemmas
   times_zero Z = Refl
   times_zero (S k) = rewrite times_zero k in Refl
   
-  lemma3 : (x : Nat) -> (y : Nat) -> y + S x = x + S y
-  lemma3 x y = 
-     let e1 = s_on_right_addend x y
-         e2 = sym $ s_on_right_addend y x
-         e3 = cong {f=S} $ plus_comm y x
-     in trans e2 $ trans e3 e1
+  times_S_x : (x : Nat) -> (y : Nat) -> y + y * x = y * S x
+  times_S_x x Z = Refl
+  times_S_x x (S k) = 
+    let e1 = the (k + (x + k * x) = k + x + k * x) $ sym $ plus_assoc k x (k * x)
+        e2 = the (k + x + k * x = x + k + k * x) $ rewrite plus_comm k x in Refl
+        e3 = the (x + k + k * x = x + (k + k * x)) $ plus_assoc x k (k * x)
+        e4 = the (x + (k + k * x) = x + (k * S x)) $ cong {f=\z => x + z} $ times_S_x x k
+        e5 = the (k + (x + k * x) = x + k * S x) $ trans e1 $ trans e2 $ trans e3 e4
+    in cong {f=S} $ the (k + (x + k * x) = x + (k * S x)) $ e5
   
-  lemma2 : (x : Nat) -> (y : Nat) -> S y + (x * y + x) = y + x * y + S x
-  lemma2 x y = 
-    let e1 = the (y + x * y + S x = x * y + y + S x) $ cong {f=\z => z + S x} $ plus_comm y (x * y)
-        e2 = plus_comm (x * y + x) (S y)
-        e3 = plus_assoc (x * y) x (S y)
-        e4 = plus_assoc (x * y) y (S x)
-        e5 = the (x * y + (y + S x) = x * y + (x + S y)) $ cong {f=\z => x * y + z} $ lemma3 x y
-        e6 = the (x * y + y + S x = x * y + x + S y) $ trans e4 $ trans e5 $ sym e3
-    in the (S y + (x * y + x) = y + x * y + S x) $ sym $ trans e1 $ trans e6 e2
-  
-  lemma : (x : Nat) -> (y : Nat) -> x * S y = x * y + x -> (S x) * (S y) = (S x) * y + (S x)
-  lemma x y prf = 
-    let e1 = the (S x * y = y + x * y) Refl
-        e2 = the (S x * S y = S y + x * S y) Refl
-        e4 = the (S y + x * S y = S y + (x * y + x)) $ cong {f=\z => S y + z} prf
-        e3 = the (y + x * y + S x = S x * y + S x) $ sym $ cong {f=\z => z + S x} e1
-    in the (S x * S y = S x * y + S x) $ trans e2 $ trans e4 $ trans (lemma2 x y) e3
-  
-  times_S : (x : Nat) -> (y : Nat) -> x * (S y) = x * y + x
-  times_S Z y = Refl
-  times_S (S k) y = lemma k y $ times_S k y
+  times_comm_S : (x : Nat) -> (y : Nat) -> x * y = y * x -> S x * y = y * S x
+  times_comm_S x y times_comm_x_y = 
+    rewrite times_comm_x_y in times_S_x x y
   
   times_comm : (x : Nat) -> (y : Nat) -> x * y = y * x
   times_comm Z y = sym $ times_zero y
-  times_comm (S k) Z = times_zero k
-  times_comm (S k) (S j) = cong{f=S} $ the (j + (k * S j) = k + (j * S k)) ?hole
+  times_comm (S k) y = times_comm_S k y (times_comm k y)
 
   times_left_distr : (x : Nat) -> (y : Nat) -> (z : Nat) -> z * (x + y) = (z * x) + (z * y)
   times_left_distr x y Z = Refl
