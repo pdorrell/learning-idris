@@ -77,5 +77,11 @@ namespace nat_lemmas
         e3 = the ((x + y) + (k * x + k * y) = (x + k * x) + (y + k * y)) $ abcd_to_acbd_lemma x y (k * x) (k * y)
     in the ((x + y) + (k * (x + y)) = (x + (k * x)) + (y + (k * y))) $ trans e2 e3
 
-  times_right_distr : (x : Nat) -> (y : Nat) -> (z : Nat) -> (x + y) * z = (x * z) + (y * z)
-  times_right_distr x y z = ?rhs
+  times_right_distr : (x : Nat) -> (y : Nat) -> (z : Nat) -> (x + y) * z = x * z + y * z
+  times_right_distr x y z = 
+    let e1 = times_comm z x
+        e2 = times_comm z y
+        e3 = the (z * x + z * y = x * z + y * z) $ rewrite e1 in rewrite e2 in Refl
+        e4 = times_comm (x + y) z
+        e5 = times_left_distr x y z
+    in trans e4 $ trans e5 e3
