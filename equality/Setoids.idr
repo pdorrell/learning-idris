@@ -187,8 +187,28 @@ integer_plus_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (
       e3 = the ((w2 + x1) + (y1 + z2) = (w2 + x1) + (y2 + z1)) $ cong {f=\n => (w2 + x1) + n} eq_y_z
   in trans e1 $ trans e2 $ trans e3 $ nat_lemmas.abcd_to_acbd_lemma w2 x1 y2 z1
   
+combine_equalities : {x1 : t1} -> {y1 : t1} -> {x2 : t2} -> {y2 : t2} -> 
+                            (f : t1 -> t2 -> t3) -> x1 = y1 -> x2 = y2 -> f x1 x2 = f y1 y2
+combine_equalities {x1} {y1} {x2} {y2} f x1_is_y1 x2_is_y2 = 
+  let e1 = the (f x1 x2 = f y1 x2) $ cong {f=\z => f z x2} x1_is_y1
+      e2 = the (f y1 x2 = f y1 y2) $ cong {f=\z => f y1 z} x2_is_y2
+  in trans e1 e2
+  
 integer_times_respects_eq_left : bin_op_respects_eq_left (*) (eq IntegerSetoid)
-integer_times_respects_eq_left (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) int_eq_x_y = ?left
+integer_times_respects_eq_left (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) int_eq_x_y = 
+  let e1 = the ((x1 + y2) * z1 = (x2 + y1) * z1) $ cong {f=\s => s * z1} int_eq_x_y
+      e2 = nat_lemmas.times_right_distr x1 y2 z1
+      e3 = nat_lemmas.times_right_distr x2 y1 z1
+      e4 = the (x1 * z1 + y2 * z1 = x2 * z1 + y1 * z1) $ trans (sym e2) $ trans e1 e3
+      
+      e5 = the ((x1 + y2) * z2 = (x2 + y1) * z2) $ cong {f=\s => s * z2} int_eq_x_y
+      e6 = nat_lemmas.times_right_distr x1 y2 z2
+      e7 = nat_lemmas.times_right_distr x2 y1 z2
+      e8 = the (x2 * z2 + y1 * z2 = x1 * z2 + y2 * z2) $ trans (sym e7) $ trans (sym e5) e6
+      
+      e9 = combine_equalities (+) e4 e8
+      
+  in the ((x1 * z1 + x2 * z2) + (y1 * z2 + y2 * z1) = (x1 * z2 + x2 * z1) + (y1 * z1 + y2 * z2)) $ ?hole
 
 integer_times_respects_eq_right : bin_op_respects_eq_right (*) (eq IntegerSetoid)
 integer_times_respects_eq_right = ?right
