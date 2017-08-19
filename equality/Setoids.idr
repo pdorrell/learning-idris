@@ -128,21 +128,6 @@ Neg Integer_ where
                             then MkInteger x1 x2
                             else MkInteger x2 x1
   
-bcd_to_dbc_lemma : (b : Nat) -> (c : Nat) -> (d : Nat) -> 
-                b + (c + d) = d + (b + c)
-bcd_to_dbc_lemma b c d = 
-  let e1 = the (b + (c + d) = (b + c) + d) $ sym $ nat_lemmas.plus_assoc b c d
-      e2 = the ((b + c) + d = d + (b + c)) $ nat_lemmas.plus_comm (b + c) d
-  in the (b + (c + d) = d + (b + c)) $ trans e1 e2
-      
-abcd_to_adbc_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (d : Nat) -> 
-                (a + b) + (c + d) = (a + d) + (b + c)
-abcd_to_adbc_lemma a b c d = 
-  let e1 = the ((a + b) + (c + d) = a + (b + (c + d))) $ nat_lemmas.plus_assoc a b (c + d)
-      e2 = the ((a + d) + (b + c) = a + (d + (b + c))) $ nat_lemmas.plus_assoc a d (b + c)
-      e3 = the (a + (b + (c + d)) = a + (d + (b + c))) $ cong $ bcd_to_dbc_lemma b c d
-    in the ((a + b) + (c + d) = (a + d) + (b + c)) $ trans e1 (trans e3 (sym e2))
-
 IntegerSetoid : Setoid
 IntegerSetoid = MkSetoid Integer_ int_eq int_refl_eq int_symm_eq int_trans_eq where
     int_eq : Integer_ -> Integer_ -> Type
@@ -165,8 +150,8 @@ IntegerSetoid = MkSetoid Integer_ int_eq int_refl_eq int_symm_eq int_trans_eq wh
           e2 = the (y1 + z2 = y2 + z1) $ y_eq_z
           e3 = the ((x1 + y2) + (y1 + z2) = (x2 + y1) + (y1 + z2)) $ cong {f = \n => n + (y1 + z2)} e1
           e4 = the ((x1 + y2) + (y1 + z2) = (x2 + y1) + (y2 + z1)) $ rewrite sym e2 in e3
-          e5 = the ((x1 + y2) + (y1 + z2) = (x1 + z2) + (y2 + y1)) $ abcd_to_adbc_lemma x1 y2 y1 z2
-          e6 = the ((x2 + y1) + (y2 + z1) = (x2 + z1) + (y1 + y2)) $ abcd_to_adbc_lemma x2 y1 y2 z1
+          e5 = the ((x1 + y2) + (y1 + z2) = (x1 + z2) + (y2 + y1)) $ nat_lemmas.abcd_to_adbc_lemma x1 y2 y1 z2
+          e6 = the ((x2 + y1) + (y2 + z1) = (x2 + z1) + (y1 + y2)) $ nat_lemmas.abcd_to_adbc_lemma x2 y1 y2 z1
           e7 = the ((x1 + z2) + (y2 + y1) = (x2 + z1) + (y1 + y2)) $ trans (sym e5) $ trans e4 e6
           e8 = the ((x2 + z1) + (y1 + y2) = (x2 + z1) + (y2 + y1)) $ cong $ nat_lemmas.plus_comm y1 y2
           e9 = the ((x1 + z2) + (y2 + y1) = (x2 + z1) + (y2 + y1)) $ trans e7 e8
@@ -182,7 +167,7 @@ abc_to_acb_lemma a b c =
 
 integer_plus_respects_eq : bin_op_respects_eq (+) (eq IntegerSetoid)                                                         
 integer_plus_respects_eq (MkInteger w1 w2) (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) eq_w_x eq_y_z = 
-  let e1 = the ((w1 + y1) + (x2 + z2) = (w1 + x2) + (y1 + z2)) $ abcd_to_acbd_lemma w1 y1 x2 z2
+  let e1 = the ((w1 + y1) + (x2 + z2) = (w1 + x2) + (y1 + z2)) $ nat_lemmas.abcd_to_acbd_lemma w1 y1 x2 z2
       e2 = the ((w1 + x2) + (y1 + z2) = (w2 + x1) + (y1 + z2)) $ cong {f=\n => n + (y1 + z2)} eq_w_x
       e3 = the ((w2 + x1) + (y1 + z2) = (w2 + x1) + (y2 + z1)) $ cong {f=\n => (w2 + x1) + n} eq_y_z
   in trans e1 $ trans e2 $ trans e3 $ nat_lemmas.abcd_to_acbd_lemma w2 x1 y2 z1
@@ -206,9 +191,13 @@ integer_times_respects_eq_left (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1
       e7 = nat_lemmas.times_right_distr x2 y1 z2
       e8 = the (x2 * z2 + y1 * z2 = x1 * z2 + y2 * z2) $ trans (sym e7) $ trans (sym e5) e6
       
-      e9 = combine_equalities (+) e4 e8
-      
-  in the ((x1 * z1 + x2 * z2) + (y1 * z2 + y2 * z1) = (x1 * z2 + x2 * z1) + (y1 * z1 + y2 * z2)) $ ?hole
+      e9 = the ((x1 * z1 + y2 * z1) + (x2 * z2 + y1 * z2) = (x2 * z1 + y1 * z1) + (x1 * z2 + y2 * z2)) 
+                   $ combine_equalities (+) e4 e8
+                   
+      e10 = nat_lemmas.abcd_to_adbc_lemma (x1 * z1) (x2 * z2) (y1 * z2) (y2 * z1)
+      e11 = nat_lemmas.abcd_to_cabd_lemma (x2 * z1) (y1 * z1) (x1 * z2) (y2 * z2)
+  in the ((x1 * z1 + x2 * z2) + (y1 * z2 + y2 * z1) = (x1 * z2 + x2 * z1) + (y1 * z1 + y2 * z2)) 
+             $ trans e10 $ trans e9 e11
 
 integer_times_respects_eq_right : bin_op_respects_eq_right (*) (eq IntegerSetoid)
 integer_times_respects_eq_right = ?right

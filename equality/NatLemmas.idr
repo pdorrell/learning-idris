@@ -35,6 +35,30 @@ namespace nat_lemmas
         e5 = the ((((a + c) + b) + d) = (a + c) + (b + d)) $ plus_assoc (a + c) b d
     in trans e1 $ trans e2 $ trans e3 $ trans e4 e5
 
+  abc_to_cab_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> 
+                  a + (b + c) = c + (a + b)
+  abc_to_cab_lemma a b c = 
+    let e1 = the (a + (b + c) = (a + b) + c) $ sym $ nat_lemmas.plus_assoc a b c
+        e2 = the ((a + b) + c = c + (a + b)) $ nat_lemmas.plus_comm (a + b) c
+    in the (a + (b + c) = c + (a + b)) $ trans e1 e2
+        
+  abcd_to_adbc_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (d : Nat) -> 
+                  (a + b) + (c + d) = (a + d) + (b + c)
+  abcd_to_adbc_lemma a b c d = 
+    let e1 = the ((a + b) + (c + d) = a + (b + (c + d))) $ plus_assoc a b (c + d)
+        e2 = the ((a + d) + (b + c) = a + (d + (b + c))) $ plus_assoc a d (b + c)
+        e3 = the (a + (b + (c + d)) = a + (d + (b + c))) $ cong $ abc_to_cab_lemma b c d
+      in the ((a + b) + (c + d) = (a + d) + (b + c)) $ trans e1 (trans e3 (sym e2))
+      
+  abcd_to_cabd_lemma : (a : Nat) -> (b : Nat) -> (c : Nat) -> (d : Nat) -> 
+                 (a + b) + (c + d) = (c + a) + (b + d)
+  abcd_to_cabd_lemma a b c d = 
+    let e1 = sym $ nat_lemmas.plus_assoc (a + b) c d
+        e2 = nat_lemmas.plus_assoc (c + a) b d
+        e3 = the (a + b + c = c + a + b) $ trans (plus_assoc a b c) $ trans (abc_to_cab_lemma a b c) (sym $ plus_assoc c a b)
+        e4 = the (a + b + c + d = c + a + b + d) $ rewrite e3 in Refl
+    in trans e1 $ trans e4 e2
+  
   plus_left_cancel : (x : Nat) -> (y : Nat) -> (z : Nat) -> z + x = z + y -> x = y
   plus_left_cancel x y Z z_plus_x_is_z_plus_y = z_plus_x_is_z_plus_y
   plus_left_cancel x y (S k) z_plus_x_is_z_plus_y = 
