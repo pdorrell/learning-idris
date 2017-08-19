@@ -151,6 +151,12 @@ Num Integer_ where
                      then MkInteger 0 (fromInteger (- x))
                      else MkInteger (fromInteger x) 0
                      
+Integer_plus_comm : Commutative ((+) {ty=Integer_})
+Integer_plus_comm (MkInteger x1 x2) (MkInteger y1 y2) = 
+  let e1 = nat_lemmas.plus_comm x1 y1
+      e2 = nat_lemmas.plus_comm x2 y2
+  in rewrite e1 in rewrite e2 in Refl
+
 Neg Integer_ where
   negate (MkInteger x1 x2) = MkInteger x2 x1
   (MkInteger x1 x2) - (MkInteger y1 y2) = MkInteger (x1 + y2) (x2 + y1)
