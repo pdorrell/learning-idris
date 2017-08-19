@@ -25,11 +25,11 @@ IntensionalSetoid t = MkSetoid t t_eq t_refl_eq t_symm_eq t_trans_eq where
     t_trans_eq x_eq_y y_eq_z = trans x_eq_y y_eq_z
 
     
-data EqualPair : (setoid: Setoid) -> Type where
-  MkEqualPair : (x : carrier setoid) -> (y : carrier setoid) -> eq setoid x y -> EqualPair setoid
+data EqPair : (setoid: Setoid) -> Type where
+  MkEqPair : (x : carrier setoid) -> (y : carrier setoid) -> eq setoid x y -> EqPair setoid
   
-identical_pair : {setoid: Setoid} -> (x : carrier setoid) -> EqualPair setoid
-identical_pair {setoid} x = MkEqualPair x x (refl_eq setoid)
+identical_pair : {setoid: Setoid} -> (x : carrier setoid) -> EqPair setoid
+identical_pair {setoid} x = MkEqPair x x (refl_eq setoid)
 
 BinaryOp : (t : Type) -> Type
 BinaryOp t = t -> t -> t
@@ -54,20 +54,20 @@ bin_op_respects_eq {t} op eq = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) ->
                                eq x1 x2 -> eq y1 y2 -> eq (op x1 y1) (op x2 y2)
                                
 lift_bin_op_to_equal_pair : (setoid : Setoid) -> (op : BinaryOp (carrier setoid)) -> 
-                                 (eq_respects_op : bin_op_respects_eq op (eq setoid)) -> BinaryOp (EqualPair setoid)
-lift_bin_op_to_equal_pair setoid op eq_respects_op (MkEqualPair x1 x2 eq_x1_x2) (MkEqualPair y1 y2 eq_y1_y2) =
+                                 (eq_respects_op : bin_op_respects_eq op (eq setoid)) -> BinaryOp (EqPair setoid)
+lift_bin_op_to_equal_pair setoid op eq_respects_op (MkEqPair x1 x2 eq_x1_x2) (MkEqPair y1 y2 eq_y1_y2) =
   let op_x1_y1 = op x1 y1
       op_x2_y2 = op x2 y2
       eq_from_respect = eq_respects_op x1 x2 y1 y2 eq_x1_x2 eq_y1_y2
-  in MkEqualPair op_x1_y1 op_x2_y2 eq_from_respect
+  in MkEqPair op_x1_y1 op_x2_y2 eq_from_respect
   
-equal_pair_eq : (setoid : Setoid) -> (EqualPair setoid) -> (EqualPair setoid) -> Type
-equal_pair_eq setoid (MkEqualPair x1 x2 eq_x1_x2) (MkEqualPair y1 y2 eq_y1_y2) = eq setoid x1 y1
+equal_pair_eq : (setoid : Setoid) -> (EqPair setoid) -> (EqPair setoid) -> Type
+equal_pair_eq setoid (MkEqPair x1 x2 eq_x1_x2) (MkEqPair y1 y2 eq_y1_y2) = eq setoid x1 y1
 
 equal_pairs_lifts_comm : (setoid : Setoid) -> (op : BinaryOp (carrier setoid)) -> CommutativeBy op (eq setoid) -> 
                          (eq_respects_op : bin_op_respects_eq op (eq setoid)) ->
                          CommutativeBy (lift_bin_op_to_equal_pair setoid op eq_respects_op) (equal_pair_eq setoid)
-equal_pairs_lifts_comm setoid op comm_op_eq eq_respects_op (MkEqualPair x1 x2 eq_x1_x2) (MkEqualPair y1 y2 eq_y1_y2) = 
+equal_pairs_lifts_comm setoid op comm_op_eq eq_respects_op (MkEqPair x1 x2 eq_x1_x2) (MkEqPair y1 y2 eq_y1_y2) = 
   comm_op_eq x1 y1
 
 bin_op_respects_eq_left : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
@@ -112,20 +112,20 @@ NatSetoid : Setoid
 NatSetoid = IntensionalSetoid Nat
   
 data Nat' : Type where
-  MkNat' : EqualPair NatSetoid -> Nat'
+  MkNat' : EqPair NatSetoid -> Nat'
   
 interface WrapsSetoid (t : Type) (setoid : Setoid) | t where
-  wrap_pair : EqualPair setoid -> t
-  unwrap_pair : t -> EqualPair setoid
+  wrap_pair : EqPair setoid -> t
+  unwrap_pair : t -> EqPair setoid
   
 WrapsSetoid Nat' NatSetoid where
   wrap_pair pair = MkNat' pair
   unwrap_pair (MkNat' pair) = pair
   
-lift_bin_op_to_setoid_wrapper : WrapsSetoid t setoid => BinaryOp (EqualPair setoid) -> BinaryOp t
+lift_bin_op_to_setoid_wrapper : WrapsSetoid t setoid => BinaryOp (EqPair setoid) -> BinaryOp t
 lift_bin_op_to_setoid_wrapper op x y = wrap_pair $ op (unwrap_pair x) (unwrap_pair y)
 
-lift_bin_op_to_intensional_equal_pair : (op : BinaryOp t) -> BinaryOp (EqualPair (IntensionalSetoid t))
+lift_bin_op_to_intensional_equal_pair : (op : BinaryOp t) -> BinaryOp (EqPair (IntensionalSetoid t))
 lift_bin_op_to_intensional_equal_pair {t} op = lift_bin_op_to_equal_pair (IntensionalSetoid t) op (bin_op_respects_intensional_eq op)
     
 Num Nat' where
@@ -140,9 +140,9 @@ double_nat : Nat -> Nat
 double_nat x = x + x
 
 lift_fun_to_intensional_eq : {setoid_t2 : Setoid} -> (f : t1 -> carrier setoid_t2) -> 
-                         (EqualPair (IntensionalSetoid t1) -> EqualPair setoid_t2)
-lift_fun_to_intensional_eq {setoid_t2} f (MkEqualPair x y eq_x_y) = 
-  MkEqualPair (f x) (f y) eq_fx_fy where
+                         (EqPair (IntensionalSetoid t1) -> EqPair setoid_t2)
+lift_fun_to_intensional_eq {setoid_t2} f (MkEqPair x y eq_x_y) = 
+  MkEqPair (f x) (f y) eq_fx_fy where
      eq_fx_fy : eq setoid_t2 (f x) (f y)
      eq_fx_fy = 
        let x_is_y = the (x = y) eq_x_y
@@ -252,7 +252,7 @@ integer_times_respects_eq = bin_op_respect_eq_from_lr (*) (eq IntegerSetoid) (tr
                                  integer_times_respects_eq_left integer_times_respects_eq_right
 
 data Integer' : Type where
-  MkInteger' : EqualPair IntegerSetoid -> Integer'
+  MkInteger' : EqPair IntegerSetoid -> Integer'
   
 WrapsSetoid Integer' IntegerSetoid where
   wrap_pair pair = MkInteger' pair
