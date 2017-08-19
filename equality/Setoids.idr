@@ -37,6 +37,17 @@ BinaryOp t = t -> t -> t
 CommutativeBy : (op : t -> t -> t2) -> (eq : t2 -> t2 -> Type) -> Type
 CommutativeBy {t} op eq = (x : t) -> (y : t) -> eq (op x y) (op y x)
 
+Commutative : (op : t -> t -> t2) -> Type
+Commutative op = CommutativeBy op (=)
+
+reflexive : (eq : t -> t -> Type) -> Type
+reflexive {t} eq = (x : t) -> eq x x
+
+CommutativeBy_from_Commutative : {op : t -> t -> t2} -> reflexive eq -> Commutative op -> CommutativeBy op eq
+CommutativeBy_from_Commutative {t} {op} {eq} refl_eq op_is_comm x y = 
+  let e1 = the (op x y = op y x) $ op_is_comm x y
+      e2 = the (eq (op x y) (op x y)) $ refl_eq (op x y)
+  in rewrite sym e1 in e2
 
 bin_op_respects_eq : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
 bin_op_respects_eq {t} op eq = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
