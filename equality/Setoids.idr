@@ -34,6 +34,10 @@ identical_pair {setoid} x = MkEqualPair x x (refl_eq setoid x)
 BinaryOp : (t : Type) -> Type
 BinaryOp t = t -> t -> t
 
+CommutativeBy : (op : t -> t -> t2) -> (eq : t2 -> t2 -> Type) -> Type
+CommutativeBy {t} op eq = (x : t) -> (y : t) -> eq (op x y) (op y x)
+
+
 bin_op_respects_eq : (op : BinaryOp t) -> (eq : t -> t -> Type) -> Type
 bin_op_respects_eq {t} op eq = (x1 : t) -> (x2 : t) -> (y1 : t) -> (y2 : t) -> 
                                eq x1 x2 -> eq y1 y2 -> eq (op x1 y1) (op x2 y2)
@@ -49,6 +53,18 @@ bin_op_respects_eq_right {t} op eq = (x : t) -> (y1 : t) -> (y2 : t) ->
 transitive : (eq : t -> t -> Type) -> Type
 transitive {t} eq = (x : t) -> (y : t) -> (z : t) -> eq x y -> eq y z -> eq x z
                                
+comm_applies_to_respect_eq : bin_op_respects_eq_left op eq -> CommutativeBy op eq -> transitive eq -> 
+                               bin_op_respects_eq_right op eq
+comm_applies_to_respect_eq {op} op_respects_eq_left comm_op_eq trans_eq x y1 y2 eq_y1_y2 = 
+  let e1 = op_respects_eq_left y1 y2 x eq_y1_y2
+      e2 = comm_op_eq x y1
+      e3 = comm_op_eq y2 x
+      e4 = trans_eq (op y1 x) (op y2 x) (op x y2) e1 e3
+      e5 = trans_eq (op x y1) (op y1 x) (op x y2) e2 e4
+  in ?hole
+
+
+{-                                         
 bin_op_respect_eq_from_lr : {t: Type} -> (op : BinaryOp t) -> (eq : t -> t -> Type) -> transitive eq -> 
                              bin_op_respects_eq_left op eq -> bin_op_respects_eq_right op eq -> bin_op_respects_eq op eq
 bin_op_respect_eq_from_lr {t} op eq transitive_eq respects_left respects_right x1 x2 y1 y2 eq_x1_x2 e1_y1_y2 = 
@@ -220,3 +236,4 @@ Num Integer' where
 
 Integer'3 : Integer'
 Integer'3 = 3
+-}
