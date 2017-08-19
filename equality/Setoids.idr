@@ -6,30 +6,30 @@ record Setoid where
   constructor MkSetoid
   carrier : Type
   eq : carrier -> carrier -> Type
-  refl_eq : (x : carrier) -> eq x x
-  symm_eq : (x : carrier) -> (y : carrier) -> eq x y -> eq y x
-  trans_eq : (x : carrier) -> (y : carrier) -> (z : carrier) -> eq x y -> eq y z -> eq x z
+  refl_eq : {x : carrier} -> eq x x
+  symm_eq : {x : carrier} -> {y : carrier} -> eq x y -> eq y x
+  trans_eq : {x : carrier} -> {y : carrier} -> {z : carrier} -> eq x y -> eq y z -> eq x z
   
 IntensionalSetoid : (t : Type) -> Setoid
 IntensionalSetoid t = MkSetoid t t_eq t_refl_eq t_symm_eq t_trans_eq where
     t_eq : t -> t -> Type
     t_eq x y = x = y
 
-    t_refl_eq : (x : t) -> t_eq x x
-    t_refl_eq x = Refl
+    t_refl_eq : {x : t} -> t_eq x x
+    t_refl_eq = Refl
     
-    t_symm_eq : (x : t) -> (y : t) -> t_eq x y -> t_eq y x
-    t_symm_eq x y x_eq_y = sym $ the (x = y) x_eq_y
+    t_symm_eq : {x : t} -> {y : t} -> t_eq x y -> t_eq y x
+    t_symm_eq {x} {y} x_eq_y = sym $ the (x = y) x_eq_y
     
-    t_trans_eq : (x : t) -> (y : t) -> (z : t) -> t_eq x y -> t_eq y z -> t_eq x z
-    t_trans_eq x y z x_eq_y y_eq_z = trans x_eq_y y_eq_z
+    t_trans_eq : {x : t} -> {y : t} -> {z : t} -> t_eq x y -> t_eq y z -> t_eq x z
+    t_trans_eq x_eq_y y_eq_z = trans x_eq_y y_eq_z
 
     
 data EqualPair : (setoid: Setoid) -> Type where
   MkEqualPair : (x : carrier setoid) -> (y : carrier setoid) -> eq setoid x y -> EqualPair setoid
   
 identical_pair : {setoid: Setoid} -> (x : carrier setoid) -> EqualPair setoid
-identical_pair {setoid} x = MkEqualPair x x (refl_eq setoid x)
+identical_pair {setoid} x = MkEqualPair x x (refl_eq setoid)
 
 BinaryOp : (t : Type) -> Type
 BinaryOp t = t -> t -> t
@@ -51,26 +51,29 @@ bin_op_respects_eq_right {t} op eq = (x : t) -> (y1 : t) -> (y2 : t) ->
                                eq y1 y2 -> eq (op x y1) (op x y2)
                                
 transitive : (eq : t -> t -> Type) -> Type
-transitive {t} eq = (x : t) -> (y : t) -> (z : t) -> eq x y -> eq y z -> eq x z
+transitive {t} eq = {x : t} -> {y : t} -> {z : t} -> eq x y -> eq y z -> eq x z
                                
-comm_applies_to_respect_eq : bin_op_respects_eq_left op eq -> CommutativeBy op eq -> transitive eq -> 
+respect_eq_right_from_left_when_comm : bin_op_respects_eq_left op eq -> CommutativeBy op eq -> transitive eq -> 
                                bin_op_respects_eq_right op eq
-comm_applies_to_respect_eq {op} op_respects_eq_left comm_op_eq trans_eq x y1 y2 eq_y1_y2 = 
+respect_eq_right_from_left_when_comm {op} op_respects_eq_left comm_op_eq trans_eq x y1 y2 eq_y1_y2 = 
   let e1 = op_respects_eq_left y1 y2 x eq_y1_y2
       e2 = comm_op_eq x y1
       e3 = comm_op_eq y2 x
-      e4 = trans_eq (op y1 x) (op y2 x) (op x y2) e1 e3
-      e5 = trans_eq (op x y1) (op y1 x) (op x y2) e2 e4
-  in ?hole
-
-
-{-                                         
+      e4 = trans_eq e1 e3
+  in trans_eq e2 e4
+  
 bin_op_respect_eq_from_lr : {t: Type} -> (op : BinaryOp t) -> (eq : t -> t -> Type) -> transitive eq -> 
                              bin_op_respects_eq_left op eq -> bin_op_respects_eq_right op eq -> bin_op_respects_eq op eq
 bin_op_respect_eq_from_lr {t} op eq transitive_eq respects_left respects_right x1 x2 y1 y2 eq_x1_x2 e1_y1_y2 = 
   let e1 = the (eq (op x1 y1) (op x2 y1)) $ respects_left x1 x2 y1 eq_x1_x2
       e2 = the (eq (op x2 y1) (op x2 y2)) $ respects_right x2 y1 y2 e1_y1_y2
-  in transitive_eq (op x1 y1) (op x2 y1) (op x2 y2) e1 e2
+  in transitive_eq e1 e2
+
+respect_eq_from_left_when_comm : bin_op_respects_eq_left op eq -> CommutativeBy op eq -> transitive eq -> 
+                               bin_op_respects_eq op eq
+respect_eq_from_left_when_comm {op} {eq} op_respects_eq_left comm_op_eq trans_eq = 
+  let op_respects_eq_right = respect_eq_right_from_left_when_comm op_respects_eq_left comm_op_eq trans_eq 
+  in bin_op_respect_eq_from_lr op eq trans_eq op_respects_eq_left op_respects_eq_right
 
 bin_op_respects_intensional_eq : (op : BinaryOp t) -> bin_op_respects_eq op (eq (IntensionalSetoid t))
 bin_op_respects_intensional_eq {t} op x1 x2 y1 y2 eq_x1_x2 eq_y1_y2 = 
@@ -124,7 +127,7 @@ lift_fun_to_intensional_eq {setoid_t2} f (MkEqualPair x y eq_x_y) =
      eq_fx_fy = 
        let x_is_y = the (x = y) eq_x_y
            fx_is_fy = cong {f=f} x_is_y
-           eq_fy_fy = refl_eq setoid_t2 (f y)
+           eq_fy_fy = refl_eq setoid_t2
          in rewrite fx_is_fy in the (eq setoid_t2 (f y) (f y)) eq_fy_fy
 
 data Integer_ : Type where
@@ -149,19 +152,19 @@ IntegerSetoid = MkSetoid Integer_ int_eq int_refl_eq int_symm_eq int_trans_eq wh
     int_eq : Integer_ -> Integer_ -> Type
     int_eq (MkInteger x1 x2) (MkInteger y1 y2) = x1 + y2 = x2 + y1
 
-    int_refl_eq : (x : Integer_) -> int_eq x x
-    int_refl_eq (MkInteger x1 x2) = nat_lemmas.plus_comm x1 x2
+    int_refl_eq : {x : Integer_} -> int_eq x x
+    int_refl_eq {x=MkInteger x1 x2} = nat_lemmas.plus_comm x1 x2
 
-    int_symm_eq : (x : Integer_) -> (y : Integer_) -> int_eq x y -> int_eq y x
-    int_symm_eq (MkInteger x1 x2) (MkInteger y1 y2) x_eq_y = 
+    int_symm_eq : {x : Integer_} -> {y : Integer_} -> int_eq x y -> int_eq y x
+    int_symm_eq {x=MkInteger x1 x2} {y=MkInteger y1 y2} x_eq_y = 
       let e1 = the (y2 + x1 = x1 + y2) $ nat_lemmas.plus_comm y2 x1
           e2 = the (x2 + y1 = y1 + x2) $ nat_lemmas.plus_comm x2 y1
           e3 = the (x1 + y2 = x2 + y1) $ x_eq_y
        in sym $ trans e1 $ trans e3 e2
         
-    int_trans_eq : (x : Integer_) -> (y : Integer_) -> (z : Integer_) -> 
+    int_trans_eq : {x : Integer_} -> {y : Integer_} -> {z : Integer_} -> 
                       int_eq x y -> int_eq y z -> int_eq x z
-    int_trans_eq (MkInteger x1 x2) (MkInteger y1 y2) (MkInteger z1 z2) x_eq_y y_eq_z = 
+    int_trans_eq {x=MkInteger x1 x2} {y=MkInteger y1 y2} {z=MkInteger z1 z2} x_eq_y y_eq_z = 
       let e1 = the (x1 + y2 = x2 + y1) $ x_eq_y
           e2 = the (y1 + z2 = y2 + z1) $ y_eq_z
           e3 = the ((x1 + y2) + (y1 + z2) = (x2 + y1) + (y1 + z2)) $ cong {f = \n => n + (y1 + z2)} e1
@@ -236,4 +239,3 @@ Num Integer' where
 
 Integer'3 : Integer'
 Integer'3 = 3
--}
