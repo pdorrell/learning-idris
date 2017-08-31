@@ -28,21 +28,35 @@ Wraps t (IntensionalSetoid t) where
 FunRespectsEq : (Setoid t1, Setoid t2) => (t1 -> t2) -> Type
 FunRespectsEq {t1} {t2} f = (x1 : t1) -> (x2 : t1) -> eq x1 x2 -> eq (f x1) (f x2)
 
+infixr 2 ->>
+
+interface ProofWrapped (wrapped : Type) (raw : Type) | wrapped where
+  without_proof : wrapped -> raw
+
 data FunctionSetoid : (t1 : Type) -> (t2 : Type) -> Type where
   MkFunction : (Setoid t1, Setoid t2) => (f : t1 -> t2) -> FunRespectsEq f -> FunctionSetoid t1 t2
   
-Setoid (FunctionSetoid t1 t2) where
+(->>) : (t1 : Type) -> (t2 : Type) -> Type
+t1 ->> t2 = FunctionSetoid t1 t2
+  
+Setoid (t1 ->> t2) where
   eq (MkFunction f1 _) (MkFunction f2 _) = (x : t1) -> eq (f1 x) (f2 x)
   refl_eq {x=MkFunction f1 _} x' = refl_eq {x=f1 x'}
   symm_eq {x=MkFunction f1 _} {y=MkFunction f2 _} eq_f1_f2 x' = 
                              symm_eq {x=f1 x'} {y=f2 x'} $ eq_f1_f2 x'
   trans_eq {x=MkFunction f1 _} {y=MkFunction f2 _} {z=MkFunction f3 _} eq_f1_f2 eq_f2_f3 x' = 
                              trans_eq {x=f1 x'} {y=f2 x'} {z=f3 x'} (eq_f1_f2 x') (eq_f2_f3 x')
+                             
+ProofWrapped (FunctionSetoid t1 t2) (t1 -> t2) where
+  without_proof (MkFunction f f_respects_f) = f
 
 Num t => Num (IntensionalSetoid t) where
   x + y = wrap (unwrap x + unwrap y)
   x * y = wrap (unwrap x * unwrap y)
   fromInteger x = wrap (fromInteger x)
+  
+interface (Num t, Setoid t) => NumSetoid t where
+  respectful_plus : (t ->> t ->> t)
   
 Nat_ : Type
 Nat_ = IntensionalSetoid Nat
