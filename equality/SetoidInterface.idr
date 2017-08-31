@@ -1,3 +1,5 @@
+import NatLemmas
+
 %default total
 
 interface Setoid t where
@@ -41,7 +43,42 @@ Num t => Num (IntensionalSetoid t) where
   x + y = wrap (unwrap x + unwrap y)
   x * y = wrap (unwrap x * unwrap y)
   fromInteger x = wrap (fromInteger x)
+  
+Nat_ : Type
+Nat_ = IntensionalSetoid Nat
+
+Nat_3 : Nat_
+Nat_3 = 3
 
 data Integer_ : Type where
   MkInteger : (x : Nat) -> (y : Nat) -> Integer_
   
+Setoid Integer_ where
+  eq (MkInteger x1 x2) (MkInteger y1 y2) = x1 + y2 = x2 + y1
+  
+  refl_eq {x=MkInteger x1 x2} = nat_lemmas.plus_comm x1 x2
+  
+  symm_eq {x=MkInteger x1 x2} {y=MkInteger y1 y2} x_eq_y = 
+      let e1 = the (y2 + x1 = x1 + y2) $ nat_lemmas.plus_comm y2 x1
+          e2 = the (x2 + y1 = y1 + x2) $ nat_lemmas.plus_comm x2 y1
+          e3 = the (x1 + y2 = x2 + y1) $ x_eq_y
+       in sym $ trans e1 $ trans e3 e2
+       
+  trans_eq {x=MkInteger x1 x2} {y=MkInteger y1 y2} {z=MkInteger z1 z2} x_eq_y y_eq_z = 
+      let e1 = the (x1 + y2 = x2 + y1) $ x_eq_y
+          e2 = the (y1 + z2 = y2 + z1) $ y_eq_z
+          e3 = the ((x1 + y2) + (y1 + z2) = (x2 + y1) + (y1 + z2)) $ cong {f = \n => n + (y1 + z2)} e1
+          e4 = the ((x1 + y2) + (y1 + z2) = (x2 + y1) + (y2 + z1)) $ rewrite sym e2 in e3
+          e5 = the ((x1 + y2) + (y1 + z2) = (x1 + z2) + (y2 + y1)) $ nat_lemmas.abcd_to_adbc_lemma x1 y2 y1 z2
+          e6 = the ((x2 + y1) + (y2 + z1) = (x2 + z1) + (y1 + y2)) $ nat_lemmas.abcd_to_adbc_lemma x2 y1 y2 z1
+          e7 = the ((x1 + z2) + (y2 + y1) = (x2 + z1) + (y1 + y2)) $ trans (sym e5) $ trans e4 e6
+          e8 = the ((x2 + z1) + (y1 + y2) = (x2 + z1) + (y2 + y1)) $ cong $ nat_lemmas.plus_comm y1 y2
+          e9 = the ((x1 + z2) + (y2 + y1) = (x2 + z1) + (y2 + y1)) $ trans e7 e8
+      in the ((x1 + z2) = (x2 + z1)) $ nat_lemmas.plus_right_cancel (x1 + z2) (x2 + z1) (y2 + y1) $ e9
+
+Num Integer_ where
+  (MkInteger x1 x2) + (MkInteger y1 y2) = MkInteger (x1 + y1) (x2 + y2)
+  (MkInteger x1 x2) * (MkInteger y1 y2) = MkInteger (x1 * y1 + x2 * y2) (x1 * y2 + x2 * y1)
+  fromInteger x = if x < 0 
+                     then MkInteger 0 (fromInteger (- x))
+                     else MkInteger (fromInteger x) 0
