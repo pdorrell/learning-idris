@@ -16,22 +16,27 @@ interface FiniteType t where
 eq_from_fin : FiniteType t => t -> t -> Bool
 eq_from_fin x y = toFin x == toFin y
 
+nat_to_fin: Nat -> {max : Nat} -> Fin (S max)
+nat_to_fin Z {max} = FZ
+nat_to_fin (S k) {max = Z} = FZ
+nat_to_fin (S k) {max = (S j)} = FS (nat_to_fin k)
+
 data MyType
     = One | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten
 
 FiniteType MyType where
   size = the Nat 10
   values = [One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten]
-  toFin One = FZ
-  toFin Two = (FS FZ)
-  toFin Three = (FS (FS FZ))
-  toFin Four = (FS (FS (FS FZ)))
-  toFin Five = (FS (FS (FS (FS FZ))))
-  toFin Six = (FS (FS (FS (FS (FS FZ)))))
-  toFin Seven = (FS (FS (FS (FS (FS (FS FZ))))))
-  toFin Eight = (FS (FS (FS (FS (FS (FS (FS FZ)))))))
-  toFin Nine = (FS (FS (FS (FS (FS (FS (FS (FS FZ))))))))
-  toFin Ten = (FS (FS (FS (FS (FS (FS (FS (FS (FS FZ)))))))))
+  toFin One   = nat_to_fin 0
+  toFin Two   = nat_to_fin 1
+  toFin Three = nat_to_fin 2
+  toFin Four  = nat_to_fin 3
+  toFin Five  = nat_to_fin 4
+  toFin Six   = nat_to_fin 5
+  toFin Seven = nat_to_fin 6
+  toFin Eight = nat_to_fin 7
+  toFin Nine  = nat_to_fin 8
+  toFin Ten   = nat_to_fin 9
   
 Eq MyType where
   (==) = eq_from_fin
@@ -41,3 +46,4 @@ four_eq_four = Refl
 
 four_not_eq_seven : Four == Seven = False
 four_not_eq_seven = Refl
+
