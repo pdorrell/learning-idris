@@ -48,3 +48,25 @@ four_not_eq_seven = Refl
 interface FiniteType t size => VerifiedFiniteType t (size : Nat) | t where
   toAndFromFin : (x : t) -> the t (fromFin (toFin x)) = x
   fromAndToFin : (y : Fin size) -> toFin (the t (fromFin y)) = y
+
+VerifiedFiniteType MyType 10 where
+  toAndFromFin One = Refl
+  toAndFromFin Two = Refl
+  toAndFromFin Three = Refl
+  toAndFromFin Four = Refl
+  toAndFromFin Five = Refl
+  toAndFromFin Six = Refl
+  toAndFromFin Seven = Refl
+  toAndFromFin Eight = Refl
+  toAndFromFin Nine = Refl
+  toAndFromFin Ten = Refl
+  fromAndToFin FZ = Refl
+  fromAndToFin (FS FZ) = Refl
+  fromAndToFin (FS (FS FZ)) = Refl
+  fromAndToFin (FS (FS (FS FZ))) = Refl
+  fromAndToFin (FS (FS (FS (FS FZ)))) = Refl
+  fromAndToFin (FS (FS (FS (FS (FS FZ))))) = Refl
+  fromAndToFin (FS (FS (FS (FS (FS (FS FZ)))))) = Refl
+  fromAndToFin (FS (FS (FS (FS (FS (FS (FS FZ))))))) = Refl
+  fromAndToFin (FS (FS (FS (FS (FS (FS (FS (FS FZ)))))))) = Refl
+  fromAndToFin (FS (FS (FS (FS (FS (FS (FS (FS (FS FZ))))))))) = Refl
