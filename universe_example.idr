@@ -30,7 +30,6 @@ NT = MPair Tree (\t => normal t)
 p : NT -> Tree
 p (MkMPair x _) = x
 
-{-
 R : Tree
 R = Sup NT p
 
@@ -44,5 +43,3 @@ lemma (MkMPair (MkMPair y1 y2) z)
 total
 russell : Void
 russell = lemma (MkMPair (MkMPair R lemma) REFL) 
--}
- 
