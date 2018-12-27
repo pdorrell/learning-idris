@@ -5,17 +5,15 @@
 data Set : Type where
   MkSet : (x : Type) -> (x -> Set) -> Set
 
-DepPairType : (x : Type) -> (f: x -> Type) -> Type
-DepPairType x f = (x1 : x ** f x1)
-
-DepPair : {x : Type} -> {f : x -> Type} -> (x1 : x) -> (y : f x1) -> DepPairType x f
-DepPair {x} {f} x1 y = (x1 ** y)
+data DepPairType : (x : Type) -> (f: x -> Type) -> Type where
+  DepPair : {x : Type} -> {f : x -> Type} -> (x1 : x) -> (y : f x1) -> DepPairType x f
 
 DepPairFst : {x : Type} -> {f : x -> Type} -> DepPairType x f -> x
-DepPairFst {x} {f} p = fst p
+DepPairFst (DepPair x1 y) = x1
 
 DepPairSnd : {x : Type} -> {f : x -> Type} -> (p : DepPairType x f) -> (f (DepPairFst p))
-DepPairSnd p = snd p
+DepPairSnd (DepPair x1 y) = y
+
 
 IsMemberOf : Set -> Set -> Type
 IsMemberOf a (MkSet x f) = DepPairType x (\x_value => (a = f x_value))
