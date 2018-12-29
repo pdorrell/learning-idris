@@ -62,3 +62,8 @@ x_implies_not_y_implies_y_implies_not_x x_implies_not_y y1 x1 = x_implies_not_y 
 
 terminates_implies_not_runs_forever : Terminates program initial_state result -> RunsForever program initial_state -> Void
 terminates_implies_not_runs_forever = x_implies_not_y_implies_y_implies_not_x runs_forever_implies_not_terminates
+
+Stepped : (program : ProgramType state_type) -> (ProgramType (Int, state_type))
+Stepped program (step_num, state) = 
+  let (terminated, next_state) = program state
+  in (terminated, (step_num, next_state))
