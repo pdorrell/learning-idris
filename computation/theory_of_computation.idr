@@ -19,10 +19,6 @@ data ExecutionState state_type = Running state_type | Terminated state_type
 running_is_not_terminated : Running running_state = Terminated terminated_state -> Void
 running_is_not_terminated Refl impossible
 
-has_terminated : ExecutionState state_type -> Bool
-has_terminated (Running x) = False
-has_terminated (Terminated x) = True
-
 -- Execute one step of an executable program, taking into account whether or not it has already terminated
 ExecuteStep : (program : ProgramType state_type) -> ExecutionState state_type -> ExecutionState state_type
 ExecuteStep program (Running state) = 
@@ -47,15 +43,22 @@ ImpliesTermination : (program1, program2 : ProgramType state_type) -> Type
 ImpliesTermination {state_type} program1 program2 = 
    {initial_state, result : state_type} -> Terminates program1 initial_state result -> Terminates program2 initial_state result
 
-IsNonTerminating : (program : ProgramType state_type) -> (initial_state : state_type) -> Type
-IsNonTerminating program initial_state = (num_steps : Nat) -> (state ** ExecuteSteps program num_steps initial_state = Running state)
+-- 'Runs Forever' means that after any number of steps, the program is still running
+RunsForever : (program : ProgramType state_type) -> (initial_state : state_type) -> Type
+RunsForever program initial_state = (num_steps : Nat) -> (state ** ExecuteSteps program num_steps initial_state = Running state)
 
-is_non_terminating_implies_not_terminates : IsNonTerminating program initial_state -> Terminates program initial_state result -> Void
-is_non_terminating_implies_not_terminates {program} {initial_state} {result} is_non_terminating terminates = 
+runs_forever_implies_not_terminates : RunsForever program initial_state -> Terminates program initial_state result -> Void
+runs_forever_implies_not_terminates {program} {initial_state} {result} runs_forever terminates = 
   let (num_steps ** terminated_result) = terminates
       e1 = the (ExecuteSteps program num_steps initial_state = Terminated result) terminated_result
-      e2 = is_non_terminating num_steps
+      e2 = runs_forever num_steps
       (running_state ** e3) = e2
       e4 = the (ExecuteSteps program num_steps initial_state = Running running_state) e3
       e5 = the (Terminated result = Running running_state) $ trans (sym e1) e4
   in running_is_not_terminated $ sym e5
+
+x_implies_not_y_implies_y_implies_not_x : (x -> (y -> Void)) -> (y -> (x -> Void))
+x_implies_not_y_implies_y_implies_not_x x_implies_not_y y1 x1 = x_implies_not_y x1 y1
+
+terminates_implies_not_runs_forever : Terminates program initial_state result -> RunsForever program initial_state -> Void
+terminates_implies_not_runs_forever = x_implies_not_y_implies_y_implies_not_x runs_forever_implies_not_terminates
