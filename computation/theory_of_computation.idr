@@ -39,9 +39,14 @@ Terminates program initial_state result = (num_steps: Nat ** (ExecuteSteps progr
 
 -- If termination of program1 implies termination of program2, then we can use program1 wherever we want to use program2
 -- (if the only thing we are interested in is the result of program2 terminating).
-ImpliesTermination : (program1, program2 : ProgramType state_type) -> Type
-ImpliesTermination {state_type} program1 program2 = 
-   {initial_state, result : state_type} -> Terminates program1 initial_state result -> Terminates program2 initial_state result
+ImpliesTermination : (program1 : ProgramType state_type, program2 : ProgramType state_type2,
+                      transform_initial_state : state_type2 -> state_type,
+                      transform_result : state_type -> state_type2) -> Type
+ImpliesTermination {state_type} {state_type2} program1 program2 transform_initial_state transform_result = 
+   {initial_state: state_type2} -> {result : state_type} 
+     -> Terminates program1 (transform_initial_state initial_state) result
+     -> Terminates program2 initial_state (transform_result result)
+
 
 -- 'Runs Forever' means that after any number of steps, the program is still running
 RunsForever : (program : ProgramType state_type) -> (initial_state : state_type) -> Type
@@ -63,7 +68,12 @@ x_implies_not_y_implies_y_implies_not_x x_implies_not_y y1 x1 = x_implies_not_y 
 terminates_implies_not_runs_forever : Terminates program initial_state result -> RunsForever program initial_state -> Void
 terminates_implies_not_runs_forever = x_implies_not_y_implies_y_implies_not_x runs_forever_implies_not_terminates
 
-Stepped : (program : ProgramType state_type) -> (ProgramType (Int, state_type))
-Stepped program (step_num, state) = 
+data SteppedState state_type = Step Nat state_type
+
+SteppedProgram : (program : ProgramType state_type) -> (ProgramType (SteppedState state_type))
+SteppedProgram program (Step step_num state) = 
   let (terminated, next_state) = program state
-  in (terminated, (step_num, next_state))
+  in (terminated, (Step (S step_num) next_state))
+  
+SteppedInitialState : (state : state_type) -> (SteppedState state_type)
+SteppedInitialState state = (Step 0 state)
