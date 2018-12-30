@@ -1,6 +1,5 @@
 %default total
 
-
 -- exploring the idea that a meaningful set of mathematical axioms
 -- defines a theory of computation.
 
@@ -25,51 +24,51 @@ running_is_not_terminated : Running running_state = Terminated terminated_state 
 running_is_not_terminated Refl impossible
 
 -- Execute one step of an executable program, taking into account whether or not it has already terminated
-ExecuteStep2 : (program : Program _ state_type _) -> ExecutionState state_type -> ExecutionState state_type
-ExecuteStep2 program (Running state) = 
+ExecuteStep : (program : Program _ state_type _) -> ExecutionState state_type -> ExecutionState state_type
+ExecuteStep program (Running state) = 
   let (terminated, updated_state) = execute_step program state
   in case terminated of
        True => Terminated updated_state
        False => Running updated_state
-ExecuteStep2 program (Terminated state) = Terminated state
+ExecuteStep program (Terminated state) = Terminated state
 
 -- Execute specified number of steps of program on initial state
-ExecuteSteps2 : (program : Program input_type state_type _) -> (steps : Nat) -> (input : input_type) -> ExecutionState state_type
-ExecuteSteps2 program Z input = Running $ get_initial_state program input
-ExecuteSteps2 program (S k) input = ExecuteStep2 program (ExecuteSteps2 program k input) 
+ExecuteSteps : (program : Program input_type state_type _) -> (steps : Nat) -> (input : input_type) -> ExecutionState state_type
+ExecuteSteps program Z input = Running $ get_initial_state program input
+ExecuteSteps program (S k) input = ExecuteStep program (ExecuteSteps program k input) 
 
 -- A program terminates executing from an initial state if after executing some number of steps it terminates
-Terminates2 : (program : Program input_type state_type output_type) -> (input : input_type) -> (result : output_type) -> Type
-Terminates2 program input result = (num_steps: Nat ** 
+Terminates : (program : Program input_type state_type output_type) -> (input : input_type) -> (result : output_type) -> Type
+Terminates program input result = (num_steps: Nat ** 
                                       (final_state : state_type ** 
-                                        (ExecuteSteps2 program num_steps input = Terminated final_state,
+                                        (ExecuteSteps program num_steps input = Terminated final_state,
                                          get_result program final_state = result)))
 
 -- If termination of program1 implies termination of program2, then we can use program1 wherever we want to use program2
 -- (if the only thing we are interested in is the result of program2 terminating).
-ImpliesTermination2 : (program1 : Program input_type _ output_type) -> 
+ImpliesTermination : (program1 : Program input_type _ output_type) -> 
                       (program2 : Program input_type _ output_type) -> Type
-ImpliesTermination2 {input_type} {output_type} program1 program2 = 
+ImpliesTermination {input_type} {output_type} program1 program2 = 
    {input: input_type} -> {result : output_type} 
-     -> Terminates2 program1 input result
-     -> Terminates2 program2 input result
+     -> Terminates program1 input result
+     -> Terminates program2 input result
 
 -- 'Runs Forever' means that after any number of steps, the program is still running
-RunsForever2 : (program : Program input_type state_type _) -> (input : input_type) -> Type
-RunsForever2 program input = (num_steps : Nat) -> (state : state_type ** ExecuteSteps2 program num_steps input = Running state)
+RunsForever : (program : Program input_type state_type _) -> (input : input_type) -> Type
+RunsForever program input = (num_steps : Nat) -> (state : state_type ** ExecuteSteps program num_steps input = Running state)
 
-runs_forever_implies_not_terminates2 : RunsForever2 program input -> Terminates2 program input _ -> Void
-runs_forever_implies_not_terminates2 {program} {input} runs_forever terminates = 
+runs_forever_implies_not_terminates : RunsForever program input -> Terminates program input _ -> Void
+runs_forever_implies_not_terminates {program} {input} runs_forever terminates = 
   let (num_steps ** (final_state ** terminated_result)) = terminates
-      e1 = the (ExecuteSteps2 program num_steps input = Terminated final_state) $ fst terminated_result
+      e1 = the (ExecuteSteps program num_steps input = Terminated final_state) $ fst terminated_result
       e2 = runs_forever num_steps
       (running_state ** e3) = e2
-      e4 = the (ExecuteSteps2 program num_steps input = Running running_state) e3
+      e4 = the (ExecuteSteps program num_steps input = Running running_state) e3
       e5 = the (Terminated final_state = Running running_state) $ trans (sym e1) e4
   in running_is_not_terminated $ sym e5
 
 x_implies_not_y_implies_y_implies_not_x : (x -> (y -> Void)) -> (y -> (x -> Void))
 x_implies_not_y_implies_y_implies_not_x x_implies_not_y y1 x1 = x_implies_not_y x1 y1
 
-terminates_implies_not_runs_forever2 : Terminates2 program initial_state result -> RunsForever2 program initial_state -> Void
-terminates_implies_not_runs_forever2 = x_implies_not_y_implies_y_implies_not_x runs_forever_implies_not_terminates2
+terminates_implies_not_runs_forever : Terminates program initial_state result -> RunsForever program initial_state -> Void
+terminates_implies_not_runs_forever = x_implies_not_y_implies_y_implies_not_x runs_forever_implies_not_terminates
