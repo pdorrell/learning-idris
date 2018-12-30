@@ -72,3 +72,21 @@ x_implies_not_y_implies_y_implies_not_x x_implies_not_y y1 x1 = x_implies_not_y 
 
 terminates_implies_not_runs_forever : Terminates program initial_state result -> RunsForever program initial_state -> Void
 terminates_implies_not_runs_forever = x_implies_not_y_implies_y_implies_not_x runs_forever_implies_not_terminates
+
+program_stepped_until : Program input_type state_type output_type -> (max_steps : Nat) -> 
+                            Program input_type (Nat, state_type) (Maybe output_type)
+program_stepped_until program max_steps = 
+  MkProgram stepped_get_initial_state stepped_execute_step stepped_get_result
+    where
+      stepped_get_initial_state : input_type -> (Nat, state_type)
+      stepped_get_initial_state input = (max_steps, get_initial_state program input)
+      
+      stepped_execute_step : (Nat, state_type) -> (Bool, (Nat, state_type))
+      stepped_execute_step (Z, state) = (True, (Z, state))
+      stepped_execute_step (S k, state) = 
+        let (terminated, updated_state) = execute_step program state
+        in (terminated, (k, updated_state))
+      
+      stepped_get_result : (Nat, state_type) -> Maybe output_type
+      stepped_get_result (Z, state) = Nothing
+      stepped_get_result (S k, state) = Just $ get_result program state
