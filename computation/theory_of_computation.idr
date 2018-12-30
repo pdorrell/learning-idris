@@ -75,21 +75,23 @@ terminates_implies_not_runs_forever = x_implies_not_y_implies_y_implies_not_x ru
 
 data ResultSoFar t = NoResultYet | Result t
 
+data CountingDown t = StillCountingDown Nat t | CountDownFinished t
+
 program_stepped_until : Program input_type state_type output_type -> (max_steps : Nat) -> 
-                            Program input_type (Nat, state_type) (ResultSoFar output_type)
+                            Program input_type (CountingDown state_type) (ResultSoFar output_type)
 program_stepped_until program max_steps = 
   MkProgram stepped_get_initial_state stepped_execute_step stepped_get_result
     where
-      stepped_get_initial_state : input_type -> (Nat, state_type)
-      stepped_get_initial_state input = (max_steps, get_initial_state program input)
+      stepped_get_initial_state : input_type -> CountingDown state_type
+      stepped_get_initial_state input = StillCountingDown max_steps $ get_initial_state program input
       
-      stepped_execute_step : (Nat, state_type) -> (Bool, (Nat, state_type))
-      stepped_execute_step (Z, state) = (True, (Z, state))
-      stepped_execute_step (S k, state) = 
+      stepped_execute_step : CountingDown state_type -> (Bool, CountingDown state_type)
+      stepped_execute_step (CountDownFinished state) = (True, CountDownFinished state)
+      stepped_execute_step (StillCountingDown Z state) = (True, CountDownFinished state)
+      stepped_execute_step (StillCountingDown (S k) state) = 
         let (terminated, updated_state) = execute_step program state
-        in (terminated, (k, updated_state))
+        in (terminated, StillCountingDown k updated_state)
       
-      stepped_get_result : (Nat, state_type) -> ResultSoFar output_type
-      stepped_get_result (Z, state) = NoResultYet
-      stepped_get_result (S k, state) = Result $ get_result program state
-
+      stepped_get_result : CountingDown state_type -> ResultSoFar output_type
+      stepped_get_result (CountDownFinished state) = NoResultYet
+      stepped_get_result (StillCountingDown _ state) = Result $ get_result program state
