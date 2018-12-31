@@ -44,6 +44,18 @@ Terminates : (program : Program input_type state_type output_type) -> (input : i
 Terminates program input num_steps result = 
    (final_state : state_type ** (ExecuteSteps program num_steps input = (Terminated, final_state),
                                  get_result program final_state = result))
+                                 
+data StateUpdateTerminates : (program : Program input_type state_type output_type) -> (state : state_type) -> (num_steps : Nat) -> 
+                           (final_state : state_type) -> Type where
+ InitialStateFinished : (is_finished program state = True) -> StateUpdateTerminates program state Z state
+ NextStateTerminates : (is_finished program state = False) -> StateUpdateTerminates program (update_state program state) k final_state ->
+                          StateUpdateTerminates program state (S k) final_state
+                          
+Terminates2 : (program : Program input_type state_type output_type) -> (input : input_type) -> (num_steps : Nat) -> 
+                (result : output_type) -> Type
+Terminates2 program input num_steps result = 
+   (final_state : state_type ** (StateUpdateTerminates program (get_initial_state program input) num_steps final_state,
+                                 get_result program final_state = result))
 
 -- If termination of program1 implies termination of program2, then we can use program1 wherever we want to use program2
 -- (if the only thing we are interested in is the result of program2 terminating).
