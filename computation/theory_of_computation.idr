@@ -9,8 +9,9 @@
 -- into the output value.
 record Program input_type state_type output_type where
   constructor MkProgram
-  get_initial_state: input_type -> state_type
-  execute_step : state_type -> (Bool, state_type)
+  get_initial_state : input_type -> state_type
+  is_finished : state_type -> Bool
+  update_state : state_type -> state_type
   get_result : state_type -> output_type
 
 -- A programming language maps source code to an executable program
@@ -26,10 +27,9 @@ running_is_not_terminated Refl impossible
 -- Execute one step of an executable program, taking into account whether or not it has already terminated
 ExecuteStep : (program : Program _ state_type _) -> (ExecutionStatus, state_type) -> (ExecutionStatus, state_type)
 ExecuteStep program (Running, state) = 
-  let (terminated, updated_state) = execute_step program state
-  in case terminated of
-       True => (Terminated, updated_state)
-       False => (Running, updated_state)
+  case is_finished program state of
+    True => (Terminated, state)
+    False => (Running, update_state program state)
 ExecuteStep program (Terminated, state) = (AlreadyTerminated, state)
 ExecuteStep program (AlreadyTerminated, state) = (AlreadyTerminated, state)
 
@@ -77,27 +77,36 @@ terminates_implies_not_runs_forever = x_implies_not_y_implies_y_implies_not_x ru
 
 data ResultSoFar t = NoResultYet | Result t
 
-data CountingDown t = StillCountingDown Nat t | CountDownFinished t
+data CountingDown t = StillCountingDown Nat t | CountDownFinished
 
 ProgramSteppedUntil : Program input_type state_type output_type -> (max_steps : Nat) -> 
                          Program input_type (CountingDown state_type) (ResultSoFar output_type)
 ProgramSteppedUntil program max_steps = 
-  MkProgram stepped_get_initial_state stepped_execute_step stepped_get_result
+  MkProgram stepped_get_initial_state stepped_is_finished stepped_update_state stepped_get_result
     where
       stepped_get_initial_state : input_type -> CountingDown state_type
       stepped_get_initial_state input = StillCountingDown max_steps $ get_initial_state program input
       
-      stepped_execute_step : CountingDown state_type -> (Bool, CountingDown state_type)
-      stepped_execute_step (CountDownFinished state) = (True, CountDownFinished state)
-      stepped_execute_step (StillCountingDown Z state) = (True, CountDownFinished state)
-      stepped_execute_step (StillCountingDown (S k) state) = 
-        let (terminated, updated_state) = execute_step program state
-        in (terminated, StillCountingDown k updated_state)
+      stepped_is_finished : CountingDown state_type -> Bool
+      stepped_is_finished CountDownFinished = True
+      stepped_is_finished (StillCountingDown Z state) = True
+      stepped_is_finished (StillCountingDown (S k) state) = is_finished program state
+      
+      stepped_update_state : CountingDown state_type -> CountingDown state_type
+      stepped_update_state CountDownFinished = CountDownFinished
+      stepped_update_state (StillCountingDown Z state) = CountDownFinished
+      stepped_update_state (StillCountingDown (S k) state) = StillCountingDown k $ update_state program state
       
       stepped_get_result : CountingDown state_type -> ResultSoFar output_type
-      stepped_get_result (CountDownFinished state) = NoResultYet
+      stepped_get_result CountDownFinished = NoResultYet
       stepped_get_result (StillCountingDown _ state) = Result $ get_result program state
 
-lemma_eq_max_steps : {input : input_type} -> (result : result_type) -> Terminates program input num_steps result -> 
+lemma_eq_max_steps : {input : input_type} -> {result : result_type} -> Terminates program input num_steps result -> 
                        Terminates (ProgramSteppedUntil program num_steps) input num_steps (Result result)
-lemma_eq_max_steps {program} {input} {num_steps} {result} terminates_program = ?lemma_eq_max_steps_rhs
+
+lemma_eq_max_steps {program} {input} {num_steps = Z} {result} terminates_program = 
+  let (final_state ** (terminates_after_num_steps, gets_result)) = terminates_program
+      cant_terminate_in_zero = the (Void) $ running_is_not_terminated $ cong {f=fst} terminates_after_num_steps
+  in void cant_terminate_in_zero
+
+lemma_eq_max_steps {program} {input} {num_steps = (S k)} {result} terminates_program = ?lemma_eq_max_steps_rhs_2
