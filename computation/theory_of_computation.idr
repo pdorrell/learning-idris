@@ -39,11 +39,11 @@ ExecuteSteps program Z input = (Running, get_initial_state program input)
 ExecuteSteps program (S k) input = ExecuteStep program (ExecuteSteps program k input) 
 
 -- A program terminates executing from an initial state if after executing some number of steps it terminates
-Terminates : (program : Program input_type state_type output_type) -> (input : input_type) -> (result : output_type) -> Type
-Terminates program input result = (num_steps: Nat ** 
-                                      (final_state : state_type ** 
-                                        (ExecuteSteps program num_steps input = (Terminated, final_state),
-                                         get_result program final_state = result)))
+Terminates : (program : Program input_type state_type output_type) -> (input : input_type) -> (num_steps : Nat) -> 
+                (result : output_type) -> Type
+Terminates program input num_steps result = 
+   (final_state : state_type ** (ExecuteSteps program num_steps input = (Terminated, final_state),
+                                 get_result program final_state = result))
 
 -- If termination of program1 implies termination of program2, then we can use program1 wherever we want to use program2
 -- (if the only thing we are interested in is the result of program2 terminating).
@@ -51,16 +51,16 @@ ImpliesTermination : (program1 : Program input_type _ output_type) ->
                       (program2 : Program input_type _ output_type) -> Type
 ImpliesTermination {input_type} {output_type} program1 program2 = 
    {input: input_type} -> {result : output_type} 
-     -> Terminates program1 input result
-     -> Terminates program2 input result
+     -> (num_steps1: Nat ** Terminates program1 input num_steps1 result)
+     -> (num_steps2: Nat ** Terminates program2 input num_steps2 result)
 
 -- 'Runs Forever' means that after any number of steps, the program is still running
 RunsForever : (program : Program input_type state_type _) -> (input : input_type) -> Type
 RunsForever program input = (num_steps : Nat) -> (state : state_type ** (ExecuteSteps program num_steps input = (Running, state)))
 
-runs_forever_implies_not_terminates : RunsForever program input -> Terminates program input _ -> Void
-runs_forever_implies_not_terminates {program} {input} runs_forever terminates = 
-  let (num_steps ** (final_state ** terminated_result)) = terminates
+runs_forever_implies_not_terminates : RunsForever program input -> Terminates program input num_steps _ -> Void
+runs_forever_implies_not_terminates {program} {input} {num_steps} runs_forever terminates = 
+  let (final_state ** terminated_result) = terminates
       e1 = the (ExecuteSteps program num_steps input = (Terminated, final_state)) $ fst terminated_result
       e2 = runs_forever num_steps
       (running_state ** e3) = e2
@@ -72,7 +72,7 @@ runs_forever_implies_not_terminates {program} {input} runs_forever terminates =
 x_implies_not_y_implies_y_implies_not_x : (x -> (y -> Void)) -> (y -> (x -> Void))
 x_implies_not_y_implies_y_implies_not_x x_implies_not_y y1 x1 = x_implies_not_y x1 y1
 
-terminates_implies_not_runs_forever : Terminates program initial_state result -> RunsForever program initial_state -> Void
+terminates_implies_not_runs_forever : Terminates program input _ _ -> RunsForever program input -> Void
 terminates_implies_not_runs_forever = x_implies_not_y_implies_y_implies_not_x runs_forever_implies_not_terminates
 
 data ResultSoFar t = NoResultYet | Result t
@@ -97,5 +97,4 @@ ProgramSteppedUntil program max_steps =
       stepped_get_result : CountingDown state_type -> ResultSoFar output_type
       stepped_get_result (CountDownFinished state) = NoResultYet
       stepped_get_result (StillCountingDown _ state) = Result $ get_result program state
-      
 
