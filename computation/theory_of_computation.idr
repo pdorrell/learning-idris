@@ -48,11 +48,11 @@ Terminates program input num_steps result =
 -- If termination of program1 implies termination of program2, then we can use program1 wherever we want to use program2
 -- (if the only thing we are interested in is the result of program2 terminating).
 ImpliesTermination : (program1 : Program input_type _ output_type) -> 
-                      (program2 : Program input_type _ output_type) -> Type
+                        (program2 : Program input_type _ output_type) -> Type
 ImpliesTermination {input_type} {output_type} program1 program2 = 
-   {input: input_type} -> {result : output_type} 
-     -> (num_steps1: Nat ** Terminates program1 input num_steps1 result)
-     -> (num_steps2: Nat ** Terminates program2 input num_steps2 result)
+   {input: input_type} -> {result : output_type} ->
+      (num_steps1: Nat ** Terminates program1 input num_steps1 result) ->
+      (num_steps2: Nat ** Terminates program2 input num_steps2 result)
 
 -- 'Runs Forever' means that after any number of steps, the program is still running
 RunsForever : (program : Program input_type state_type _) -> (input : input_type) -> Type
@@ -80,7 +80,7 @@ data ResultSoFar t = NoResultYet | Result t
 data CountingDown t = StillCountingDown Nat t | CountDownFinished t
 
 ProgramSteppedUntil : Program input_type state_type output_type -> (max_steps : Nat) -> 
-                            Program input_type (CountingDown state_type) (ResultSoFar output_type)
+                         Program input_type (CountingDown state_type) (ResultSoFar output_type)
 ProgramSteppedUntil program max_steps = 
   MkProgram stepped_get_initial_state stepped_execute_step stepped_get_result
     where
@@ -98,3 +98,5 @@ ProgramSteppedUntil program max_steps =
       stepped_get_result (CountDownFinished state) = NoResultYet
       stepped_get_result (StillCountingDown _ state) = Result $ get_result program state
 
+lemma_eq_max_steps : Terminates program input num_steps result -> 
+                       Terminates (ProgramSteppedUntil program num_steps) input num_steps (Result result)
