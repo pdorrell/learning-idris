@@ -98,5 +98,6 @@ ProgramSteppedUntil program max_steps =
       stepped_get_result (CountDownFinished state) = NoResultYet
       stepped_get_result (StillCountingDown _ state) = Result $ get_result program state
 
-lemma_eq_max_steps : Terminates program input num_steps result -> 
+lemma_eq_max_steps : {input : input_type} -> (result : result_type) -> Terminates program input num_steps result -> 
                        Terminates (ProgramSteppedUntil program num_steps) input num_steps (Result result)
+lemma_eq_max_steps {program} {input} {num_steps} {result} terminates_program = ?lemma_eq_max_steps_rhs
