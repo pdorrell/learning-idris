@@ -18,7 +18,7 @@ ProgrammingLanguage : (source_type, input_type, state_type, output_type : Type) 
 ProgrammingLanguage source_type input_type state_type output_type = source_type -> Program input_type state_type output_type
 
 -- Execution status is either running or terminated
-data ExecutionStatus = Running | Terminated
+data ExecutionStatus = Running | Terminated | AlreadyTerminated
 
 running_is_not_terminated : Running = Terminated -> Void
 running_is_not_terminated Refl impossible
@@ -30,7 +30,8 @@ ExecuteStep program (Running, state) =
   in case terminated of
        True => (Terminated, updated_state)
        False => (Running, updated_state)
-ExecuteStep program (Terminated, state) = (Terminated, state)
+ExecuteStep program (Terminated, state) = (AlreadyTerminated, state)
+ExecuteStep program (AlreadyTerminated, state) = (AlreadyTerminated, state)
 
 -- Execute specified number of steps of program on initial state
 ExecuteSteps : (program : Program input_type state_type _) -> (steps : Nat) -> (input : input_type) -> (ExecutionStatus, state_type)
@@ -97,23 +98,4 @@ ProgramSteppedUntil program max_steps =
       stepped_get_result (CountDownFinished state) = NoResultYet
       stepped_get_result (StillCountingDown _ state) = Result $ get_result program state
       
--- after executing the nth step (where step = 0 is the 1st step), return the execution state of the 
--- stepped program as a function of the execution state of the original program
--- if step < max_steps, then wrap in StillCountingDown, otherwise return CountDownFinished
-SteppedResult : (step : Nat) -> (max_steps : Nat) -> (ExecutionStatus, state_type) -> (ExecutionStatus, (CountingDown state_type))
-SteppedResult step Z execution_state = ?hole_1
-SteppedResult step (S k) execution_state = ?hole_2
-      
-lemma1 : (program: Program input_type state_type output_type) -> 
-           (max_steps : Nat) -> 
-           (step : Nat) -> 
-           (ExecuteSteps (ProgramSteppedUntil program max_steps) step input = SteppedResult step max_steps (ExecuteSteps program step input))
 
-{-runs_forever_implies_always_no_result_yet : (program : Program input_type state_type result_type) -> 
-                                              RunsForever program input -> 
-                                              (max_steps : Nat) -> 
-                                              Terminates (ProgramSteppedUntil program max_steps) input NoResultYet
-runs_forever_implies_always_no_result_yet program runs_forever max_steps = 
-  let state_after_max_steps = runs_forever max_steps
-  in ?hole
--}
