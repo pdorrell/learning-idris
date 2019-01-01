@@ -15,6 +15,7 @@ record Program input_type state_type output_type where
   get_result : state_type -> output_type
 
 -- A programming language maps source code to an executable program
+-- (So it's really programming language _and_ a compiler/interpreter.)
 ProgrammingLanguage : (source_type, input_type, state_type, output_type : Type) -> Type
 ProgrammingLanguage source_type input_type state_type output_type = source_type -> Program input_type state_type output_type
 
@@ -45,12 +46,37 @@ Terminates program input num_steps result =
    (final_state : state_type ** (ExecuteSteps program num_steps input = (Terminated, final_state),
                                  get_result program final_state = result))
                                  
-data StateUpdateTerminates : (program : Program input_type state_type output_type) -> (state : state_type) -> (num_steps : Nat) -> 
-                           (final_state : state_type) -> Type where
- InitialStateFinished : (is_finished program state = True) -> StateUpdateTerminates program state Z state
- NextStateTerminates : (is_finished program state = False) -> StateUpdateTerminates program (update_state program state) k final_state ->
-                          StateUpdateTerminates program state (S k) final_state
+data StateUpdateTerminatesOrNot : (program : Program input_type state_type output_type) -> (state : state_type) -> (num_steps : Nat) -> 
+                           (terminates : Bool) -> (final_state : state_type) -> Type where
+ InitialStateFinished : (is_finished program state = terminates) -> 
+                          StateUpdateTerminatesOrNot program state Z terminates state
+ NextStateTerminates : (is_finished program state = False) -> 
+                          StateUpdateTerminatesOrNot program (update_state program state) k terminates final_state ->
+                          StateUpdateTerminatesOrNot program state (S k) terminates final_state
                           
+StateUpdateTerminates : (program : Program input_type state_type output_type) -> (state : state_type) -> (num_steps : Nat) -> 
+                          (final_state : state_type) -> Type
+StateUpdateTerminates program state num_steps = StateUpdateTerminatesOrNot program state num_steps True
+                          
+not__terminates_and_not_terminates : StateUpdateTerminates program state num_steps _ -> 
+                                       StateUpdateTerminatesOrNot program state num_steps False _ -> Void
+not__terminates_and_not_terminates {num_steps = Z} (InitialStateFinished finished1) (InitialStateFinished finished2) = 
+   trueNotFalse $ trans (sym finished1) finished2
+not__terminates_and_not_terminates {num_steps = (S k)}
+   (NextStateTerminates finished1 terminates_k) (NextStateTerminates finished2 not_terminates_k) = 
+       not__terminates_and_not_terminates terminates_k not_terminates_k
+
+StateUpdateRunsForever : (program : Program input_type state_type output_type) -> (state : state_type) -> Type
+StateUpdateRunsForever program state = 
+   (num_steps : Nat) -> (final_state : state_type ** (StateUpdateTerminatesOrNot program state num_steps False final_state))
+   
+not_state_update_terminates_and_runs_forever : StateUpdateTerminates program state num_steps final_state -> 
+                                                  StateUpdateRunsForever program state -> Void
+                          
+not_state_update_terminates_and_runs_forever {program} {state} {num_steps} {final_state} terminates runs_forever = 
+  let (final_state ** not_terminates) = runs_forever num_steps
+  in not__terminates_and_not_terminates terminates not_terminates
+
 Terminates2 : (program : Program input_type state_type output_type) -> (input : input_type) -> (num_steps : Nat) -> 
                 (result : output_type) -> Type
 Terminates2 program input num_steps result = 
@@ -66,9 +92,24 @@ ImpliesTermination {input_type} {output_type} program1 program2 =
       (num_steps1: Nat ** Terminates program1 input num_steps1 result) ->
       (num_steps2: Nat ** Terminates program2 input num_steps2 result)
 
+ImpliesTermination2 : (program1 : Program input_type _ output_type) -> 
+                        (program2 : Program input_type _ output_type) -> Type
+ImpliesTermination2 {input_type} {output_type} program1 program2 = 
+   {input: input_type} -> {result : output_type} ->
+      (num_steps1: Nat ** Terminates2 program1 input num_steps1 result) ->
+      (num_steps2: Nat ** Terminates2 program2 input num_steps2 result)
+
 -- 'Runs Forever' means that after any number of steps, the program is still running
 RunsForever : (program : Program input_type state_type _) -> (input : input_type) -> Type
 RunsForever program input = (num_steps : Nat) -> (state : state_type ** (ExecuteSteps program num_steps input = (Running, state)))
+
+RunsForever2 : (program : Program input_type state_type _) -> (input : input_type) -> Type
+RunsForever2 program input = StateUpdateRunsForever program (get_initial_state program input)
+
+runs_forever_implies_not_terminates2 : RunsForever2 program input -> Terminates2 program input num_steps _ -> Void
+runs_forever_implies_not_terminates2 {program} {input} {num_steps} runs_forever terminates = 
+    let (final_state ** (state_update_terminates, _)) = terminates
+in not_state_update_terminates_and_runs_forever state_update_terminates runs_forever
 
 runs_forever_implies_not_terminates : RunsForever program input -> Terminates program input num_steps _ -> Void
 runs_forever_implies_not_terminates {program} {input} {num_steps} runs_forever terminates = 
@@ -80,12 +121,9 @@ runs_forever_implies_not_terminates {program} {input} {num_steps} runs_forever t
       e5 = the ((Terminated, final_state) = (Running, running_state)) $ trans (sym e1) e4
       e6 = the (Terminated = Running) $ cong {f=fst} e5
   in running_is_not_terminated $ sym e6
-
+  
 x_implies_not_y_implies_y_implies_not_x : (x -> (y -> Void)) -> (y -> (x -> Void))
 x_implies_not_y_implies_y_implies_not_x x_implies_not_y y1 x1 = x_implies_not_y x1 y1
-
-terminates_implies_not_runs_forever : Terminates program input _ _ -> RunsForever program input -> Void
-terminates_implies_not_runs_forever = x_implies_not_y_implies_y_implies_not_x runs_forever_implies_not_terminates
 
 data ResultSoFar t = NoResultYet | Result t
 
@@ -113,6 +151,7 @@ ProgramSteppedUntil program max_steps =
       stepped_get_result CountDownFinished = NoResultYet
       stepped_get_result (StillCountingDown _ state) = Result $ get_result program state
 
+{-
 lemma_eq_max_steps : {input : input_type} -> {result : result_type} -> Terminates program input num_steps result -> 
                        Terminates (ProgramSteppedUntil program num_steps) input num_steps (Result result)
 
@@ -122,3 +161,4 @@ lemma_eq_max_steps {program} {input} {num_steps = Z} {result} terminates_program
   in void cant_terminate_in_zero
 
 lemma_eq_max_steps {program} {input} {num_steps = (S k)} {result} terminates_program = ?lemma_eq_max_steps_rhs_2
+-}
