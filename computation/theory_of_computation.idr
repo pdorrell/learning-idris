@@ -51,27 +51,27 @@ not_state_update_terminates_and_runs_forever {program} {state} {num_steps} {fina
   let (final_state ** not_terminates) = runs_forever num_steps
   in not__terminates_and_not_terminates terminates not_terminates
 
-Terminates2 : (program : Program input_type state_type output_type) -> (input : input_type) -> (num_steps : Nat) -> 
+Terminates : (program : Program input_type state_type output_type) -> (input : input_type) -> (num_steps : Nat) -> 
                 (result : output_type) -> Type
-Terminates2 program input num_steps result = 
+Terminates program input num_steps result = 
    (final_state : state_type ** (StateUpdateTerminates program (get_initial_state program input) num_steps final_state,
                                  get_result program final_state = result))
 
 -- If termination of program1 implies termination of program2, then we can use program1 wherever we want to use program2
 -- (if the only thing we are interested in is the result of program2 terminating).
-ImpliesTermination2 : (program1 : Program input_type _ output_type) -> 
+ImpliesTermination : (program1 : Program input_type _ output_type) -> 
                         (program2 : Program input_type _ output_type) -> Type
-ImpliesTermination2 {input_type} {output_type} program1 program2 = 
+ImpliesTermination {input_type} {output_type} program1 program2 = 
    {input: input_type} -> {result : output_type} ->
-      (num_steps1: Nat ** Terminates2 program1 input num_steps1 result) ->
-      (num_steps2: Nat ** Terminates2 program2 input num_steps2 result)
+      (num_steps1: Nat ** Terminates program1 input num_steps1 result) ->
+      (num_steps2: Nat ** Terminates program2 input num_steps2 result)
 
 -- 'Runs Forever' means that after any number of steps, the program is still running
-RunsForever2 : (program : Program input_type state_type _) -> (input : input_type) -> Type
-RunsForever2 program input = StateUpdateRunsForever program (get_initial_state program input)
+RunsForever : (program : Program input_type state_type _) -> (input : input_type) -> Type
+RunsForever program input = StateUpdateRunsForever program (get_initial_state program input)
 
-runs_forever_implies_not_terminates2 : RunsForever2 program input -> Terminates2 program input num_steps _ -> Void
-runs_forever_implies_not_terminates2 {program} {input} {num_steps} runs_forever terminates = 
+runs_forever_implies_not_terminates : RunsForever program input -> Terminates program input num_steps _ -> Void
+runs_forever_implies_not_terminates {program} {input} {num_steps} runs_forever terminates = 
     let (final_state ** (state_update_terminates, _)) = terminates
 in not_state_update_terminates_and_runs_forever state_update_terminates runs_forever
 
