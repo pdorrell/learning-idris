@@ -15,13 +15,13 @@ record Program input_type state_type output_type where
   get_result : state_type -> output_type
 
 -- A programming language maps source code to an executable program
--- (So it's really programming language _and_ a compiler/interpreter.)
+-- (So it's really a programming language _and_ a compiler/interpreter.)
 ProgrammingLanguage : (source_type, input_type, state_type, output_type : Type) -> Type
 ProgrammingLanguage source_type input_type state_type output_type = source_type -> Program input_type state_type output_type
 
--- A program terminates executing from an initial state if after executing some number of steps it terminates
+-- This type represents the computation executing num_steps steps
 data StateUpdateTerminatesOrNot : (program : Program input_type state_type output_type) -> (state : state_type) -> (num_steps : Nat) -> 
-                           (terminates : Bool) -> (final_state : state_type) -> Type where
+                                  (terminates : Bool) -> (final_state : state_type) -> Type where
  InitialStateFinished : (is_finished program state = terminates) -> 
                           StateUpdateTerminatesOrNot program state Z terminates state
  NextStateTerminates : (is_finished program state = False) -> 
@@ -103,15 +103,7 @@ ProgramSteppedUntil program max_steps =
       stepped_get_result : CountingDown state_type -> ResultSoFar output_type
       stepped_get_result CountDownFinished = NoResultYet
       stepped_get_result (StillCountingDown _ state) = Result $ get_result program state
-
-{-
-lemma_eq_max_steps : {input : input_type} -> {result : result_type} -> Terminates program input num_steps result -> 
-                       Terminates (ProgramSteppedUntil program num_steps) input num_steps (Result result)
-
-lemma_eq_max_steps {program} {input} {num_steps = Z} {result} terminates_program = 
-  let (final_state ** (terminates_after_num_steps, gets_result)) = terminates_program
-      cant_terminate_in_zero = the (Void) $ running_is_not_terminated $ cong {f=fst} terminates_after_num_steps
-  in void cant_terminate_in_zero
-
-lemma_eq_max_steps {program} {input} {num_steps = (S k)} {result} terminates_program = ?lemma_eq_max_steps_rhs_2
--}
+      
+data NotPastMax : Nat -> Nat -> Type where
+  ZeroNotPastAnyMax : Nat -> NotPastMax Z n
+  SuccNotPastMax : NotPastMax x y -> NotPastMax (S x) (S y)
