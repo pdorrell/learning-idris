@@ -107,3 +107,20 @@ ProgramSteppedUntil program max_steps =
 data NotPastMax : Nat -> Nat -> Type where
   ZeroNotPastAnyMax : Nat -> NotPastMax Z n
   SuccNotPastMax : NotPastMax x y -> NotPastMax (S x) (S y)
+
+ImmediateProgram : {input_type, output_type : Type} -> (f : input_type -> output_type) -> Program input_type input_type output_type
+ImmediateProgram f = MkProgram id (const True) id f
+
+state_updates_forever_stepped : {state : state_type} -> StateUpdateRunsForever program state -> 
+                                  (max_num_steps : Nat) -> 
+                                  (final_state : state_type ** 
+                                     (StateUpdateTerminates (ProgramSteppedUntil program max_num_steps) (StillCountingDown num_steps state) 
+                                      max_num_steps CountDownFinished,
+                                      is_finished program final_state = False))
+
+{-
+runs_forever_stepped : (input : input_type) -> RunsForever program input -> (max_num_steps : Nat) -> 
+                         Terminates (ProgramSteppedUntil program max_num_steps) input max_num_steps NoResultYet
+                         -}
+                         
+
