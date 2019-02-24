@@ -1,17 +1,20 @@
 -- %default total
 
-myDirError : Directory -> IO Bool
-myDirError (DHandle d)
+dirWasLastEntryOrError : Directory -> IO (Either FileError Bool)
+dirWasLastEntryOrError (DHandle d)
     = do err <- foreign FFI_C "idris_dirError" (Ptr -> IO Int) d
-         putStrLn ("err = " ++ (show err))
-         pure (not (err == 0))
+         pure $ case err of
+                  0 => Right False
+                  -1 => Right True
+                  _ => Left $ GenericFileError err
 
-myDirEntry : Directory -> IO (Either FileError String)
-myDirEntry (DHandle d)
+dirNextEntry : Directory -> IO (Either FileError (Maybe String))
+dirNextEntry (DHandle d)
     = do fn <- foreign FFI_C "idris_nextDirEntry" (Ptr -> IO String) d
-         if !(myDirError (DHandle d))
-            then pure (Left FileReadError)
-            else pure (Right fn)
+         Right wasLastEntry <- dirWasLastEntryOrError (DHandle d) | Left error => pure (Left error)
+         pure $ Right $ case wasLastEntry of
+                          False => Just fn
+                          True => Nothing
 
 main : IO ()
 main = 
@@ -21,6 +24,8 @@ main =
      where
         showEntries : Directory -> IO ()
         showEntries dir  = 
-                    do Right entry <- myDirEntry dir | Left error => putStrLn ("dirEntry error: " ++ show error)
-                       putStrLn (" entry: " ++ entry)
-                       showEntries dir
+                    do Right nextEntry <- dirNextEntry dir | Left error => putStrLn ("dirEntry error: " ++ show error)
+                       case nextEntry of
+                         Just entry => do putStrLn (" entry: " ++ entry)
+                                          showEntries dir
+                         Nothing => pure ()
