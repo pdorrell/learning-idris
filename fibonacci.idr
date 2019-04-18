@@ -27,4 +27,9 @@ next_fib_state {n} (MkFibState x y x_is_fib_n y_is_fib_n1) =
       e3 = the (fibonacci (S (S n)) = x + y) $ rewrite sym y_is_fib_n1 in e2
   in MkFibState y (x + y) y_is_fib_n1 e3
 
+fib_state_n : (n : Nat) -> FibState n
+fib_state_n Z = fib_state_0
+fib_state_n (S k) = next_fib_state $ fib_state_n k
+
+
 
