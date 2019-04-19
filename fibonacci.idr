@@ -20,7 +20,7 @@ record FibState (n: Nat) where
  X : Nat
  Y : Nat
  x_is_fib_n : X = fibonacci n
- y_is_fib_n1 : Y = fibonacci (S n)
+ y_is_fib_sn : Y = fibonacci (S n)
 
 -- The initial state holding fib(0) & fib(10
 fib_state_0 : FibState 0
@@ -28,11 +28,11 @@ fib_state_0 = MkFibState 1 1 Refl Refl
 
 -- How to get to the next state from the previous state, including the required proofs
 next_fib_state : FibState n -> FibState (S n)
-next_fib_state {n} (MkFibState x y x_is_fib_n y_is_fib_n1) = 
+next_fib_state {n} (MkFibState x y x_is_fib_n y_is_fib_sn) = 
   let e1 = the (fibonacci (S (S n)) = fibonacci n + fibonacci (S n)) Refl
       e2 = the (fibonacci (S (S n)) = x + fibonacci (S n)) $ rewrite x_is_fib_n in e1
-      e3 = the (fibonacci (S (S n)) = x + y) $ rewrite y_is_fib_n1 in e2
-  in MkFibState y (x + y) y_is_fib_n1 (sym e3)
+      e3 = the (fibonacci (S (S n)) = x + y) $ rewrite y_is_fib_sn in e2
+  in MkFibState y (x + y) y_is_fib_sn (sym e3)
 
 -- The function to calculate the nth state
 fib_state_n : (n : Nat) -> FibState n
@@ -50,4 +50,4 @@ fibonacci2 (S k) = Y $ fib_state_n k
 -- (Most of the work has already been done inside next_fib_state.)
 fib_eq_fib2 : (n: Nat) -> fibonacci2 n = fibonacci n
 fib_eq_fib2 Z = Refl
-fib_eq_fib2 (S k) = y_is_fib_n1 $ fib_state_n k
+fib_eq_fib2 (S k) = y_is_fib_sn $ fib_state_n k
