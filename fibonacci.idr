@@ -14,7 +14,7 @@ test = Refl
 
 -- An intermediate state for a more efficient calculation,
 -- where we retain the last two values calculated.
--- The state includes proofs that Fibonacci_n is fib(n) and Fibonacci_sn is fib(n+1)
+-- The state includes proofs that Fibonacci_n is fibonacci(n) and Fibonacci_sn is fibonacci(n+1)
 record FibState (n: Nat) where
  constructor MkFibState
  Fibonacci_n : Nat
@@ -39,7 +39,7 @@ fib_state_n : (n : Nat) -> FibState n
 fib_state_n Z = fib_state_0
 fib_state_n (S k) = next_fib_state $ fib_state_n k
 
--- The optimized version of the Fibonacci function, that calculates the (n-1)th
+-- An optimized version of the Fibonacci function, that calculates the (n-1)th
 -- intermediate state, and then extracts the second value of the final state
 -- to be fib(n)
 fibonacci2 : Nat -> Nat 
