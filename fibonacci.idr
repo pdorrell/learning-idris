@@ -48,9 +48,9 @@ fibonacci2 (S k) = Fibonacci_sn $ fib_state_n k
 
 -- The fairly simple proof that fibonacci2 and fibonacci give the same result.
 -- (Most of the work has already been done inside next_fib_state.)
-fib_eq_fib2 : (n: Nat) -> fibonacci2 n = fibonacci n
-fib_eq_fib2 Z = Refl
-fib_eq_fib2 (S k) = Fibonacci_sn_prf $ fib_state_n k
+fib2_eq_fib : (n: Nat) -> fibonacci2 n = fibonacci n
+fib2_eq_fib Z = Refl
+fib2_eq_fib (S k) = Fibonacci_sn_prf $ fib_state_n k
 
 
 -- A slightly simpler but less optimized version
@@ -60,6 +60,6 @@ fib_eq_fib2 (S k) = Fibonacci_sn_prf $ fib_state_n k
 fibonacci3 : Nat -> Nat 
 fibonacci3 n =  Fibonacci_n $ fib_state_n n
 
-fib_eq_fib3 : (n: Nat) -> fibonacci3 n = fibonacci n
-fib_eq_fib3 n = Fibonacci_n_prf $ fib_state_n n
+fib3_eq_fib : (n: Nat) -> fibonacci3 n = fibonacci n
+fib3_eq_fib n = Fibonacci_n_prf $ fib_state_n n
 
