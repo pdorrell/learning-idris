@@ -14,7 +14,7 @@ test = Refl
 
 -- An intermediate state for a more efficient calculation,
 -- where we retain the last two values calculated.
--- The state includes a proof that Fibonacci_n is fib(n) and Fibonacci_sn is fib(n+1)
+-- The state includes proofs that Fibonacci_n is fib(n) and Fibonacci_sn is fib(n+1)
 record FibState (n: Nat) where
  constructor MkFibState
  Fibonacci_n : Nat
