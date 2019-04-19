@@ -2,14 +2,14 @@ module Fibonacci
 
 %default total
 
--- The inefficient but mathematically simply definition of the Fibonacci function
+-- The inefficient but mathematically simple definition of the Fibonacci function
 fibonacci: Nat -> Nat
 fibonacci Z = 1
 fibonacci (S Z) = 1
 fibonacci (S (S n)) = (fibonacci n) + (fibonacci (S n))
 
--- A test example
-test: fibonacci 6 = 13
+-- Some test examples
+test: [fibonacci 5, fibonacci 6, fibonacci 7, fibonacci 10] = [8, 13, 21, 89]
 test = Refl
 
 -- An intermediate state for a more efficient calculation,
