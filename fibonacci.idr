@@ -51,3 +51,15 @@ fibonacci2 (S k) = Fibonacci_sn $ fib_state_n k
 fib_eq_fib2 : (n: Nat) -> fibonacci2 n = fibonacci n
 fib_eq_fib2 Z = Refl
 fib_eq_fib2 (S k) = Fibonacci_sn_prf $ fib_state_n k
+
+
+-- A slightly simpler but less optimized version
+-- (Less optimized because it does one more update step than it needs to,
+--  and reads the answer out of Fibonacci_n instead of Fibonacci_sn,
+--  in effect wasting the work it did to compute the last value of Fibonacci_sn.)
+fibonacci3 : Nat -> Nat 
+fibonacci3 n =  Fibonacci_n $ fib_state_n n
+
+fib_eq_fib3 : (n: Nat) -> fibonacci3 n = fibonacci n
+fib_eq_fib3 n = Fibonacci_n_prf $ fib_state_n n
+
