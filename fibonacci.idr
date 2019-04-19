@@ -14,25 +14,25 @@ test = Refl
 
 -- An intermediate state for a more efficient calculation,
 -- where we retain the last two values calculated.
--- The state includes a proof that X is fib(n) and Y is fib(n+1)
+-- The state includes a proof that Fibonacci_n is fib(n) and Fibonacci_sn is fib(n+1)
 record FibState (n: Nat) where
  constructor MkFibState
- X : Nat
- Y : Nat
- x_is_fib_n : X = fibonacci n
- y_is_fib_sn : Y = fibonacci (S n)
+ Fibonacci_n : Nat
+ Fibonacci_sn : Nat
+ Fibonacci_n_prf : Fibonacci_n = fibonacci n
+ Fibonacci_sn_prf : Fibonacci_sn = fibonacci (S n)
 
--- The initial state holding fib(0) & fib(10
+-- The initial state holding fib(0) & fib(1)
 fib_state_0 : FibState 0
 fib_state_0 = MkFibState 1 1 Refl Refl
 
 -- How to get to the next state from the previous state, including the required proofs
 next_fib_state : FibState n -> FibState (S n)
-next_fib_state {n} (MkFibState x y x_is_fib_n y_is_fib_sn) = 
+next_fib_state {n} (MkFibState fibonacci_n fibonacci_sn Fibonacci_n_prf Fibonacci_sn_prf) = 
   let e1 = the (fibonacci (S (S n)) = fibonacci n + fibonacci (S n)) Refl
-      e2 = the (fibonacci (S (S n)) = x + fibonacci (S n)) $ rewrite x_is_fib_n in e1
-      e3 = the (fibonacci (S (S n)) = x + y) $ rewrite y_is_fib_sn in e2
-  in MkFibState y (x + y) y_is_fib_sn (sym e3)
+      e2 = the (fibonacci (S (S n)) = fibonacci_n + fibonacci (S n)) $ rewrite Fibonacci_n_prf in e1
+      e3 = the (fibonacci (S (S n)) = fibonacci_n + fibonacci_sn) $ rewrite Fibonacci_sn_prf in e2
+  in MkFibState fibonacci_sn (fibonacci_n + fibonacci_sn) Fibonacci_sn_prf (sym e3)
 
 -- The function to calculate the nth state
 fib_state_n : (n : Nat) -> FibState n
@@ -44,10 +44,10 @@ fib_state_n (S k) = next_fib_state $ fib_state_n k
 -- to be fib(n)
 fibonacci2 : Nat -> Nat 
 fibonacci2 Z = 1
-fibonacci2 (S k) = Y $ fib_state_n k
+fibonacci2 (S k) = Fibonacci_sn $ fib_state_n k
 
 -- The fairly simple proof that fibonacci2 and fibonacci give the same result.
 -- (Most of the work has already been done inside next_fib_state.)
 fib_eq_fib2 : (n: Nat) -> fibonacci2 n = fibonacci n
 fib_eq_fib2 Z = Refl
-fib_eq_fib2 (S k) = y_is_fib_sn $ fib_state_n k
+fib_eq_fib2 (S k) = Fibonacci_sn_prf $ fib_state_n k
