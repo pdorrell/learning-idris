@@ -22,34 +22,44 @@ ParityOf: (n : Nat) -> Parity
 ParityOf Z = Even
 ParityOf (S k) = Opposite $ ParityOf k
 
-SOrSnWithParity : (n : Nat) -> (p : Parity) -> Nat
-SOrSnWithParity n Even = case (ParityOf n) of
-                         Even => n
-                         Odd => S n
-SOrSnWithParity n Odd = case (ParityOf n) of
-                         Even => S n
-                         Odd => n
-     
-record FibWitParityState (n: Nat) where
- constructor MkFibWitParityState
+FirstIfEven: (p : Parity) -> (n1 : t) -> (n2 : t) -> t
+FirstIfEven Even n1 n2 = n1
+FirstIfEven Odd n1 n2 = n2
+
+SwappedIfOdd: (p : Parity) -> (p : Pair t t) -> Pair t t
+SwappedIfOdd Even (x, y) = (x, y)
+SwappedIfOdd Odd (x, y) = (y, x)
+                         
+record FibWithParityState (n: Nat) where
+ constructor MkFibWithParityState
  Parity_n : Parity
  Fibonacci_even_n_or_sn : Nat
  Fibonacci_odd_n_or_sn : Nat
- Parity_n_prf : Parity_n = ParityOf n
- Fibonacci_even_n_or_sn_prf : Fibonacci_even_n_or_sn = fibonacci (SOrSnWithParity n Even)
- Fibonacci_odd_n_or_sn_prf : Fibonacci_odd_n_or_sn = fibonacci (SOrSnWithParity n Odd)
+ Parity_n_prf : ParityOf n = Parity_n
+ Fibonacci_n_and_sn_prf : (Fibonacci_even_n_or_sn, Fibonacci_odd_n_or_sn) = SwappedIfOdd Parity_n (fibonacci n, fibonacci (S n))
  
-fib_with_parity_state_0 : FibWitParityState 0
-fib_with_parity_state_0 = MkFibWitParityState Even 1 1 Refl Refl Refl
+fib_with_parity_state_0 : FibWithParityState 0
+fib_with_parity_state_0 = MkFibWithParityState Even 1 1 Refl Refl
 
-next_fib_with_parity_state : FibWitParityState n -> FibWitParityState (S n)
-next_fib_with_parity_state {n} (MkFibWitParityState Even fib_even fib_odd n_is_even fib_even_prf fib_odd_prf) = 
-  let e1 = the (ParityOf (S n) = Opposite (ParityOf n)) Refl
-      e2 = the (Opposite Even = Opposite $ ParityOf n) $ cong n_is_even
-      e3 = the (Odd = Opposite Even) Refl
-      e4 = the (Odd = ParityOf (S n)) $ trans e3 $ trans e2 $ sym e1
-  in MkFibWitParityState Odd fib_even (fib_odd + fib_even) e4 ?h2 ?h3
-next_fib_with_parity_state {n} (MkFibWitParityState Odd fib_even fib_odd n_is_odd fib_even_prf fib_odd_prf) = ?hole_2
+fib_with_parity_state_1 : FibWithParityState 1
+fib_with_parity_state_1 = MkFibWithParityState Odd 2 1 Refl Refl
+
+fib_with_parity_state_2 : FibWithParityState 2
+fib_with_parity_state_2 = MkFibWithParityState Even 2 3 Refl Refl
+
+fib_with_parity_state_3 : FibWithParityState 3
+fib_with_parity_state_3 = MkFibWithParityState Odd 5 3 Refl Refl
+
+next_fib_with_parity_state : FibWithParityState n -> FibWithParityState (S n)
+next_fib_with_parity_state {n} (MkFibWithParityState Even fib_even fib_odd n_is_even fib_s_sn_prf) = 
+  let e1 = the (ParityOf (S n) = Odd) $ rewrite n_is_even in Refl
+      e2 = the ((fib_even, fib_odd) = (fibonacci n, fibonacci (S n))) $ fib_s_sn_prf
+      e3 = the (fib_even = fibonacci n) $ cong {f=fst} e2
+      e4 = the (fib_odd = fibonacci (S n)) $ cong {f=snd} e2
+      e7 = the (fib_even + fib_odd = fibonacci (S (S n))) $ rewrite e3 in rewrite e4 in Refl
+      e5 = the ((fib_even + fib_odd, fib_odd) = (fibonacci (S (S n)), fibonacci (S n))) $ rewrite e7 in rewrite e4 in Refl
+  in MkFibWithParityState Odd (fib_even + fib_odd) fib_odd e1 e5
+next_fib_with_parity_state {n} (MkFibWithParityState Odd fib_even fib_odd n_is_odd fib_s_sn_prf) = ?hole_2
 
 -- An intermediate state for a more efficient calculation,
 -- where we retain the last two values calculated.
