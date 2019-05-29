@@ -56,20 +56,21 @@ next_fib_with_parity_state {n} (MkFibWithParityState Even fib_even fib_odd n_is_
       e2 = the ((fib_even, fib_odd) = (fibonacci n, fibonacci (S n))) $ fib_s_sn_prf
       e3 = the (fib_even = fibonacci n) $ cong {f=fst} e2
       e4 = the (fib_odd = fibonacci (S n)) $ cong {f=snd} e2
-      e7 = the (fib_even + fib_odd = fibonacci (S (S n))) $ rewrite e3 in rewrite e4 in Refl
-      e5 = the ((fib_even + fib_odd, fib_odd) = (fibonacci (S (S n)), fibonacci (S n))) $ rewrite e7 in rewrite e4 in Refl
-  in MkFibWithParityState Odd (fib_even + fib_odd) fib_odd e1 e5
-next_fib_with_parity_state {n} (MkFibWithParityState Odd fib_even fib_odd n_is_odd fib_s_sn_prf) = ?hole_2
-
--- An intermediate state for a more efficient calculation,
--- where we retain the last two values calculated.
--- The state includes proofs that Fibonacci_n is fibonacci(n) and Fibonacci_sn is fibonacci(n+1)
-record FibState (n: Nat) where
- constructor MkFibState
- Fibonacci_n : Nat
- Fibonacci_sn : Nat
- Fibonacci_n_prf : Fibonacci_n = fibonacci n
- Fibonacci_sn_prf : Fibonacci_sn = fibonacci (S n)
+      e5 = the (fib_even + fib_odd = fibonacci (S (S n))) $ rewrite e3 in rewrite e4 in Refl
+      e6 = the ((fib_even + fib_odd, fib_odd) = (fibonacci (S (S n)), fibonacci (S n))) $ rewrite e5 in rewrite e4 in Refl
+  in MkFibWithParityState Odd (fib_even + fib_odd) fib_odd e1 e6
+next_fib_with_parity_state {n} (MkFibWithParityState Odd fib_even fib_odd n_is_odd fib_s_sn_prf) =
+  let e1 = the (ParityOf (S n) = Even) $ rewrite n_is_odd in Refl
+      e2 = the ((fib_even, fib_odd) = (fibonacci (S n), fibonacci n)) $ fib_s_sn_prf
+      e3 = the (fib_even = fibonacci (S n)) $ cong {f=fst} e2
+      e4 = the (fib_odd = fibonacci n) $ cong {f=snd} e2
+      e5 = the (fib_odd + fib_even = fibonacci (S (S n))) $ rewrite e3 in rewrite e4 in Refl
+      e6 = the ((fib_even, fib_odd + fib_even) = (fibonacci (S n), fibonacci (S (S n)))) $ rewrite e5 in rewrite e3 in Refl
+  in MkFibWithParityState Even fib_even (fib_odd + fib_even) e1 e6
+  
+fib_with_parity_state_n : (n : Nat) -> FibWithParityState n
+fib_with_parity_state_n Z = fib_with_parity_state_0
+fib_with_parity_state_n (S k) = next_fib_with_parity_state $ fib_with_parity_state_n k
 
 {-
 -- The initial state holding fib(0) & fib(1)
