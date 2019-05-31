@@ -72,6 +72,23 @@ fib_with_parity_state_n : (n : Nat) -> FibWithParityState n
 fib_with_parity_state_n Z = fib_with_parity_state_0
 fib_with_parity_state_n (S k) = next_fib_with_parity_state $ fib_with_parity_state_n k
 
+fib_n_of_fib_with_parity_state : FibWithParityState n -> Nat
+fib_n_of_fib_with_parity_state (MkFibWithParityState Even fib_even_n_or_sn _ _ _) = fib_even_n_or_sn
+fib_n_of_fib_with_parity_state (MkFibWithParityState Odd _ fib_odd_n_or_sn _ _) = fib_odd_n_or_sn
+
+fibonacci2 : (n : Nat) -> Nat
+fibonacci2 n = fib_n_of_fib_with_parity_state (fib_with_parity_state_n n)
+
+fib2_eq_fib_for_n : (n : Nat) -> Type
+fib2_eq_fib_for_n n = fibonacci2 n = fibonacci n
+
+fib2_eq_fib_for_3 : fib2_eq_fib_for_n 3
+fib2_eq_fib_for_3 = Refl
+
+fib2_eq_fib_for_8 : fib2_eq_fib_for_n 8
+fib2_eq_fib_for_8 = Refl
+
+
 {-
 -- The initial state holding fib(0) & fib(1)
 fib_state_0 : FibState 0
