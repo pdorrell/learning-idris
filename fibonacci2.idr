@@ -88,3 +88,19 @@ fib2_eq_fib_for_3 = Refl
 fib2_eq_fib_for_8 : fib2_eq_fib_for_n 8
 fib2_eq_fib_for_8 = Refl
 
+
+lemma : (n : Nat) -> (parity_n = ParityOf n) -> fib2_eq_fib_for_n n
+lemma n {parity_n = Even} parity_n_is_even = 
+   let fib_with_parity_state = fib_with_parity_state_n n
+       e1 = Parity_n_prf fib_with_parity_state
+       e2 = trans parity_n_is_even e1
+       e3 = Fibonacci_n_and_sn_prf fib_with_parity_state
+       e4 = the ((Fibonacci_even_n_or_sn fib_with_parity_state, Fibonacci_odd_n_or_sn fib_with_parity_state) =
+                  SwappedIfOdd (Parity_n fib_with_parity_state) (fibonacci n, fibonacci (S n)) ) $ e3
+   in ?rhs1
+lemma n {parity_n = Odd} parity_n_is_odd = ?lemma_rhs_2
+
+fib2_eq_fib: (n : Nat) -> fib2_eq_fib_for_n n
+fib2_eq_fib n = 
+    let parity_n = ParityOf n
+    in ?hole
