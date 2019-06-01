@@ -27,8 +27,8 @@ FirstIfEven Even n1 n2 = n1
 FirstIfEven Odd n1 n2 = n2
 
 SwappedIfOdd: (p : Parity) -> (p : Pair t t) -> Pair t t
-SwappedIfOdd Even (x, y) = (x, y)
-SwappedIfOdd Odd (x, y) = (y, x)
+SwappedIfOdd Even = id
+SwappedIfOdd Odd = swap
                          
 record FibWithParityState (n: Nat) where
  constructor MkFibWithParityState
@@ -38,6 +38,19 @@ record FibWithParityState (n: Nat) where
  Parity_n_prf : ParityOf n = Parity_n
  Fibonacci_n_and_sn_prf : (Fibonacci_even_n_or_sn, Fibonacci_odd_n_or_sn) = SwappedIfOdd Parity_n (fibonacci n, fibonacci (S n))
  
+swapped_if_odd_when_even: (p = Even) -> SwappedIfOdd p (x,y) = (x,y)
+swapped_if_odd_when_even p_is_even = rewrite p_is_even in Refl
+
+fib_with_even_parity_state : (ParityOf n = Even) -> (fib_state : FibWithParityState n) -> Fibonacci_even_n_or_sn fib_state = fibonacci n
+fib_with_even_parity_state {n} parity_of_n_is_even fib_state = 
+  let e1 = Parity_n_prf fib_state
+      e2 = the (Parity_n fib_state = Even) $ trans (sym e1) parity_of_n_is_even
+      e3 = the ((Fibonacci_even_n_or_sn fib_state, Fibonacci_odd_n_or_sn fib_state) =
+                SwappedIfOdd (Parity_n fib_state) (fibonacci n, fibonacci (S n))) $  Fibonacci_n_and_sn_prf fib_state
+      e4 = swapped_if_odd_when_even e2 {x=fibonacci n} {y=fibonacci (S n)}
+      e5 = trans e3 e4
+  in cong {f=fst} e5
+
 fib_with_parity_state_0 : FibWithParityState 0
 fib_with_parity_state_0 = MkFibWithParityState Even 1 1 Refl Refl
 
