@@ -108,8 +108,7 @@ lemma n {parity_n = Even} parity_n_is_even =
        e1 = Parity_n_prf fib_with_parity_state
        e2 = trans parity_n_is_even e1
        e3 = Fibonacci_n_and_sn_prf fib_with_parity_state
-       e4 = the ((Fibonacci_even_n_or_sn fib_with_parity_state, Fibonacci_odd_n_or_sn fib_with_parity_state) =
-                  SwappedIfOdd (Parity_n fib_with_parity_state) (fibonacci n, fibonacci (S n)) ) $ e3
+       e4 = fib_with_even_parity_state (sym parity_n_is_even) fib_with_parity_state
    in ?rhs1
 lemma n {parity_n = Odd} parity_n_is_odd = ?lemma_rhs_2
 
