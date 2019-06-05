@@ -45,20 +45,21 @@ fib_with_parity_state_3 : FibWithParityState 3
 fib_with_parity_state_3 = MkFibWithParityState Odd 5 3 Refl Refl
 -- end of examples
 
+split_pair_equality: (x1, x2) = (y1, y2) -> (x1 = y1, x2 = y2)
+split_pair_equality x1_x2_is_y1_y2 = (cong {f=fst} x1_x2_is_y1_y2, cong {f=snd} x1_x2_is_y1_y2)
+
 next_fib_with_parity_state : FibWithParityState n -> FibWithParityState (S n)
 next_fib_with_parity_state {n} (MkFibWithParityState Even fib_even fib_odd n_is_even fib_s_sn_prf) = 
   let e1 = the (ParityOf (S n) = Odd) $ rewrite n_is_even in Refl
       e2 = the ((fib_even, fib_odd) = (fibonacci n, fibonacci (S n))) $ fib_s_sn_prf
-      e3 = the (fib_even = fibonacci n) $ cong {f=fst} e2
-      e4 = the (fib_odd = fibonacci (S n)) $ cong {f=snd} e2
+      (e3,e4) = the (fib_even = fibonacci n, fib_odd = fibonacci (S n)) $ split_pair_equality e2
       e5 = the (fib_even + fib_odd = fibonacci (S (S n))) $ rewrite e3 in rewrite e4 in Refl
       e6 = the ((fib_even + fib_odd, fib_odd) = (fibonacci (S (S n)), fibonacci (S n))) $ rewrite e5 in rewrite e4 in Refl
   in MkFibWithParityState Odd (fib_even + fib_odd) fib_odd e1 e6
 next_fib_with_parity_state {n} (MkFibWithParityState Odd fib_even fib_odd n_is_odd fib_s_sn_prf) =
   let e1 = the (ParityOf (S n) = Even) $ rewrite n_is_odd in Refl
       e2 = the ((fib_even, fib_odd) = (fibonacci (S n), fibonacci n)) $ fib_s_sn_prf
-      e3 = the (fib_even = fibonacci (S n)) $ cong {f=fst} e2
-      e4 = the (fib_odd = fibonacci n) $ cong {f=snd} e2
+      (e3,e4) = the (fib_even = fibonacci (S n), fib_odd = fibonacci n) $ split_pair_equality e2
       e5 = the (fib_odd + fib_even = fibonacci (S (S n))) $ rewrite e3 in rewrite e4 in Refl
       e6 = the ((fib_even, fib_odd + fib_even) = (fibonacci (S n), fibonacci (S (S n)))) $ rewrite e5 in rewrite e3 in Refl
   in MkFibWithParityState Even fib_even (fib_odd + fib_even) e1 e6
