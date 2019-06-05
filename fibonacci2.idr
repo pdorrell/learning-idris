@@ -41,6 +41,10 @@ record FibWithParityState (n: Nat) where
 swapped_if_odd_when_even: (p = Even) -> SwappedIfOdd p (x,y) = (x,y)
 swapped_if_odd_when_even p_is_even = rewrite p_is_even in Refl
 
+swapped_if_odd_when_odd: (p = Odd) -> SwappedIfOdd p (x,y) = (y,x)
+swapped_if_odd_when_odd p_is_odd = rewrite p_is_odd in Refl
+
+
 fib_with_even_parity_state : (ParityOf n = Even) -> (fib_state : FibWithParityState n) -> Fibonacci_even_n_or_sn fib_state = fibonacci n
 fib_with_even_parity_state {n} parity_of_n_is_even fib_state = 
   let e1 = Parity_n_prf fib_state
