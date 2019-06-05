@@ -50,10 +50,20 @@ fib_with_even_parity_state {n} parity_of_n_is_even fib_state =
   let e1 = Parity_n_prf fib_state
       e2 = the (Parity_n fib_state = Even) $ trans (sym e1) parity_of_n_is_even
       e3 = the ((Fibonacci_even_n_or_sn fib_state, Fibonacci_odd_n_or_sn fib_state) =
-                SwappedIfOdd (Parity_n fib_state) (fibonacci n, fibonacci (S n))) $  Fibonacci_n_and_sn_prf fib_state
+                 SwappedIfOdd (Parity_n fib_state) (fibonacci n, fibonacci (S n))) $  Fibonacci_n_and_sn_prf fib_state
       e4 = swapped_if_odd_when_even e2 {x=fibonacci n} {y=fibonacci (S n)}
       e5 = trans e3 e4
   in cong {f=fst} e5
+  
+fib_with_odd_parity_state : (ParityOf n = Odd) -> (fib_state : FibWithParityState n) -> Fibonacci_odd_n_or_sn fib_state = fibonacci n
+fib_with_odd_parity_state {n} parity_of_n_is_odd fib_state = 
+  let e1 = Parity_n_prf fib_state
+      e2 = the (Parity_n fib_state = Odd) $ trans (sym e1) parity_of_n_is_odd
+      e3 = the ((Fibonacci_even_n_or_sn fib_state, Fibonacci_odd_n_or_sn fib_state) =
+                 SwappedIfOdd (Parity_n fib_state) (fibonacci n, fibonacci (S n))) $ Fibonacci_n_and_sn_prf fib_state
+      e4 = swapped_if_odd_when_odd e2 {x=fibonacci n} {y=fibonacci (S n)}
+      e5 = trans e3 e4
+  in cong {f=snd} e5
 
 fib_with_parity_state_0 : FibWithParityState 0
 fib_with_parity_state_0 = MkFibWithParityState Even 1 1 Refl Refl
