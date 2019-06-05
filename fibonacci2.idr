@@ -99,12 +99,12 @@ fib_with_parity_state_n : (n : Nat) -> FibWithParityState n
 fib_with_parity_state_n Z = fib_with_parity_state_0
 fib_with_parity_state_n (S k) = next_fib_with_parity_state $ fib_with_parity_state_n k
 
-fib_n_of_fib_with_parity_state : FibWithParityState n -> Nat
-fib_n_of_fib_with_parity_state (MkFibWithParityState Even fib_even_n_or_sn _ _ _) = fib_even_n_or_sn
-fib_n_of_fib_with_parity_state (MkFibWithParityState Odd _ fib_odd_n_or_sn _ _) = fib_odd_n_or_sn
+fib_n_by_parity : Parity -> FibWithParityState n -> Nat
+fib_n_by_parity Even fib_state_n = Fibonacci_even_n_or_sn fib_state_n
+fib_n_by_parity Odd fib_state_n = Fibonacci_odd_n_or_sn fib_state_n
 
 fibonacci2 : (n : Nat) -> Nat
-fibonacci2 n = fib_n_of_fib_with_parity_state (fib_with_parity_state_n n)
+fibonacci2 n = fib_n_by_parity (ParityOf n) (fib_with_parity_state_n n)
 
 fib2_eq_fib_for_n : (n : Nat) -> Type
 fib2_eq_fib_for_n n = fibonacci2 n = fibonacci n
@@ -115,18 +115,13 @@ fib2_eq_fib_for_3 = Refl
 fib2_eq_fib_for_8 : fib2_eq_fib_for_n 8
 fib2_eq_fib_for_8 = Refl
 
-
-lemma : (n : Nat) -> (parity_n = ParityOf n) -> fib2_eq_fib_for_n n
-lemma n {parity_n = Even} parity_n_is_even = 
-   let fib_with_parity_state = fib_with_parity_state_n n
-       e1 = Parity_n_prf fib_with_parity_state
-       e2 = trans parity_n_is_even e1
-       e3 = Fibonacci_n_and_sn_prf fib_with_parity_state
-       e4 = fib_with_even_parity_state (sym parity_n_is_even) fib_with_parity_state
-   in ?rhs1
-lemma n {parity_n = Odd} parity_n_is_odd = ?lemma_rhs_2
+fib2_eq_fib_given_p : (n : Nat) -> (p : Parity) -> ParityOf n = p -> fib2_eq_fib_for_n n
+fib2_eq_fib_given_p n Even parity_of_n_is_p = 
+  let e1 = fib_with_even_parity_state parity_of_n_is_p (fib_with_parity_state_n n)
+  in rewrite parity_of_n_is_p in e1
+fib2_eq_fib_given_p n Odd parity_of_n_is_p = 
+  let e1 = fib_with_odd_parity_state parity_of_n_is_p (fib_with_parity_state_n n)
+  in rewrite parity_of_n_is_p in e1
 
 fib2_eq_fib: (n : Nat) -> fib2_eq_fib_for_n n
-fib2_eq_fib n = 
-    let parity_n = ParityOf n
-    in ?hole
+fib2_eq_fib n  = ?hole
