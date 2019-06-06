@@ -66,3 +66,9 @@ fib2_eq_fib_for_8 : fib2_eq_fib_for_n 8
 fib2_eq_fib_for_8 = Refl
 -- end of examples
 
+lemma : (fib_swappable_state : FibWithSwappableState n) -> fib_n_of_swappable_state fib_swappable_state = fibonacci n
+lemma {n = n} (MkFibWithSwappableState False fib_n_or_sn fib_sn_or_n not_swapped_prf _) = fst (not_swapped_prf Refl)
+lemma {n = n} (MkFibWithSwappableState True fib_n_or_sn fib_sn_or_n _ swapped_prf) = snd (swapped_prf Refl)
+
+fib2_eq_fib : (n : Nat) -> fib2_eq_fib_for_n n
+fib2_eq_fib n = lemma {n=n} (fib_with_swappable_state_n n)
